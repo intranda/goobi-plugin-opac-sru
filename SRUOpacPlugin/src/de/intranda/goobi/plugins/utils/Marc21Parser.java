@@ -29,14 +29,14 @@ import ugh.exceptions.TypeNotAllowedForParentException;
 import de.intranda.utils.DocumentUtils;
 
 public class Marc21Parser {
-    
+
     public class RecordInformation {
         private MarcRecordType recordType;
         private MarcBibliographicLevel bibLevel;
         private MarcMultipartLevel partLevel;
         private Date recordDate;
         private String ds;
-        
+
         public RecordInformation(MarcRecordType recordType, MarcBibliographicLevel bibLevel, MarcMultipartLevel partLevel, String dateString) {
             super();
             this.recordType = recordType;
@@ -50,17 +50,17 @@ public class Marc21Parser {
             String year = dateString.substring(0, 4);
             String month = dateString.substring(4, 6);
             String day = dateString.substring(6);
-            try {                
+            try {
                 GregorianCalendar calendar = new GregorianCalendar(Integer.valueOf(year), Integer.valueOf(month), Integer.valueOf(day));
                 return calendar.getTime();
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 LOGGER.error("Unable to convert date String into actual date. Using current date");
                 return new Date();
             }
         }
-        
+
         private void setDs() {
-            switch(recordType) {
+            switch (recordType) {
                 case CARTOGRAPHIC:
                 case MANUSCRIPTCARTOGRAPHIC:
                     ds = "Cartographic";
@@ -77,10 +77,10 @@ public class Marc21Parser {
                     ds = "Manuscript";
                     break;
                 default:
-                        ds = "Monograph";
+                    ds = "Monograph";
             }
-            
-            switch(bibLevel) {
+
+            switch (bibLevel) {
                 case SERIAL:
                     ds = "Periodical";
                     break;
@@ -91,15 +91,15 @@ public class Marc21Parser {
                 case SUBUNIT:
                     ds = "MultiVolumePart";
                     break;
-                case COLLECTION: 
+                case COLLECTION:
                     ds = "Series";
                     break;
                 case INTEGRATINGRESOURCE:
                 case MONOGRAPH:
-                default:       
+                default:
             }
-            
-            if(ds.equals("Monograph")) {
+
+            if (ds.equals("Monograph")) {
                 switch (partLevel) {
                     case DEPENDENTPART:
                     case INDEPENDENTPART:
@@ -112,21 +112,19 @@ public class Marc21Parser {
                 }
             }
         }
-        
+
         public String getDocStructType() {
             return ds;
         }
-        
+
         public boolean isAnchor() {
-            if(ds.equals("Series") || ds.equals("MultiVolume") || ds.equals("Periodical")) {
+            if (ds.equals("Series") || ds.equals("MultiVolume") || ds.equals("Periodical")) {
                 return true;
             } else {
                 return false;
             }
         }
-        
-        
-        
+
         public MarcRecordType getRecordType() {
             return recordType;
         }
@@ -148,11 +146,11 @@ public class Marc21Parser {
         }
 
         public String getAnchorDs() {
-            if(ds.equals("MultiVolumePart")) {
+            if (ds.equals("MultiVolumePart")) {
                 return "MultiVolume";
-            } else if(ds.equals("SerialMonograph")) {
+            } else if (ds.equals("SerialMonograph")) {
                 return "Series";
-            } else if(ds.equals("PeriodicalVolume")) {
+            } else if (ds.equals("PeriodicalVolume")) {
                 return "Periodical";
             } else {
                 return null;
@@ -162,13 +160,9 @@ public class Marc21Parser {
 
     public enum MarcRecordType {
 
-        LANGUAGEMATERIAL("Language material", "a"), 
-        NOTATEDMUSIC("Notated music", "c"), 
-        MANUSCRIPTNOTATEDMUSIC("Manuscript notated music", "d"),
-        CARTOGRAPHIC("Cartographic marterial", "e"), 
-        MANUSCRIPTCARTOGRAPHIC("Manuscript cartographic material", "f"), 
-        MIXEDMATERIALS("Mixed materials", "p"), 
-        MANUSCRIPTLANGUAGEMATERIAL("Manuscript language material", "t");
+        LANGUAGEMATERIAL("Language material", "a"), NOTATEDMUSIC("Notated music", "c"), MANUSCRIPTNOTATEDMUSIC("Manuscript notated music", "d"),
+        CARTOGRAPHIC("Cartographic marterial", "e"), MANUSCRIPTCARTOGRAPHIC("Manuscript cartographic material", "f"), MIXEDMATERIALS(
+                "Mixed materials", "p"), MANUSCRIPTLANGUAGEMATERIAL("Manuscript language material", "t");
 
         private String label, identifyingCharacter;
 
@@ -184,10 +178,10 @@ public class Marc21Parser {
         public String getIdentifyingCharacter() {
             return identifyingCharacter;
         }
-        
+
         public static MarcRecordType getByChar(String c) {
             for (MarcRecordType type : MarcRecordType.values()) {
-                if(type.identifyingCharacter.equals(c)) {
+                if (type.identifyingCharacter.equals(c)) {
                     return type;
                 }
             }
@@ -197,13 +191,8 @@ public class Marc21Parser {
 
     public enum MarcBibliographicLevel {
 
-        MONOGRAPHICPART("Monographic component part", "a"), 
-        SERIALPART("Serial component part", "b"), 
-        COLLECTION("Collection", "c"), 
-        SUBUNIT("Subunit", "d"), 
-        INTEGRATINGRESOURCE("Integrating resource", "i"), 
-        MONOGRAPH("Monograph/Item", "m"), 
-        SERIAL("Serial", "s");
+        MONOGRAPHICPART("Monographic component part", "a"), SERIALPART("Serial component part", "b"), COLLECTION("Collection", "c"), SUBUNIT(
+                "Subunit", "d"), INTEGRATINGRESOURCE("Integrating resource", "i"), MONOGRAPH("Monograph/Item", "m"), SERIAL("Serial", "s");
 
         private String label, identifyingCharacter;
 
@@ -219,10 +208,10 @@ public class Marc21Parser {
         public String getIdentifyingCharacter() {
             return identifyingCharacter;
         }
-        
+
         public static MarcBibliographicLevel getByChar(String c) {
             for (MarcBibliographicLevel type : MarcBibliographicLevel.values()) {
-                if(type.identifyingCharacter.equals(c)) {
+                if (type.identifyingCharacter.equals(c)) {
                     return type;
                 }
             }
@@ -232,9 +221,8 @@ public class Marc21Parser {
 
     public enum MarcMultipartLevel {
 
-        NAN("Not specified or not applicable", "0"), SET("Set", "a"), 
-        INDEPENDENTPART("Part with independent title", "b"), 
-        DEPENDENTPART("Part with dependent title", "c");
+        NAN("Not specified or not applicable", "0"), SET("Set", "a"), INDEPENDENTPART("Part with independent title", "b"), DEPENDENTPART(
+                "Part with dependent title", "c");
 
         private String label, identifyingCharacter;
 
@@ -250,10 +238,10 @@ public class Marc21Parser {
         public String getIdentifyingCharacter() {
             return identifyingCharacter;
         }
-        
+
         public static MarcMultipartLevel getByChar(String c) {
             for (MarcMultipartLevel type : MarcMultipartLevel.values()) {
-                if(type.identifyingCharacter.equals(c)) {
+                if (type.identifyingCharacter.equals(c)) {
                     return type;
                 }
             }
@@ -269,6 +257,8 @@ public class Marc21Parser {
     private Prefs prefs;
     private boolean writeLogical;
     private boolean writePhysical;
+    private boolean writeToAnchor;
+    private boolean writeToChild;
     private DocStruct dsLogical;
     private DocStruct dsAnchor;
     private DocStruct dsPhysical;
@@ -284,7 +274,7 @@ public class Marc21Parser {
         try {
             mapDoc = DocumentUtils.getDocumentFromFile(mapFile);
         } catch (JDOMException e) {
-            throw new ParserException("Failed to read xml-Document from file " + mapFile.getAbsolutePath()+ ":"+e.getMessage());
+            throw new ParserException("Failed to read xml-Document from file " + mapFile.getAbsolutePath() + ":" + e.getMessage());
         } catch (IOException e) {
             throw new ParserException("Failed to open file " + mapFile.getAbsolutePath());
         }
@@ -321,11 +311,11 @@ public class Marc21Parser {
         try {
             dsLogical = dd.createDocStruct(prefs.getDocStrctTypeByName(dsTypeLogical));
             dsPhysical = dd.createDocStruct(prefs.getDocStrctTypeByName(dsTypePhysical));
-            if(info.getAnchorDs() != null) {
+            if (info.getAnchorDs() != null) {
                 dsAnchor = dd.createDocStruct(prefs.getDocStrctTypeByName(info.getAnchorDs()));
                 dsAnchor.addChild(dsLogical);
                 dd.setLogicalDocStruct(dsAnchor);
-            } else {                
+            } else {
                 dd.setLogicalDocStruct(dsLogical);
             }
             dd.setPhysicalDocStruct(dsPhysical);
@@ -338,19 +328,21 @@ public class Marc21Parser {
     }
 
     private RecordInformation getRecordInfo(Document marcDoc) {
-        if(marcDoc != null && marcDoc.hasRootElement()) {
+        if (marcDoc != null && marcDoc.hasRootElement()) {
             Element leader = marcDoc.getRootElement().getChild("leader", NS_MARC);
-            if(leader != null) {
+            if (leader != null) {
                 String leaderStr = leader.getValue();
                 String typeString = leaderStr.substring(6, 7);
                 String bibLevelString = leaderStr.substring(7, 8);
-                String partLevelString = leaderStr.trim().substring(leaderStr.trim().length()-1);
+                String partLevelString = leaderStr.trim().substring(leaderStr.trim().length() - 1);
                 String dateString = "";
                 Element controlField005 = getControlfield(marcDoc, "005");
-                if(controlField005 != null) {
+                if (controlField005 != null) {
                     dateString = controlField005.getText().substring(0, 8);
                 }
-                RecordInformation info = new RecordInformation(MarcRecordType.getByChar(typeString), MarcBibliographicLevel.getByChar(bibLevelString), MarcMultipartLevel.getByChar(partLevelString), dateString);
+                RecordInformation info =
+                        new RecordInformation(MarcRecordType.getByChar(typeString), MarcBibliographicLevel.getByChar(bibLevelString),
+                                MarcMultipartLevel.getByChar(partLevelString), dateString);
                 return info;
             }
         }
@@ -358,12 +350,12 @@ public class Marc21Parser {
     }
 
     private Element getControlfield(Document marcDoc, String tag) {
-        if(marcDoc != null && marcDoc.hasRootElement()) {
+        if (marcDoc != null && marcDoc.hasRootElement()) {
             @SuppressWarnings("rawtypes")
             List controlfields = marcDoc.getRootElement().getChildren("controlfield", NS_MARC);
             for (Object object : controlfields) {
-                if(object instanceof Element) {
-                    if(tag.equals(((Element) object).getAttributeValue("tag"))) {
+                if (object instanceof Element) {
+                    if (tag.equals(((Element) object).getAttributeValue("tag"))) {
                         return (Element) object;
                     }
                 }
@@ -376,6 +368,8 @@ public class Marc21Parser {
         writeLogical = writeLogical(metadataElement);
         writePhysical = writePhysical(metadataElement);
         separator = getSeparator(metadataElement);
+        writeToAnchor = writeToAnchor(metadataElement);
+        writeToChild = writeToChild(metadataElement);
         String mdTypeName = getMetadataName(metadataElement);
         MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
         if (mdType.getIsPerson()) {
@@ -404,6 +398,24 @@ public class Marc21Parser {
 
     private boolean writePhysical(Element metadataElement) {
         return ("true".equals(metadataElement.getAttributeValue("physical")));
+    }
+
+    private boolean writeToAnchor(Element metadataElement) {
+        if (metadataElement.getAttributeValue("anchor") != null && !metadataElement.getAttributeValue("anchor").isEmpty()) {
+            if (metadataElement.getAttributeValue("anchor").equalsIgnoreCase("true")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean writeToChild(Element metadataElement) {
+        if (metadataElement.getAttributeValue("child") != null && !metadataElement.getAttributeValue("child").isEmpty()) {
+            if (metadataElement.getAttributeValue("child").equalsIgnoreCase("false")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void writeMetadataXPaths(List<Element> eleXpathList, MetadataType mdType, boolean mergeXPaths) {
@@ -678,27 +690,28 @@ public class Marc21Parser {
     private void writeMetadata(Metadata metadata) {
 
         if (writeLogical) {
-
-            try {
-                dsLogical.addMetadata(metadata);
-            } catch (MetadataTypeNotAllowedException e) {
-                LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
-            } catch (IncompletePersonObjectException e) {
-                LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
-            }
-
-            if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(metadata.getType().getName()))) {
+            if (writeToChild) {
                 try {
-                    dsAnchor.addMetadata(metadata);
+                    dsLogical.addMetadata(metadata);
                 } catch (MetadataTypeNotAllowedException e) {
-                    LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
-
+                    LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
                 } catch (IncompletePersonObjectException e) {
-                    LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
-
+                    LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
                 }
             }
+            if (writeToAnchor) {
+                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(metadata.getType().getName()))) {
+                    try {
+                        dsAnchor.addMetadata(metadata);
+                    } catch (MetadataTypeNotAllowedException e) {
+                        LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
 
+                    } catch (IncompletePersonObjectException e) {
+                        LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
+
+                    }
+                }
+            }
         }
 
         if (writePhysical) {
@@ -718,27 +731,28 @@ public class Marc21Parser {
     private void writePerson(Person person) {
 
         if (writeLogical) {
-
-            try {
-                dsLogical.addPerson(person);
-            } catch (MetadataTypeNotAllowedException e) {
-                LOGGER.error("Failed to write person " + person.getType().getName() + " to logical topStruct: " + e.getMessage());
-            } catch (IncompletePersonObjectException e) {
-                LOGGER.error("Failed to write person " + person.getType().getName() + " to logical topStruct: " + e.getMessage());
-            }
-
-            if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(person.getType().getName()))) {
+            if (writeToChild) {
                 try {
-                    dsAnchor.addPerson(person);
+                    dsLogical.addPerson(person);
                 } catch (MetadataTypeNotAllowedException e) {
-                    LOGGER.warn("Failed to write person " + person.getType().getName() + " to logical anchor: " + e.getMessage());
-
+                    LOGGER.error("Failed to write person " + person.getType().getName() + " to logical topStruct: " + e.getMessage());
                 } catch (IncompletePersonObjectException e) {
-                    LOGGER.warn("Failed to write person " + person.getType().getName() + " to logical anchor: " + e.getMessage());
-
+                    LOGGER.error("Failed to write person " + person.getType().getName() + " to logical topStruct: " + e.getMessage());
                 }
             }
+            if (writeToAnchor) {
+                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(person.getType().getName()))) {
+                    try {
+                        dsAnchor.addPerson(person);
+                    } catch (MetadataTypeNotAllowedException e) {
+                        LOGGER.warn("Failed to write person " + person.getType().getName() + " to logical anchor: " + e.getMessage());
 
+                    } catch (IncompletePersonObjectException e) {
+                        LOGGER.warn("Failed to write person " + person.getType().getName() + " to logical anchor: " + e.getMessage());
+
+                    }
+                }
+            }
         }
 
         if (writePhysical) {
@@ -764,10 +778,10 @@ public class Marc21Parser {
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-                    for (Element subfield : getChildElements(eleValue, "subfield")) {
-                        if(subfields != null && subfields.contains(subfield.getAttributeValue("code"))) {
-                            value += subfield.getValue() + separator;
-                        }
+                for (Element subfield : getChildElements(eleValue, "subfield")) {
+                    if (subfields != null && subfields.contains(subfield.getAttributeValue("code"))) {
+                        value += subfield.getValue() + separator;
+                    }
                 }
             } else if (objValue instanceof Attribute) {
                 Attribute atrValue = (Attribute) objValue;
@@ -775,7 +789,7 @@ public class Marc21Parser {
                 value = atrValue.getValue();
             }
             if (value.length() > separator.length()) {
-                value = value.substring(0, value.length()-separator.length());
+                value = value.substring(0, value.length() - separator.length());
             }
             valueList.add(value);
         }
