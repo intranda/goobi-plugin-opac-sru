@@ -56,8 +56,8 @@ import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 
 @PluginImplementation
-public class ImportOpac implements IOpacPlugin {
-	private static final Logger myLogger = Logger.getLogger(ImportOpac.class);
+public class SruOpacImport implements IOpacPlugin {
+	private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
 	private int hitcount;
 	private String gattung = "Aa";
@@ -74,7 +74,7 @@ public class ImportOpac implements IOpacPlugin {
         Fileformat ff = new MetsMods(inPrefs);
         String query = inSuchbegriff;
         String recordSchema = "marcxml";
-        String answer = SRUClient.queryZ3950SRU(catalogue, query, recordSchema);
+        String answer = SRUClient.querySRU(catalogue, query, recordSchema);
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if(marcXmlDoc != null) {
             hitcount = 1;

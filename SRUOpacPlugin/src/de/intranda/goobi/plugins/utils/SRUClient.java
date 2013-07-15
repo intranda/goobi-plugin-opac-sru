@@ -17,13 +17,13 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import de.intranda.goobi.plugins.ImportOpac;
+import de.intranda.goobi.plugins.SruOpacImport;
 import de.intranda.utils.DocumentUtils;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 
 public class SRUClient {
     
-    private static final Logger logger = Logger.getLogger(ImportOpac.class);
+    private static final Logger logger = Logger.getLogger(SruOpacImport.class);
     private static final String ENCODING = "UTF-8";
     /**
      * Queries the given catalog via Z.3950 (SRU) and returns its response.
@@ -33,7 +33,7 @@ public class SRUClient {
      * @param recordSchema The expected record schema.
      * @return Query result XML string.
      */
-    public static String queryZ3950SRU(ConfigOpacCatalogue cat, String query, String recordSchema) {
+    public static String querySRU(ConfigOpacCatalogue cat, String query, String recordSchema) {
         String ret = null;
 
         if (cat != null) {
@@ -55,7 +55,7 @@ public class SRUClient {
             url += "&maximumRecords=5";
             url += "&recordSchema=" + recordSchema;
 
-             logger.debug("Z39.50 URL: " + url);
+             logger.debug("SRU URL: " + url);
 
             HttpClient client = new HttpClient();
             GetMethod method = new GetMethod(url);
@@ -100,25 +100,6 @@ public class SRUClient {
         }
 
         return string;
-    }
-    
-    @SuppressWarnings("unused")
-    private static String prepareIdentifier(String identifier, Catalog catalog) {
-        identifier = identifier.trim();
-        while (identifier.charAt(0) == '+') {
-            identifier = identifier.substring(1);
-        }
-        while (identifier.charAt(identifier.length() - 1) == '+') {
-            identifier = identifier.substring(0, identifier.length() - 1);
-        }
-
-        if (catalog.isAddQuotationMarksToIdentifier()) {
-            identifier = "\"" + identifier + "\"";
-        }
-
-        // logger.debug("identifier: " + identifier);
-
-        return identifier;
     }
     
     public static Document retrieveMarcRecord(String input) throws JDOMException, IOException {
