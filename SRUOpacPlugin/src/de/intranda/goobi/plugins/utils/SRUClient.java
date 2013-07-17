@@ -115,7 +115,7 @@ public class SRUClient {
             Document outDoc = new Document((Element) record.detach());
             return outDoc;
         } catch (NullPointerException e) {
-            throw new JDOMException("Unable to find marcxml record");
+            return null;
         }
     }
 

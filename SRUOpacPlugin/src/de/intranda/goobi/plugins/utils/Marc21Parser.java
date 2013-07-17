@@ -36,6 +36,7 @@ public class Marc21Parser {
         private MarcMultipartLevel partLevel;
         private Date recordDate;
         private String ds;
+        private String gattung;
 
         public RecordInformation(MarcRecordType recordType, MarcBibliographicLevel bibLevel, MarcMultipartLevel partLevel, String dateString) {
             super();
@@ -64,35 +65,44 @@ public class Marc21Parser {
                 case CARTOGRAPHIC:
                 case MANUSCRIPTCARTOGRAPHIC:
                     ds = "Cartographic";
+                    gattung = "Ka";
                     break;
                 case NOTATEDMUSIC:
                 case MANUSCRIPTNOTATEDMUSIC:
                     ds = "SheetMusic";
+                    gattung = "Ma";
                     break;
                 case LANGUAGEMATERIAL:
                 case MIXEDMATERIALS:
                     ds = "Monograph";
+                    gattung = "Za";
                     break;
                 case MANUSCRIPTLANGUAGEMATERIAL:
                     ds = "Manuscript";
+                    gattung = "Ha";
                     break;
                 default:
                     ds = "Monograph";
+                    gattung = "Aa";
             }
 
             switch (bibLevel) {
                 case SERIAL:
                     ds = "Periodical";
+                    gattung = "Ab";
                     break;
                 case SERIALPART:
                     ds = "PeriodicalPart";
+                    gattung = "Av";
                     break;
                 case MONOGRAPHICPART:
                 case SUBUNIT:
                     ds = "MultiVolumePart";
+                    gattung = "Af";
                     break;
                 case COLLECTION:
                     ds = "Series";
+                    gattung = "Ad";
                     break;
                 case INTEGRATINGRESOURCE:
                 case MONOGRAPH:
@@ -104,13 +114,19 @@ public class Marc21Parser {
                     case DEPENDENTPART:
                     case INDEPENDENTPART:
                         ds = "SerialMonograph";
+                        gattung = "Av";
                         break;
                     case SET:
                         ds = "Series";
+                        gattung = "Ad";
                     default:
                         break;
                 }
             }
+        }
+        
+        public String getGattung() {
+            return gattung;
         }
 
         public String getDocStructType() {
@@ -264,7 +280,8 @@ public class Marc21Parser {
     private DocStruct dsPhysical;
     private List<String> anchorMetadataList = new ArrayList<String>();
     private String separator;
-
+    private  RecordInformation info;
+    
     public Marc21Parser(Prefs prefs, File mapFile) throws ParserException {
         this.prefs = prefs;
         loadMap(mapFile);
@@ -305,7 +322,7 @@ public class Marc21Parser {
 
     private DigitalDocument generateDD() throws ParserException {
         DigitalDocument dd = new DigitalDocument();
-        RecordInformation info = getRecordInfo(this.marcDoc);
+        info = getRecordInfo(this.marcDoc);
         String dsTypeLogical = info.getDocStructType();
         String dsTypePhysical = "BoundBook";
         try {
@@ -332,6 +349,7 @@ public class Marc21Parser {
             Element leader = marcDoc.getRootElement().getChild("leader", NS_MARC);
             if (leader != null) {
                 String leaderStr = leader.getValue();
+//              03315    a2200733   450 
                 String typeString = leaderStr.substring(6, 7);
                 String bibLevelString = leaderStr.substring(7, 8);
                 String partLevelString = leaderStr.trim().substring(leaderStr.trim().length() - 1);
@@ -829,4 +847,7 @@ public class Marc21Parser {
 
     }
 
+    public RecordInformation getInfo() {
+        return info;
+    }
 }

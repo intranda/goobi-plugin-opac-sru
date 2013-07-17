@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.jdom.Document;
+import org.jdom.JDOMException;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -50,39 +51,48 @@ import de.intranda.goobi.plugins.utils.Marc21Parser;
 import de.intranda.goobi.plugins.utils.Marc21Parser.ParserException;
 import de.intranda.goobi.plugins.utils.SRUClient;
 import de.sub.goobi.config.ConfigMain;
-import de.sub.goobi.helper.Helper;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 
 @PluginImplementation
 public class SruOpacImport implements IOpacPlugin {
-	private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
+    private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
-	private int hitcount;
-	private String gattung = "Aa";
-	private String atstsl;
-	private ConfigOpacCatalogue coc;
-	private Prefs prefs;
-	private boolean verbose = true;
-	public static final String MARC_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "marc_map.xml";
-	
+    private int hitcount;
+    private String gattung = "Aa";
+    private String atstsl;
+    private ConfigOpacCatalogue coc;
+    private Prefs prefs;
+    public static final String MARC_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "marc_map.xml";
+
     @Override
-	public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
         Fileformat ff = new MetsMods(inPrefs);
         String query = inSuchbegriff;
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, query, recordSchema);
+
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-        if(marcXmlDoc != null) {
+        if (marcXmlDoc == null) {
+            answer = SRUClient.querySRU(catalogue, "rec.id=" +query, recordSchema);
+            marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+        }
+        if (marcXmlDoc != null) {
             hitcount = 1;
+        } else {
+            throw new Exception("Unable to find record");
         }
         File mapFile = new File(MARC_MAPPING_FILE);
         try {
             Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
+           
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
+           
+            gattung = parser.getInfo().getGattung();
+            
             createAtstsl(dd);
             ff.setDigitalDocument(dd);
         } catch (ParserException e) {
@@ -91,65 +101,41 @@ public class SruOpacImport implements IOpacPlugin {
         return ff;
     }
 
-	private void createAtstsl(DigitalDocument dd) {
+    private void createAtstsl(DigitalDocument dd) {
         DocStruct logStruct = dd.getLogicalDocStruct();
-        if(logStruct.getType().isAnchor()) {
+        if (logStruct.getType().isAnchor()) {
             logStruct = logStruct.getAllChildren().get(0);
         }
-        
+
         String author = "";
         String title = "";
-        
-       List<? extends Metadata> authorList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("Author"));
-       if(authorList != null && !authorList.isEmpty()) {
-           author = ((Person)authorList.get(0)).getLastname();
-       }
-       List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
-       if(titleList != null && !titleList.isEmpty()) {
-           title = titleList.get(0).getValue();
-       }
-       this.atstsl = createAtstsl(title, author);
+
+        List<? extends Metadata> authorList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("Author"));
+        if (authorList != null && !authorList.isEmpty()) {
+            author = ((Person) authorList.get(0)).getLastname();
+        }
+        List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
+        if (titleList != null && !titleList.isEmpty()) {
+            title = titleList.get(0).getValue();
+        }
+        this.atstsl = createAtstsl(title, author);
     }
 
     /* (non-Javadoc)
      * @see de.sub.goobi.Import.IOpac#getHitcount()
      */
-	@Override
+    @Override
     public int getHitcount() {
-		return this.hitcount;
-	}
+        return this.hitcount;
+    }
 
-	/* (non-Javadoc)
+    /* (non-Javadoc)
      * @see de.sub.goobi.Import.IOpac#getAtstsl()
      */
-	@Override
+    @Override
     public String getAtstsl() {
-		return this.atstsl;
-	}
-
-    public ConfigOpacDoctype getOpacDocType(boolean verbose) {
-		try {
-			ConfigOpac co = new ConfigOpac();
-			ConfigOpacDoctype cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
-			if (cod == null) {
-				if (verbose) {
-					Helper.setFehlerMeldung(Helper.getTranslation("CatalogueUnKnownType") + ": ", this.gattung);
-				}
-				cod = new ConfigOpac().getAllDoctypes().get(0);
-				this.gattung = cod.getMappings().get(0);
-				if (verbose) {
-					Helper.setFehlerMeldung(Helper.getTranslation("CatalogueChangeDocType") + ": ", this.gattung + " - " + cod.getTitle());
-				}
-			}
-			return cod;
-		} catch (IOException e) {
-			myLogger.error("OpacDoctype unknown", e);
-			if (verbose) {
-				Helper.setFehlerMeldung(Helper.getTranslation("CatalogueUnKnownType"), e);
-			}
-			return null;
-		}
-	}
+        return this.atstsl;
+    }
 
     @Override
     public PluginType getType() {
@@ -166,11 +152,23 @@ public class SruOpacImport implements IOpacPlugin {
         return "SRU";
     }
 
-
     @Override
     public ConfigOpacDoctype getOpacDocType() {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            ConfigOpac co = new ConfigOpac();
+            ConfigOpacDoctype cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
+            if (cod == null) {
+
+                cod = new ConfigOpac().getAllDoctypes().get(0);
+                this.gattung = cod.getMappings().get(0);
+
+            }
+            return cod;
+        } catch (IOException e) {
+            myLogger.error("OpacDoctype unknown", e);
+
+            return null;
+        }
     }
 
     @Override
@@ -227,10 +225,9 @@ public class SruOpacImport implements IOpacPlugin {
             }
         }
         /* im ATS-TSL die Umlaute ersetzen */
-    
+
         myAtsTsl = myAtsTsl.replaceAll("[\\W]", "");
         return myAtsTsl;
     }
-
 
 }
