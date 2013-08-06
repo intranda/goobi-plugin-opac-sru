@@ -2,7 +2,11 @@
 <metadata logical="true" separateXPaths="true" separator=" ">
     <name>TitleDocMain</name>
     <marcfield tag="130"  subfields="a" separateOccurences="true"></marcfield>
-    <marcfield tag="331" ind1="-" ind2="1" subfields="abc" separateOccurences="true"></marcfield>
+    <marcfield tag="331" ind1="-" subfields="abc" separateOccurences="true"></marcfield>
+</metadata>
+<metadata logical="true" anchor="true" child="false" separateXPaths="true" separator=" ">
+    <name>TitleDocMain</name>
+    <marcfield tag="451"  subfields="a" separateOccurences="true"></marcfield>
 </metadata>
 <metadata logical="true">
     <name>Author</name>
@@ -10,6 +14,6 @@
 </metadata>
 <metadata logical="true">
     <name>CatalogIDDigital</name>
-    <marcfield tag="026" ind1="-" subfields="a"></marcfield>
+    <marcfield tag="026" ind1="-" ind2="1" subfields="a" separateOccurences="true"></marcfield>
 </metadata>
 </map>

@@ -103,7 +103,7 @@ public class SruOpacImport implements IOpacPlugin {
 
     private void createAtstsl(DigitalDocument dd) {
         DocStruct logStruct = dd.getLogicalDocStruct();
-        if (logStruct.getType().isAnchor()) {
+        if (logStruct.getType().isAnchor() && logStruct.getAllChildren() != null && !logStruct.getAllChildren().isEmpty()) {
             logStruct = logStruct.getAllChildren().get(0);
         }
 

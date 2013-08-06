@@ -18,6 +18,7 @@ import org.jdom.xpath.XPath;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
+import ugh.dl.DocStructType;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Person;
@@ -124,7 +125,7 @@ public class Marc21Parser {
                 }
             }
         }
-        
+
         public String getGattung() {
             return gattung;
         }
@@ -162,15 +163,35 @@ public class Marc21Parser {
         }
 
         public String getAnchorDs() {
-            if (ds.equals("MultiVolumePart")) {
-                return "MultiVolume";
+            if (ds.equals("MultiVolumePart") || ds.equals("Volume")) {
+                return "MultiVolumeWork";
             } else if (ds.equals("SerialMonograph")) {
                 return "Series";
-            } else if (ds.equals("PeriodicalVolume")) {
+            } else if (ds.equals("PeriodicalVolume") || ds.equals("PeriodicalPart")) {
                 return "Periodical";
             } else {
                 return null;
             }
+        }
+
+        public void setDocStruct(DocStructType structType) {
+            ds = structType.getName();
+            if ("Periodical".equals(ds)) {
+                gattung = "Ab";
+            } else if ("PeriodicalPart".equals(ds) || "PeriodicalVolume".equals(ds)) {
+                gattung = "Av";
+            } else if ("MultiVolumeWork".equals(ds)) {
+                gattung = "Af";
+            } else if ("Volume".equals(ds) || "MultiVolumePart".equals(ds)) {
+                gattung = "Af";
+            } else if ("Monograph".equals(ds)) {
+                gattung = "Aa";
+            } else if ("SerialMonograph".equals(ds)) {
+                gattung = "Av";
+            } else if ("Series".equals(ds)) {
+                gattung = "Ad";
+            }
+
         }
     }
 
@@ -278,10 +299,10 @@ public class Marc21Parser {
     private DocStruct dsLogical;
     private DocStruct dsAnchor;
     private DocStruct dsPhysical;
-    private List<String> anchorMetadataList = new ArrayList<String>();
+//    private List<String> anchorMetadataList = new ArrayList<String>();
     private String separator;
-    private  RecordInformation info;
-    
+    private RecordInformation info;
+
     public Marc21Parser(Prefs prefs, File mapFile) throws ParserException {
         this.prefs = prefs;
         loadMap(mapFile);
@@ -349,7 +370,7 @@ public class Marc21Parser {
             Element leader = marcDoc.getRootElement().getChild("leader", NS_MARC);
             if (leader != null) {
                 String leaderStr = leader.getValue();
-//              03315    a2200733   450 
+                //              03315    a2200733   450 
                 String typeString = leaderStr.substring(6, 7);
                 String bibLevelString = leaderStr.substring(7, 8);
                 String partLevelString = leaderStr.trim().substring(leaderStr.trim().length() - 1);
@@ -361,10 +382,52 @@ public class Marc21Parser {
                 RecordInformation info =
                         new RecordInformation(MarcRecordType.getByChar(typeString), MarcBibliographicLevel.getByChar(bibLevelString),
                                 MarcMultipartLevel.getByChar(partLevelString), dateString);
+
+                //set docStruct type from field 959
+                DocStructType logStructType = getDocTypeFrom959(marcDoc);
+                info.setDocStruct(logStructType);
+
                 return info;
             }
         }
         return null;
+    }
+
+    private DocStructType getDocTypeFrom959(Document marcDoc) {
+        XPath xpath;
+        String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
+        try {
+            xpath = XPath.newInstance(query);
+            if (NS_MARC != null) {
+                xpath.addNamespace(NS_MARC);
+            }
+            @SuppressWarnings("unchecked")
+            List<Element> nodeList = xpath.selectNodes(marcDoc);
+            if (nodeList != null && !nodeList.isEmpty() && nodeList.get(0) instanceof Element) {
+                Element node = nodeList.get(0);
+                String typeName = node.getValue();
+                DocStructType docStruct = prefs.getDocStrctTypeByName(getDocStructType(typeName));
+                return docStruct;
+            } else {
+                throw new JDOMException("No datafield 959 with subfield a found in marc document");
+            }
+        } catch (JDOMException e) {
+            LOGGER.error("Unable to retrieve document type information from datafield 959", e);
+        }
+        return null;
+    }
+
+    private String getDocStructType(String typeName) {
+        if ("Monographie".equals(typeName)) {
+            return "Monograph";
+        } else if ("Stücktitel".equals(typeName) || "Stuecktitel".equals(typeName)) {
+            return "Volume";
+        } else if ("Bandaufführung".equals(typeName) || "Bandauffuehrung".equals(typeName)) {
+            return "MultiVolumeWork";
+        } else if ("Zeitschrift".equals(typeName)) {
+            return "Periodical";
+        }
+        return typeName;
     }
 
     private Element getControlfield(Document marcDoc, String tag) {
@@ -717,8 +780,8 @@ public class Marc21Parser {
                     LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
                 }
             }
-            if (writeToAnchor) {
-                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(metadata.getType().getName()))) {
+            if (writeToAnchor && dsAnchor != null) {
+//                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(metadata.getType().getName()))) {
                     try {
                         dsAnchor.addMetadata(metadata);
                     } catch (MetadataTypeNotAllowedException e) {
@@ -728,7 +791,7 @@ public class Marc21Parser {
                         LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
 
                     }
-                }
+//                }
             }
         }
 
@@ -758,8 +821,8 @@ public class Marc21Parser {
                     LOGGER.error("Failed to write person " + person.getType().getName() + " to logical topStruct: " + e.getMessage());
                 }
             }
-            if (writeToAnchor) {
-                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(person.getType().getName()))) {
+            if (writeToAnchor && dsAnchor != null) {
+//                if (dsAnchor != null && (anchorMetadataList == null || anchorMetadataList.contains(person.getType().getName()))) {
                     try {
                         dsAnchor.addPerson(person);
                     } catch (MetadataTypeNotAllowedException e) {
@@ -769,7 +832,7 @@ public class Marc21Parser {
                         LOGGER.warn("Failed to write person " + person.getType().getName() + " to logical anchor: " + e.getMessage());
 
                     }
-                }
+//                }
             }
         }
 
