@@ -117,7 +117,7 @@ public class SruOpacImport implements IOpacPlugin {
             myLogger.info("Retrieved anchor record ");
             DocStruct topStruct =  dd.getLogicalDocStruct();
             if(topStruct.getType().isAnchor()) {
-            	topStruct = topStruct.getAllChildren().get(0);
+                topStruct = topStruct.getAllChildren().get(0);
             }
             DocStruct anchor = anchorFormat.getDigitalDocument().getLogicalDocStruct();
             anchor.addChild(topStruct);
