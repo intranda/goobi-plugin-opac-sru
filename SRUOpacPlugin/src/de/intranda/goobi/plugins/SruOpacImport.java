@@ -46,6 +46,8 @@ import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.Person;
 import ugh.dl.Prefs;
+import ugh.exceptions.PreferencesException;
+import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
 import de.intranda.goobi.plugins.utils.Marc21Parser;
 import de.intranda.goobi.plugins.utils.Marc21Parser.ParserException;
@@ -68,16 +70,19 @@ public class SruOpacImport implements IOpacPlugin {
 
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
+        return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, null);
+    }
+    
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, String docTypeName) throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
         Fileformat ff = new MetsMods(inPrefs);
-        String query = inSuchbegriff;
         String recordSchema = "marcxml";
-        String answer = SRUClient.querySRU(catalogue, query, recordSchema);
+        String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
 
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if (marcXmlDoc == null) {
-            answer = SRUClient.querySRU(catalogue, "rec.id=" +query, recordSchema);
+            answer = SRUClient.querySRU(catalogue, "rec.id=" +inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         }
         if (marcXmlDoc != null) {
@@ -88,9 +93,15 @@ public class SruOpacImport implements IOpacPlugin {
         File mapFile = new File(MARC_MAPPING_FILE);
         try {
             Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
-           
+            parser.setDocType(docTypeName);
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
-           
+            
+            String anchorId = parser.getAchorID();
+            if(anchorId != null) {
+                Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, parser.getInfo().getAnchorDs());
+                attachToAnchor(dd, af);
+            }
+            
             gattung = parser.getInfo().getGattung();
             
             createAtstsl(dd);
@@ -99,6 +110,21 @@ public class SruOpacImport implements IOpacPlugin {
             myLogger.error(e);
         }
         return ff;
+    }
+
+    private void attachToAnchor(DigitalDocument dd, Fileformat anchorFormat) throws PreferencesException, TypeNotAllowedAsChildException {
+        if(anchorFormat != null && anchorFormat.getDigitalDocument().getLogicalDocStruct().getType().isAnchor()) {
+            myLogger.info("Retrieved anchor record ");
+            DocStruct topStruct =  dd.getLogicalDocStruct();
+            if(topStruct.getType().isAnchor()) {
+            	topStruct = topStruct.getAllChildren().get(0);
+            }
+            DocStruct anchor = anchorFormat.getDigitalDocument().getLogicalDocStruct();
+            anchor.addChild(topStruct);
+            dd.setLogicalDocStruct(anchor);
+        } else {
+            myLogger.error("Failed to retrieve anchor record ");
+        }
     }
 
     private void createAtstsl(DigitalDocument dd) {
