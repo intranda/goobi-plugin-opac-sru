@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -173,6 +175,17 @@ public class Marc21Parser {
                 return null;
             }
         }
+        
+        public String getChildDs() {
+        	if(ds.equals("Periodical")) {
+        		return "PeriodicalVolume";
+        	} else if(ds.equals("MultiVolumeWork")) {
+        		return "Volume";
+        	} else if(ds.equals("Series")) {
+        		return "SerialMonograph";
+        	}
+        	return null;
+        }
 
         public void setDocStruct(DocStructType structType) {
             ds = structType.getName();
@@ -181,7 +194,7 @@ public class Marc21Parser {
             } else if ("PeriodicalPart".equals(ds) || "PeriodicalVolume".equals(ds)) {
                 gattung = "Av";
             } else if ("MultiVolumeWork".equals(ds)) {
-                gattung = "Af";
+                gattung = "Ac";
             } else if ("Volume".equals(ds) || "MultiVolumePart".equals(ds)) {
                 gattung = "Af";
             } else if ("Monograph".equals(ds)) {
@@ -303,6 +316,7 @@ public class Marc21Parser {
     private String separator;
     private RecordInformation info;
     private String docType = null;;
+    private boolean treatAsPeriodical = false;
 
     public Marc21Parser(Prefs prefs, File mapFile) throws ParserException {
         this.prefs = prefs;
@@ -356,6 +370,14 @@ public class Marc21Parser {
                 dd.setLogicalDocStruct(dsAnchor);
             } else {
                 dd.setLogicalDocStruct(dsLogical);
+            }
+            if(docType == null && dsLogical.getType().isAnchor()) {
+            	//This is the main entry, but an anchor
+            	dsAnchor = dsLogical;
+            	dsLogical = dd.createDocStruct(prefs.getDocStrctTypeByName(info.getChildDs()));
+            	dsAnchor.addChild(dsLogical);
+            	dd.setLogicalDocStruct(dsAnchor);
+            	treatAsPeriodical = true;
             }
             dd.setPhysicalDocStruct(dsPhysical);
         } catch (TypeNotAllowedForParentException e) {
@@ -481,6 +503,9 @@ public class Marc21Parser {
         writeToChild = writeToChild(metadataElement);
         String mdTypeName = getMetadataName(metadataElement);
         MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
+        if(mdType == null) {
+        	LOGGER.error("Unable To create metadata type " + mdTypeName);
+        }
         if (mdType.getIsPerson()) {
             writePersonXPaths(getXPaths(metadataElement), mdType);
         } else {
@@ -510,21 +535,39 @@ public class Marc21Parser {
     }
 
     private boolean writeToAnchor(Element metadataElement) {
-        if (metadataElement.getAttributeValue("anchor") != null && !metadataElement.getAttributeValue("anchor").isEmpty()) {
+        if(treatAsPeriodical) {
+        	if (metadataElement.getAttributeValue("anchor") != null && !metadataElement.getAttributeValue("anchor").isEmpty()) {
+                if (metadataElement.getAttributeValue("anchor").equalsIgnoreCase("false")) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+    	if (metadataElement.getAttributeValue("anchor") != null && !metadataElement.getAttributeValue("anchor").isEmpty()) {
             if (metadataElement.getAttributeValue("anchor").equalsIgnoreCase("true")) {
                 return true;
             }
         }
         return false;
+        }
     }
 
     private boolean writeToChild(Element metadataElement) {
-        if (metadataElement.getAttributeValue("child") != null && !metadataElement.getAttributeValue("child").isEmpty()) {
-            if (metadataElement.getAttributeValue("child").equalsIgnoreCase("false")) {
-                return false;
-            }
-        }
-        return true;
+       if(treatAsPeriodical) {
+    	   if (metadataElement.getAttributeValue("child") != null && !metadataElement.getAttributeValue("child").isEmpty()) {
+    		   if (metadataElement.getAttributeValue("child").equalsIgnoreCase("true")) {
+    			   return true;
+    		   }
+    	   }
+    	   return false;
+       } else {    	   
+    	   if (metadataElement.getAttributeValue("child") != null && !metadataElement.getAttributeValue("child").isEmpty()) {
+    		   if (metadataElement.getAttributeValue("child").equalsIgnoreCase("false")) {
+    			   return false;
+    		   }
+    	   }
+    	   return true;
+       }
     }
 
     private void writeMetadataXPaths(List<Element> eleXpathList, MetadataType mdType, boolean mergeXPaths) {
@@ -583,15 +626,36 @@ public class Marc21Parser {
                 Metadata md = new Metadata(mdType);
                 md.setValue(value);
                 writeMetadata(md);
+
             } catch (MetadataTypeNotAllowedException e) {
                 LOGGER.error("Failed to create metadata " + mdType.getName());
             }
-
+            if(mdType.getName().equals("TitleDocMain")) {
+            	writeSortingTitle(value);
+            }
         }
 
     }
 
-    @SuppressWarnings("unused")
+    private void writeSortingTitle(String value) {
+		Pattern pattern = Pattern.compile("<<.+>>");
+		Matcher matcher = pattern.matcher(value);
+		String sortedValue = value;
+		if(matcher.find()) {
+			String artikel = matcher.group();
+			sortedValue = value.replace(artikel, "").trim();
+		}
+		try {
+			Metadata md = new Metadata(prefs.getMetadataTypeByName("TitleDocMainShort"));
+			md.setValue(sortedValue);
+			writeMetadata(md);
+		} catch (MetadataTypeNotAllowedException e) {
+			LOGGER.error("Failed to create metadata TitleDocMainShort");
+		}
+		
+	}
+
+	@SuppressWarnings("unused")
     private boolean testConditions(Element eleXpath) {
         boolean ret = true;
         for (Element condition : getChildElements(eleXpath, "conditional")) {

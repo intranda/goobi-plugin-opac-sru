@@ -19,7 +19,7 @@
 			<mapping>Ob</mapping>
 		</type>
 		<type isContainedWork="false" isMultiVolume="true" isPeriodical="false"
-			rulesetType="MultivolumeWork" tifHeaderType="Band_MultivolumeWork" title="multivolume">
+			rulesetType="MultiVolumeWork" tifHeaderType="Band_MultivolumeWork" title="multivolume">
 			<label language="de">Mehrbändiges Werk</label>
 			<label language="en">Multivolume work</label>
 			<mapping>Of</mapping>
@@ -52,9 +52,12 @@
 	<catalogue title="HU-BERLIN">
 		<config address="opac.intranda.com" database="12"
 			description="HU Berlin Aleph"
-			iktlist="IKTLIST.xml" port="80" />
+			iktlist="IKTLIST.xml" port="80"/>
 	</catalogue>
-	
+	   <catalogue title="HUB">
+        <config address="aleph20.ub.hu-berlin.de" database="hub01" description="Humboldt Universität Berlin"
+            port="5661" opacType="SRU"/>
+    </catalogue>
 	<catalogue title="SUB">
 		<config address="opac.sub.uni-goettingen.de" database="1"
 			description="Niedersächsische Staats- und Universitätsbibliothek Göttingen"
