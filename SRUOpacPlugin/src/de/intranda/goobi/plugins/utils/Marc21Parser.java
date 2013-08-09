@@ -315,7 +315,8 @@ public class Marc21Parser {
     //    private List<String> anchorMetadataList = new ArrayList<String>();
     private String separator;
     private RecordInformation info;
-    private String docType = null;;
+    private String docType = null;
+    private String individualIdentifier = null;
     private boolean treatAsPeriodical = false;
 
     public Marc21Parser(Prefs prefs, File mapFile) throws ParserException {
@@ -353,10 +354,25 @@ public class Marc21Parser {
         for (Element metadataElement : getMetadataList()) {
             writeElementToDD(metadataElement, dd);
         }
+        addMissingMetadata(dd);
         return dd;
     }
 
-    private DigitalDocument generateDD() throws ParserException {
+    private void addMissingMetadata(DigitalDocument dd) {
+		if(dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo")) && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
+			try {
+				Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
+				md.setValue(dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo")).get(0).getValue());
+				dsLogical.addMetadata(md);
+			} catch (MetadataTypeNotAllowedException e) {
+				LOGGER.error("Cannot add CurrentNoSorting: Not allowed for ds " + dsLogical.getType().getName());
+			}
+			
+		}
+		
+	}
+
+	private DigitalDocument generateDD() throws ParserException {
         DigitalDocument dd = new DigitalDocument();
         info = getRecordInfo(this.marcDoc);
         String dsTypeLogical = info.getDocStructType();
@@ -753,10 +769,31 @@ public class Marc21Parser {
         }
         @SuppressWarnings("unchecked")
         List<Element> nodeList = xpath.selectNodes(marcDoc);
-        return nodeList;
+        if(individualIdentifier != null && nodeList != null && nodeList.size() > 1 && "999".equals(nodeList.get(0).getParentElement().getAttributeValue("tag"))) {
+        	return selectMatching999(nodeList);
+        } else {        	
+        	return nodeList;
+        }
     }
 
-    private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType) {
+    private List<Element> selectMatching999(List<Element> nodeList) {
+		List<Element> newList = new ArrayList<Element>();
+		for (Element element : nodeList) {
+			List<Element> children  = element.getChildren();
+			for (Element child : children) {
+				if(individualIdentifier.equals(child.getValue().trim())) {
+					newList.add(element);
+					break;
+				}
+			}
+		}
+		if(newList.isEmpty()) {
+			newList.add(nodeList.get(0));
+		}
+		return newList;
+	}
+
+	private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType) {
         for (Element node : xPathNodeList) {
             String displayName = "";
             String nameNumeration = "";
@@ -1010,4 +1047,14 @@ public class Marc21Parser {
         this.docType = docTypeName;
 
     }
+
+	public String getIndividualIdentifier() {
+		return individualIdentifier;
+	}
+
+	public void setIndividualIdentifier(String individualIdentifier) {
+		this.individualIdentifier = individualIdentifier;
+	}
+    
+    
 }

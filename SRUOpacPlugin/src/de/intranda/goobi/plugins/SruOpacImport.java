@@ -38,7 +38,6 @@ import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.jdom.Document;
-import org.jdom.JDOMException;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -94,6 +93,7 @@ public class SruOpacImport implements IOpacPlugin {
         try {
             Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
             parser.setDocType(docTypeName);
+            parser.setIndividualIdentifier(inSuchbegriff.trim());
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
             
             String anchorId = parser.getAchorID();
