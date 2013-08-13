@@ -54,7 +54,7 @@
 			description="HU Berlin Aleph"
 			iktlist="IKTLIST.xml" port="80"/>
 	</catalogue>
-	   <catalogue title="HUB">
+	   <catalogue title="HU-BERLIN(SRU)">
         <config address="aleph20.ub.hu-berlin.de" database="hub01" description="Humboldt Universität Berlin"
             port="5661" opacType="SRU"/>
     </catalogue>
