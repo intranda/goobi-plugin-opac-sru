@@ -38,7 +38,6 @@ import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.jdom.Document;
-import org.jdom.JDOMException;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -77,13 +76,12 @@ public class SruOpacImport implements IOpacPlugin {
         this.coc = catalogue;
         this.prefs = inPrefs;
         Fileformat ff = new MetsMods(inPrefs);
-        String query = inSuchbegriff;
         String recordSchema = "marcxml";
-        String answer = SRUClient.querySRU(catalogue, query, recordSchema);
+        String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
 
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if (marcXmlDoc == null) {
-            answer = SRUClient.querySRU(catalogue, "rec.id=" +query, recordSchema);
+            answer = SRUClient.querySRU(catalogue, "rec.id=" +inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         }
         if (marcXmlDoc != null) {
@@ -95,6 +93,7 @@ public class SruOpacImport implements IOpacPlugin {
         try {
             Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
             parser.setDocType(docTypeName);
+            parser.setIndividualIdentifier(inSuchbegriff.trim());
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
             
             String anchorId = parser.getAchorID();
