@@ -215,6 +215,10 @@ public class Marc21Parser {
 			}
 
 		}
+
+		public boolean hasAnchor() {
+			return !ds.equals("Monograph") && !isAnchor();
+		}
 	}
 
 	public enum MarcRecordType {
@@ -397,9 +401,38 @@ public class Marc21Parser {
 				LOGGER.error("Cannot add CurrentNoSorting: Not allowed for ds "
 						+ dsLogical.getType().getName());
 			}
-
 		}
 
+	}
+	
+	private String getMetadataValue(DocStruct ds, String metadataName) {
+		@SuppressWarnings("rawtypes")
+		List mdList = ds.getAllMetadataByType(prefs.getMetadataTypeByName(metadataName));
+		if(mdList != null && !mdList.isEmpty()) {
+			try {				
+				String value = ((Metadata) mdList.get(0)).getValue();
+				return value;
+			}catch(ClassCastException e) {
+				LOGGER.error("unable to cast " + metadataName + " to metadata");
+			}
+		}
+		return null;
+	}
+	
+	private Metadata getMetadata(DocStruct ds, String metadataName) {
+		@SuppressWarnings("rawtypes")
+		List mdList = ds.getAllMetadataByType(prefs.getMetadataTypeByName(metadataName));
+		if(mdList != null && !mdList.isEmpty()) {
+			if(prefs.getMetadataTypeByName(metadataName).getIsPerson()) {
+				Person person = (Person) mdList.get(0);
+				return person;
+			} else {				
+				Metadata md = ((Metadata) mdList.get(0));
+				return md;
+			}
+
+		}
+		return null;
 	}
 
 	private DigitalDocument generateDD() throws ParserException {
@@ -505,7 +538,11 @@ public class Marc21Parser {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public String getAchorID() {
+		if(this.info != null && !this.info.hasAnchor()) {
+			return null;
+		}
 		XPath xpath;
 		String query = "/marc:record/marc:datafield[@tag=\"453\"]/marc:subfield[@code=\"a\"]";
 		try {
@@ -513,16 +550,24 @@ public class Marc21Parser {
 			if (NS_MARC != null) {
 				xpath.addNamespace(NS_MARC);
 			}
-			@SuppressWarnings("unchecked")
 			List<Element> nodeList = xpath.selectNodes(marcDoc);
+			if (nodeList == null || nodeList.isEmpty()) {
+				//try again with different field
+				query = "/marc:record/marc:datafield[@tag=\"958\"][@ind2=\"2\"]/marc:subfield[@code=\"a\"]";
+				xpath = XPath.newInstance(query);
+				if (NS_MARC != null) {
+					xpath.addNamespace(NS_MARC);
+				}
+				nodeList = xpath.selectNodes(marcDoc);
+			}
 			if (nodeList != null && !nodeList.isEmpty()
 					&& nodeList.get(0) instanceof Element) {
 				Element node = nodeList.get(0);
 				String id = node.getValue();
 				return id;
-			} else {
-				throw new JDOMException(
-						"No datafield 453 with subfield a found in marc document");
+			} else {				
+					throw new JDOMException(
+							"No datafield 453 with subfield a found in marc document");
 			}
 		} catch (JDOMException e) {
 			LOGGER.error("Unable to retrieve anchor record from datafield 453");
@@ -535,10 +580,10 @@ public class Marc21Parser {
 			return "Monograph";
 		} else if ("Stücktitel".equals(typeName)
 				|| "Stuecktitel".equals(typeName)) {
-			return "Volume";
+			return "Monograph";
 		} else if ("Bandaufführung".equals(typeName)
 				|| "Bandauffuehrung".equals(typeName)) {
-			return "MultiVolumeWork";
+			return "Volume";
 		} else if ("Zeitschrift".equals(typeName)) {
 			return "Periodical";
 		}
@@ -680,10 +725,10 @@ public class Marc21Parser {
 							for (String value : nodeValueList) {
 								if (value != null && valueList.size() <= count) {
 									valueList.add(value);
-								} else if (value != null) {
+								} else if (value != null && !value.trim().isEmpty()) {
 									value = valueList.get(count) + separator
 											+ value;
-									valueList.set(count, value.substring(0, value.length()-separator.length()));
+									valueList.set(count, value);
 								}
 								count++;
 							}
@@ -724,7 +769,7 @@ public class Marc21Parser {
 
 	private void writeCurrentNoSort(String value) {
 		String sortingValue = value;
-		if (dsLogical.getType().getName().toLowerCase().contains("Periodical")) {
+		if (dsLogical.getType().getName().toLowerCase().contains("periodical")) {
 			StringBuilder builder = new StringBuilder();
 			String[] parts = value.split(separator);
 			for (int i = 0; i < 3; i++) {
@@ -876,7 +921,22 @@ public class Marc21Parser {
 		}
 		if (ind2 != null) {
 			query.append("[@ind2=\"" + ind2 + "\"]");
+		} else if(!"true".equals(eleXpath.getParentElement().getAttributeValue("child"))) {
+			query.append("[not(@ind2=\"2\")]");
 		}
+//			//For MultiVolumes separate Volume and Anchor Metadata by Value of ind2
+//			if(treatAsMultiVolume) {
+//				String child = eleXpath.getParentElement().getAttributeValue("child");
+//				String anchor = eleXpath.getParentElement().getAttributeValue("anchor");
+//				if(docType == null && !"true".equals(child)) {
+//					//Volume
+//					query.append("[not(@ind2=\"2\")]");
+//				} else if(docType != null && !"true".equals(anchor)) {
+//					//MiltiVolume
+//					query.append("[not(@ind2=\"1\")]");
+//				}
+//			}
+//		}
 		return query.toString();
 	}
 
@@ -1176,21 +1236,25 @@ public class Marc21Parser {
 	}
 
 	private boolean separateXPaths(Element metadataElement) {
-		if (metadataElement.getAttribute("separateXPaths") != null
-				&& metadataElement.getAttribute("separateXPaths").getValue()
-						.equals("true")) {
+		Attribute attr = metadataElement.getAttribute("separateXPaths");
+//		if(attr == null) {
+//			attr = metadataElement.getParentElement().getAttribute("separateXPaths");
+//		}
+		if (attr != null && attr.getValue().equals("true")) {
 			return true;
-		} else {
+		} else {			
 			return false;
 		}
 	}
 
 	private boolean separateOccurances(Element xpathElement) {
-		if (xpathElement.getAttribute("separateOccurances") != null
-				&& xpathElement.getAttribute("separateOccurances").getValue()
-						.equals("true")) {
+		Attribute attr = xpathElement.getAttribute("separateOccurances");
+		if(attr == null) {
+			attr = xpathElement.getParentElement().getAttribute("separateOccurances");
+		}
+		if (attr != null && attr.getValue().equals("true")) {
 			return true;
-		} else {
+		} else {			
 			return false;
 		}
 	}
