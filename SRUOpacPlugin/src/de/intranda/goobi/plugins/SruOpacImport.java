@@ -106,6 +106,8 @@ public class SruOpacImport implements IOpacPlugin {
             
             createAtstsl(dd);
             ff.setDigitalDocument(dd);
+//            File tempFile = new File("/opt/digiverso/logs/aesorne.xml");
+//            ff.write(tempFile.getAbsolutePath());
         } catch (ParserException e) {
             myLogger.error(e);
         }
@@ -140,11 +142,16 @@ public class SruOpacImport implements IOpacPlugin {
         if (authorList != null && !authorList.isEmpty()) {
             author = ((Person) authorList.get(0)).getLastname();
         }
-        List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
-        if (titleList != null && !titleList.isEmpty()) {
-            title = titleList.get(0).getValue();
-        }
-        this.atstsl = createAtstsl(title, author);
+        List<? extends Metadata> titleShortList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMainShort"));
+        if (titleShortList != null && !titleShortList.isEmpty()) {
+            title = titleShortList.get(0).getValue();
+        } else {
+	        List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
+	        if (titleList != null && !titleList.isEmpty()) {
+	            title = titleList.get(0).getValue();
+	        }
+		}
+        this.atstsl = createAtstsl(title, author).toLowerCase();
     }
 
     /* (non-Javadoc)

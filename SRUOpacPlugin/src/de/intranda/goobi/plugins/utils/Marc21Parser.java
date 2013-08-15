@@ -7,6 +7,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -324,6 +325,8 @@ public class Marc21Parser {
 			"http://www.loc.gov/MARC21/slim");
 	private static final NumberFormat noSortingFormat = new DecimalFormat(
 			"0000");
+	private static final NumberFormat noSubSortingFormat = new DecimalFormat(
+			"00");
 
 	private Document marcDoc;
 	private Document mapDoc;
@@ -402,7 +405,32 @@ public class Marc21Parser {
 						+ dsLogical.getType().getName());
 			}
 		}
-
+		List<Person> logicalPersonList = dsLogical.getAllPersons();
+		if((logicalPersonList == null || logicalPersonList.isEmpty()) && dsAnchor != null) {
+			List<Person> anchorPersonList = dsAnchor.getAllPersons();
+			if(anchorPersonList != null) {
+				for (Person person : anchorPersonList) {
+					try {
+						Person newPerson = new Person(person.getType());
+						newPerson.setAffiliation(person.getAffiliation());
+						newPerson.setAutorityFileID(person.getAuthorityFileID());
+						newPerson.setCorporation(person.isCorporation());
+						newPerson.setDisplayname(person.getDisplayname());
+						newPerson.setFirstname(person.getFirstname());
+						newPerson.setIdentifier(person.getIdentifier());
+						newPerson.setIdentifierType(person.getIdentifierType());
+						newPerson.setInstitution(person.getInstitution());
+						newPerson.setLastname(person.getLastname());
+						newPerson.setPersontype(person.getPersontype());
+						newPerson.setRole(person.getRole());
+						dsLogical.addPerson(newPerson);
+					} catch (MetadataTypeNotAllowedException e) {
+						LOGGER.error(e);
+					}
+					
+				}
+			}
+		}
 	}
 	
 	private String getMetadataValue(DocStruct ds, String metadataName) {
@@ -613,6 +641,12 @@ public class Marc21Parser {
 		writeToAnchor = writeToAnchor(metadataElement);
 		writeToChild = writeToChild(metadataElement);
 		String mdTypeName = getMetadataName(metadataElement);
+		if(mdTypeName.equals("Person")) {
+			List<Element> roleList = metadataElement.getChildren("Role");
+			for (Element roleElement : roleList) {				
+				writePersonXPaths(getXPaths(metadataElement), roleElement);
+			}
+		} else {
 		MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
 		if (mdType == null) {
 			LOGGER.error("Unable To create metadata type " + mdTypeName);
@@ -622,6 +656,7 @@ public class Marc21Parser {
 		} else {
 			writeMetadataXPaths(getXPaths(metadataElement), mdType,
 					!separateXPaths(metadataElement));
+		}
 		}
 
 	}
@@ -699,13 +734,7 @@ public class Marc21Parser {
 				boolean mergeOccurances = !separateOccurances(eleXpath);
 				String query = generateQuery(eleXpath);
 				String subfields = eleXpath.getAttributeValue("subfields");
-				XPath xpath;
-				xpath = XPath.newInstance(query);
-				if (NS_MARC != null) {
-					xpath.addNamespace(NS_MARC);
-				}
-				@SuppressWarnings("rawtypes")
-				List nodeList = xpath.selectNodes(marcDoc);
+				List<Element> nodeList = getXpathNodes(query);
 
 				// read values
 				if (nodeList != null && !nodeList.isEmpty()) {
@@ -717,9 +746,9 @@ public class Marc21Parser {
 							sb.append(string);
 							sb.append(separator);
 						}
-						valueList.add(sb.substring(0,
-								sb.length() - separator.length()));
-					} else {
+						nodeValueList = new LinkedList<String>();
+						nodeValueList.add(sb.substring(0, sb.length() - separator.length()));
+					}
 						if (mergeXPaths) {
 							int count = 0;
 							for (String value : nodeValueList) {
@@ -735,7 +764,6 @@ public class Marc21Parser {
 						} else {
 							valueList.addAll(nodeValueList);
 						}
-					}
 				}
 
 			} catch (JDOMException e) {
@@ -748,10 +776,10 @@ public class Marc21Parser {
 
 		// create and write medadata
 		for (String value : valueList) {
-			value = cleanValue(mdType, value);
+			String cleanedValue = cleanValue(mdType, value);
 			try {
 				Metadata md = new Metadata(mdType);
-				md.setValue(value);
+				md.setValue(cleanedValue);
 				writeMetadata(md);
 
 			} catch (MetadataTypeNotAllowedException e) {
@@ -768,6 +796,21 @@ public class Marc21Parser {
 	}
 
 	private void writeCurrentNoSort(String value) {
+		if(!dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
+		String sortingValue = createCurrentNoSort(value);
+
+		try {
+			Metadata md = new Metadata(
+					prefs.getMetadataTypeByName("CurrentNoSorting"));
+			md.setValue(sortingValue);
+			writeMetadata(md);
+		} catch (MetadataTypeNotAllowedException e) {
+			LOGGER.error("Failed to create metadata CurrentNoSorting");
+		}
+		}
+	}
+
+	private String createCurrentNoSort(String value) {
 		String sortingValue = value;
 		if (dsLogical.getType().getName().toLowerCase().contains("periodical")) {
 			StringBuilder builder = new StringBuilder();
@@ -776,9 +819,16 @@ public class Marc21Parser {
 				String partSort = "0000";
 				if (parts.length > i && !parts[i].isEmpty()) {
 					try {
-						String sortedPart = parts[i].replaceAll("\\D", "");
-						int no = Integer.valueOf(sortedPart);
-						partSort = noSortingFormat.format(no);
+						if(parts[i].contains("/") || parts[i].contains("-")) {
+							String[] subparts = parts[i].split("[/-]");
+							if(subparts.length > 0) {									
+									partSort = noSortingFormat.format(Integer.valueOf(subparts[0].replaceAll("\\D", "")));
+							}
+						} else {
+							String sortedPart = parts[i].replaceAll("\\D", "");
+							int no = Integer.valueOf(sortedPart);
+							partSort = noSortingFormat.format(no);
+						}
 					} catch (NumberFormatException e) {
 						LOGGER.error(e);
 					}
@@ -789,36 +839,24 @@ public class Marc21Parser {
 		} else {
 			sortingValue = value.replaceAll("\\D", "");
 		}
-
-		try {
-			Metadata md = new Metadata(
-					prefs.getMetadataTypeByName("CurrentNoSorting"));
-			md.setValue(sortingValue);
-			writeMetadata(md);
-		} catch (MetadataTypeNotAllowedException e) {
-			LOGGER.error("Failed to create metadata CurrentNoSorting");
-		}
+		return sortingValue;
 	}
 
 	private String cleanValue(MetadataType mdType, String value) {
 		String returnValue = value;
-		if (mdType.getName().equals("shelfmarksource")) {
-			if (value.contains(">>")) {
-				returnValue = value.substring(value.lastIndexOf(">>") + 2)
-						.trim();
-			}
+		if (mdType.getName().equals("shelfmarksource") || mdType.getName().equals("TitleDocMainShort")) {
+			returnValue = value.replaceAll("<<.+?>>", "").trim();
+		} else if(mdType.getName().equals("TitleDocMain")) {
+			returnValue = value.replaceAll("<<|>>", "").trim();
+		} else if(mdType.getName().equals("CurrentNoSorting")) {
+			returnValue = createCurrentNoSort(value);
 		}
 		return returnValue;
 	}
 
 	private void writeSortingTitle(String value) {
-		Pattern pattern = Pattern.compile("<<.+>>");
-		Matcher matcher = pattern.matcher(value);
-		String sortedValue = value;
-		if (matcher.find()) {
-			String artikel = matcher.group();
-			sortedValue = value.replace(artikel, "").trim();
-		}
+		if(!dsLogical.hasMetadataType(prefs.getMetadataTypeByName("TitleDocMainShort"))) {
+		String sortedValue = value.replaceAll("<<.+?>>", "").trim();
 		try {
 			Metadata md = new Metadata(
 					prefs.getMetadataTypeByName("TitleDocMainShort"));
@@ -826,6 +864,7 @@ public class Marc21Parser {
 			writeMetadata(md);
 		} catch (MetadataTypeNotAllowedException e) {
 			LOGGER.error("Failed to create metadata TitleDocMainShort");
+		}
 		}
 
 	}
@@ -880,6 +919,21 @@ public class Marc21Parser {
 		}
 		return eleList;
 	}
+	
+	private List<Element> getSubfieldsByCode(Element parent, String code) {
+		List childNodes = null;
+		childNodes = parent.getChildren("subfield", NS_MARC);
+
+		List<Element> eleList = new LinkedList<Element>();
+		for (Object node : childNodes) {
+			if (node instanceof Element) {
+				if(((Element) node).getAttributeValue("code").equals(code)) {					
+					eleList.add((Element) node);
+				}
+			}
+		}
+		return eleList;
+	}
 
 	private void writePersonXPaths(List<Element> eleXpathList,
 			MetadataType mdType) {
@@ -887,13 +941,7 @@ public class Marc21Parser {
 		for (Element eleXpath : eleXpathList) {
 			try {
 				String query = generateQuery(eleXpath);
-				XPath xpath;
-				xpath = XPath.newInstance(query);
-				if (NS_MARC != null) {
-					xpath.addNamespace(NS_MARC);
-				}
-				@SuppressWarnings("unchecked")
-				List<Element> nodeList = xpath.selectNodes(marcDoc);
+				List<Element> nodeList = getXpathNodes(query);
 				if (nodeList != null) {
 					writePersonNodeValues(nodeList, mdType);
 				}
@@ -905,6 +953,59 @@ public class Marc21Parser {
 				continue;
 			}
 		}
+	}
+	
+	private void writePersonXPaths(List<Element> eleXpathList,
+			Element roleElement) {
+
+		for (Element eleXpath : eleXpathList) {
+			try {
+				String query = generateQuery(eleXpath);
+				List<Element> nodeList = getXpathNodes(query);
+				nodeList = filterByRole(nodeList, roleElement);
+				MetadataType mdType = getPersonType(roleElement);
+				if (nodeList != null && mdType != null) {
+					writePersonNodeValues(nodeList, mdType);
+				}
+
+			} catch (JDOMException e) {
+				LOGGER.error(
+						"Error parsing mods section for node "
+								+ eleXpath.getTextTrim(), e);
+				continue;
+			}
+		}
+	}
+
+	private MetadataType getPersonType(Element roleElement) {
+		String typeName = roleElement.getValue().trim();
+		MetadataType type = prefs.getMetadataTypeByName(typeName);
+		return type;
+	}
+
+	private List<Element> filterByRole(List<Element> nodeList,
+			Element roleElement) {
+		List<Element> returnList = new LinkedList<Element>();
+		for (Element node : nodeList) {
+			boolean write = false;
+			String subfield = roleElement.getAttributeValue("subfield");
+			String subfieldValue = roleElement.getAttributeValue("value");
+			List<Element> subfieldList = getSubfieldsByCode(node, subfield);
+			if(subfieldValue == null || subfieldValue.isEmpty() && subfieldList.isEmpty()) {
+				write=true;
+			} else {				
+				for (Element element : subfieldList) {
+					if(element.getValue().trim().equals(subfieldValue.trim())) {
+						write=true;
+						break;
+					}
+				}
+			}
+			if(write) {
+				returnList.add(node);
+			}
+		}
+		return returnList;
 	}
 
 	private String generateQuery(Element eleXpath) {
@@ -951,8 +1052,8 @@ public class Marc21Parser {
 		if (individualIdentifier != null
 				&& nodeList != null
 				&& nodeList.size() > 1
-				&& "999".equals(nodeList.get(0).getParentElement()
-						.getAttributeValue("tag"))) {
+				&& ("999".equals(nodeList.get(0).getParentElement()
+						.getAttributeValue("tag")) || "999".equals(nodeList.get(0).getAttributeValue("tag")))) {
 			return selectMatching999(nodeList);
 		} else {
 			return nodeList;
@@ -989,8 +1090,7 @@ public class Marc21Parser {
 			String authorityID = "";
 			String institution = "";
 			String identifier = "";
-			String roleTerm = "";
-			String typeName = mdType.getName();
+			String roleTerm = mdType.getName();
 
 			// get subelements of person
 			for (Object o : node.getChildren()) {

@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/jdom.jar"/>
-	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/ugh-1.10.jar" sourcepath="/ugh_new"/>
+	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/ugh-1.10.jar" sourcepath="/ugh_new/src"/>
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="lib" path="/Goobi/WEB-INF/lib/jspf.core-1.0.0.jar"/>
