@@ -14,7 +14,7 @@
 	<property name="pluginFolderUnix" value="/opt/digiverso/goobi/plugins/opac/" />
 
 	<path id="classpath">
-	    <fileset dir="/opt/digiverso/goobilibs/lib"/> 
+	    <fileset dir="/opt/digiverso/goobi-193/lib"/> 
 	    <fileset dir="/opt/digiverso/libs" />
 	</path>
 	
@@ -84,8 +84,8 @@
 			<classpath refid="classpath" />
 			<compilerarg value="-Xlint" />
 			<src path="src" />
-			<src path="../Goobi/WEB-INF/src" />
-<!--		<src path="../Goobi/src" />
+<!--		<src path="../Goobi/WEB-INF/src" />
+			<src path="../Goobi/src" />
 			<src path="../Goobi/src-dubious" />			-->
 		</javac>
 	</target>
