@@ -36,23 +36,31 @@ import de.intranda.utils.DocumentUtils;
 
 public class Marc21Parser {
 
-	public class RecordInformation {
-		private MarcRecordType recordType;
-		private MarcBibliographicLevel bibLevel;
-		private MarcMultipartLevel partLevel;
+	public static class RecordInformation {
 		private Date recordDate;
 		private String ds;
+		private String anchorDs;
+		private String childDs;
 		private String gattung;
 
-		public RecordInformation(MarcRecordType recordType,
-				MarcBibliographicLevel bibLevel, MarcMultipartLevel partLevel,
-				String dateString) {
+		public RecordInformation(Element element) {
 			super();
-			this.recordType = recordType;
-			this.bibLevel = bibLevel;
-			this.partLevel = partLevel;
-			this.recordDate = createDate(dateString);
-			setDs();
+			String gattung = element.getAttributeValue("gattung");
+			String anchor = element.getAttributeValue("anchorType");
+			String child = element.getAttributeValue("childType");
+			String ds = element.getAttributeValue("mapTo");
+
+			this.gattung = gattung;
+			this.ds = ds;
+			this.anchorDs = anchor;
+			this.childDs = child;
+		}
+
+		public RecordInformation(RecordInformation child) {
+			this.gattung = child.gattung;
+			this.ds = child.anchorDs;
+			this.childDs = child.ds;
+			this.anchorDs = null;
 		}
 
 		private Date createDate(String dateString) {
@@ -70,71 +78,6 @@ public class Marc21Parser {
 			}
 		}
 
-		private void setDs() {
-			switch (recordType) {
-			case CARTOGRAPHIC:
-			case MANUSCRIPTCARTOGRAPHIC:
-				ds = "Cartographic";
-				gattung = "Ka";
-				break;
-			case NOTATEDMUSIC:
-			case MANUSCRIPTNOTATEDMUSIC:
-				ds = "SheetMusic";
-				gattung = "Ma";
-				break;
-			case LANGUAGEMATERIAL:
-			case MIXEDMATERIALS:
-				ds = "Monograph";
-				gattung = "Za";
-				break;
-			case MANUSCRIPTLANGUAGEMATERIAL:
-				ds = "Manuscript";
-				gattung = "Ha";
-				break;
-			default:
-				ds = "Monograph";
-				gattung = "Aa";
-			}
-
-			switch (bibLevel) {
-			case SERIAL:
-				ds = "Periodical";
-				gattung = "Ab";
-				break;
-			case SERIALPART:
-				ds = "PeriodicalPart";
-				gattung = "Av";
-				break;
-			case MONOGRAPHICPART:
-			case SUBUNIT:
-				ds = "MultiVolumePart";
-				gattung = "Af";
-				break;
-			case COLLECTION:
-				ds = "Series";
-				gattung = "Ad";
-				break;
-			case INTEGRATINGRESOURCE:
-			case MONOGRAPH:
-			default:
-			}
-
-			if (ds.equals("Monograph")) {
-				switch (partLevel) {
-				case DEPENDENTPART:
-				case INDEPENDENTPART:
-					ds = "SerialMonograph";
-					gattung = "Av";
-					break;
-				case SET:
-					ds = "Series";
-					gattung = "Ad";
-				default:
-					break;
-				}
-			}
-		}
-
 		public String getGattung() {
 			return gattung;
 		}
@@ -144,28 +87,15 @@ public class Marc21Parser {
 		}
 
 		public boolean isAnchor() {
-			if (ds.equals("Series") || ds.equals("MultiVolume")
-					|| ds.equals("Periodical")) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		public MarcRecordType getRecordType() {
-			return recordType;
-		}
-
-		public MarcBibliographicLevel getBibLevel() {
-			return bibLevel;
-		}
-
-		public MarcMultipartLevel getPartLevel() {
-			return partLevel;
+			return childDs == null;
 		}
 
 		public Date getRecordDate() {
 			return recordDate;
+		}
+
+		public void setRecordDate(String dateString) {
+			this.recordDate = createDate(dateString);
 		}
 
 		public String getDs() {
@@ -173,150 +103,15 @@ public class Marc21Parser {
 		}
 
 		public String getAnchorDs() {
-			if (ds.equals("MultiVolumePart") || ds.equals("Volume")) {
-				return "MultiVolumeWork";
-			} else if (ds.equals("SerialMonograph")) {
-				return "Series";
-			} else if (ds.equals("PeriodicalVolume")
-					|| ds.equals("PeriodicalPart")) {
-				return "Periodical";
-			} else {
-				return null;
-			}
+			return anchorDs;
 		}
 
 		public String getChildDs() {
-			if (ds.equals("Periodical")) {
-				return "PeriodicalVolume";
-			} else if (ds.equals("MultiVolumeWork")) {
-				return "Volume";
-			} else if (ds.equals("Series")) {
-				return "SerialMonograph";
-			}
-			return null;
-		}
-
-		public void setDocStruct(DocStructType structType) {
-			ds = structType.getName();
-			if ("Periodical".equals(ds)) {
-				gattung = "Ab";
-			} else if ("PeriodicalPart".equals(ds)
-					|| "PeriodicalVolume".equals(ds)) {
-				gattung = "Av";
-			} else if ("MultiVolumeWork".equals(ds)) {
-				gattung = "Ac";
-			} else if ("Volume".equals(ds) || "MultiVolumePart".equals(ds)) {
-				gattung = "Af";
-			} else if ("Monograph".equals(ds)) {
-				gattung = "Aa";
-			} else if ("SerialMonograph".equals(ds)) {
-				gattung = "Av";
-			} else if ("Series".equals(ds)) {
-				gattung = "Ad";
-			}
-
+			return childDs;
 		}
 
 		public boolean hasAnchor() {
-			return !ds.equals("Monograph") && !isAnchor();
-		}
-	}
-
-	public enum MarcRecordType {
-
-		LANGUAGEMATERIAL("Language material", "a"), NOTATEDMUSIC(
-				"Notated music", "c"), MANUSCRIPTNOTATEDMUSIC(
-				"Manuscript notated music", "d"), CARTOGRAPHIC(
-				"Cartographic marterial", "e"), MANUSCRIPTCARTOGRAPHIC(
-				"Manuscript cartographic material", "f"), MIXEDMATERIALS(
-				"Mixed materials", "p"), MANUSCRIPTLANGUAGEMATERIAL(
-				"Manuscript language material", "t");
-
-		private String label, identifyingCharacter;
-
-		private MarcRecordType(String label, String identifyingCharacter) {
-			this.label = label;
-			this.identifyingCharacter = identifyingCharacter;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		public String getIdentifyingCharacter() {
-			return identifyingCharacter;
-		}
-
-		public static MarcRecordType getByChar(String c) {
-			for (MarcRecordType type : MarcRecordType.values()) {
-				if (type.identifyingCharacter.equals(c)) {
-					return type;
-				}
-			}
-			return LANGUAGEMATERIAL;
-		}
-	}
-
-	public enum MarcBibliographicLevel {
-
-		MONOGRAPHICPART("Monographic component part", "a"), SERIALPART(
-				"Serial component part", "b"), COLLECTION("Collection", "c"), SUBUNIT(
-				"Subunit", "d"), INTEGRATINGRESOURCE("Integrating resource",
-				"i"), MONOGRAPH("Monograph/Item", "m"), SERIAL("Serial", "s");
-
-		private String label, identifyingCharacter;
-
-		private MarcBibliographicLevel(String label, String identifyingCharacter) {
-			this.label = label;
-			this.identifyingCharacter = identifyingCharacter;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		public String getIdentifyingCharacter() {
-			return identifyingCharacter;
-		}
-
-		public static MarcBibliographicLevel getByChar(String c) {
-			for (MarcBibliographicLevel type : MarcBibliographicLevel.values()) {
-				if (type.identifyingCharacter.equals(c)) {
-					return type;
-				}
-			}
-			return MONOGRAPH;
-		}
-	}
-
-	public enum MarcMultipartLevel {
-
-		NAN("Not specified or not applicable", "0"), SET("Set", "a"), INDEPENDENTPART(
-				"Part with independent title", "b"), DEPENDENTPART(
-				"Part with dependent title", "c");
-
-		private String label, identifyingCharacter;
-
-		private MarcMultipartLevel(String label, String identifyingCharacter) {
-			this.label = label;
-			this.identifyingCharacter = identifyingCharacter;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		public String getIdentifyingCharacter() {
-			return identifyingCharacter;
-		}
-
-		public static MarcMultipartLevel getByChar(String c) {
-			for (MarcMultipartLevel type : MarcMultipartLevel.values()) {
-				if (type.identifyingCharacter.equals(c)) {
-					return type;
-				}
-			}
-			return NAN;
+			return anchorDs != null;
 		}
 	}
 
@@ -341,7 +136,6 @@ public class Marc21Parser {
 	// private List<String> anchorMetadataList = new ArrayList<String>();
 	private String separator;
 	private RecordInformation info;
-	private String docType = null;
 	private String individualIdentifier = null;
 	private boolean treatAsPeriodical = false;
 
@@ -389,7 +183,7 @@ public class Marc21Parser {
 	}
 
 	private void addMissingMetadata(DigitalDocument dd) {
-		if (dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo"))
+		if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo"))
 				&& !dsLogical.hasMetadataType(prefs
 						.getMetadataTypeByName("CurrentNoSorting"))) {
 			try {
@@ -405,56 +199,61 @@ public class Marc21Parser {
 						+ dsLogical.getType().getName());
 			}
 		}
-		List<Person> logicalPersonList = dsLogical.getAllPersons();
-		if((logicalPersonList == null || logicalPersonList.isEmpty()) && dsAnchor != null) {
-			List<Person> anchorPersonList = dsAnchor.getAllPersons();
-			if(anchorPersonList != null) {
-				for (Person person : anchorPersonList) {
-					try {
-						Person newPerson = new Person(person.getType());
-						newPerson.setAffiliation(person.getAffiliation());
-						newPerson.setAutorityFileID(person.getAuthorityFileID());
-						newPerson.setCorporation(person.isCorporation());
-						newPerson.setDisplayname(person.getDisplayname());
-						newPerson.setFirstname(person.getFirstname());
-						newPerson.setIdentifier(person.getIdentifier());
-						newPerson.setIdentifierType(person.getIdentifierType());
-						newPerson.setInstitution(person.getInstitution());
-						newPerson.setLastname(person.getLastname());
-						newPerson.setPersontype(person.getPersontype());
-						newPerson.setRole(person.getRole());
-						dsLogical.addPerson(newPerson);
-					} catch (MetadataTypeNotAllowedException e) {
-						LOGGER.error(e);
-					}
-					
-				}
-			}
-		}
+
+		// Add persons of anchor if none exist yet
+		// List<Person> logicalPersonList = dsLogical.getAllPersons();
+		// if((logicalPersonList == null || logicalPersonList.isEmpty()) &&
+		// dsAnchor != null) {
+		// List<Person> anchorPersonList = dsAnchor.getAllPersons();
+		// if(anchorPersonList != null) {
+		// for (Person person : anchorPersonList) {
+		// try {
+		// Person newPerson = new Person(person.getType());
+		// newPerson.setAffiliation(person.getAffiliation());
+		// newPerson.setAutorityFileID(person.getAuthorityFileID());
+		// newPerson.setCorporation(person.isCorporation());
+		// newPerson.setDisplayname(person.getDisplayname());
+		// newPerson.setFirstname(person.getFirstname());
+		// newPerson.setIdentifier(person.getIdentifier());
+		// newPerson.setIdentifierType(person.getIdentifierType());
+		// newPerson.setInstitution(person.getInstitution());
+		// newPerson.setLastname(person.getLastname());
+		// newPerson.setPersontype(person.getPersontype());
+		// newPerson.setRole(person.getRole());
+		// dsLogical.addPerson(newPerson);
+		// } catch (MetadataTypeNotAllowedException e) {
+		// LOGGER.error(e);
+		// }
+		//
+		// }
+		// }
+		// }
 	}
-	
+
 	private String getMetadataValue(DocStruct ds, String metadataName) {
 		@SuppressWarnings("rawtypes")
-		List mdList = ds.getAllMetadataByType(prefs.getMetadataTypeByName(metadataName));
-		if(mdList != null && !mdList.isEmpty()) {
-			try {				
+		List mdList = ds.getAllMetadataByType(prefs
+				.getMetadataTypeByName(metadataName));
+		if (mdList != null && !mdList.isEmpty()) {
+			try {
 				String value = ((Metadata) mdList.get(0)).getValue();
 				return value;
-			}catch(ClassCastException e) {
+			} catch (ClassCastException e) {
 				LOGGER.error("unable to cast " + metadataName + " to metadata");
 			}
 		}
 		return null;
 	}
-	
+
 	private Metadata getMetadata(DocStruct ds, String metadataName) {
 		@SuppressWarnings("rawtypes")
-		List mdList = ds.getAllMetadataByType(prefs.getMetadataTypeByName(metadataName));
-		if(mdList != null && !mdList.isEmpty()) {
-			if(prefs.getMetadataTypeByName(metadataName).getIsPerson()) {
+		List mdList = ds.getAllMetadataByType(prefs
+				.getMetadataTypeByName(metadataName));
+		if (mdList != null && !mdList.isEmpty()) {
+			if (prefs.getMetadataTypeByName(metadataName).getIsPerson()) {
 				Person person = (Person) mdList.get(0);
 				return person;
-			} else {				
+			} else {
 				Metadata md = ((Metadata) mdList.get(0));
 				return md;
 			}
@@ -464,8 +263,12 @@ public class Marc21Parser {
 	}
 
 	private DigitalDocument generateDD() throws ParserException {
+		boolean anchorMode = true;
 		DigitalDocument dd = new DigitalDocument();
-		info = getRecordInfo(this.marcDoc);
+		if(info == null) {			
+			info = getRecordInfo(this.marcDoc);
+			anchorMode = false;
+		}
 		String dsTypeLogical = info.getDocStructType();
 		String dsTypePhysical = "BoundBook";
 		try {
@@ -475,18 +278,22 @@ public class Marc21Parser {
 					.getDocStrctTypeByName(dsTypePhysical));
 			if (info.getAnchorDs() != null) {
 				dsAnchor = dd.createDocStruct(prefs.getDocStrctTypeByName(info
-						.getAnchorDs()));
-				dsAnchor.addChild(dsLogical);
+						.getAnchorDs()));			
+					dsAnchor.addChild(dsLogical);
 				dd.setLogicalDocStruct(dsAnchor);
 			} else {
 				dd.setLogicalDocStruct(dsLogical);
 			}
-			if (docType == null && dsLogical.getType().isAnchor()) {
-				// This is the main entry, but an anchor
+			if (dsLogical.getType().isAnchor()) {
+				// This is not the main entry, but an anchor
 				dsAnchor = dsLogical;
-				dsLogical = dd.createDocStruct(prefs.getDocStrctTypeByName(info
-						.getChildDs()));
-				dsAnchor.addChild(dsLogical);
+				if(!anchorMode) {					
+					dsLogical = dd.createDocStruct(prefs.getDocStrctTypeByName(info
+							.getChildDs()));
+					dsAnchor.addChild(dsLogical);
+				} else {
+					dsLogical = null;
+				}
 				dd.setLogicalDocStruct(dsAnchor);
 				treatAsPeriodical = true;
 			}
@@ -508,67 +315,72 @@ public class Marc21Parser {
 			if (leader != null) {
 				String leaderStr = leader.getValue();
 				// 03315 a2200733 450
-				String typeString = leaderStr.substring(6, 7);
-				String bibLevelString = leaderStr.substring(7, 8);
-				String partLevelString = leaderStr.trim().substring(
-						leaderStr.trim().length() - 1);
+//				String typeString = leaderStr.substring(6, 7);
+//				String bibLevelString = leaderStr.substring(7, 8);
+//				String partLevelString = leaderStr.trim().substring(
+//						leaderStr.trim().length() - 1);
 				String dateString = "";
 				Element controlField005 = getControlfield(marcDoc, "005");
 				if (controlField005 != null) {
 					dateString = controlField005.getText().substring(0, 8);
 				}
-				RecordInformation info = new RecordInformation(
-						MarcRecordType.getByChar(typeString),
-						MarcBibliographicLevel.getByChar(bibLevelString),
-						MarcMultipartLevel.getByChar(partLevelString),
-						dateString);
 
-				// set docStruct type from field 959
-				DocStructType logStructType = getDocTypeFrom959(marcDoc);
-				info.setDocStruct(logStructType);
-
+				String docStructTitle = getDocTypeFrom959(marcDoc);
+				Element docStructEle = getDocStructEle(docStructTitle);
+				RecordInformation info = new RecordInformation(docStructEle);
+				info.setRecordDate(dateString);
 				return info;
 			}
 		}
 		return null;
 	}
 
-	private DocStructType getDocTypeFrom959(Document marcDoc) {
-		if (this.docType != null) {
-			return prefs.getDocStrctTypeByName(getDocStructType(this.docType));
-		} else {
-			XPath xpath;
-			String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
-			try {
-				xpath = XPath.newInstance(query);
-				if (NS_MARC != null) {
-					xpath.addNamespace(NS_MARC);
-				}
-				@SuppressWarnings("unchecked")
-				List<Element> nodeList = xpath.selectNodes(marcDoc);
-				if (nodeList != null && !nodeList.isEmpty()
-						&& nodeList.get(0) instanceof Element) {
-					Element node = nodeList.get(0);
-					String typeName = node.getValue();
-					DocStructType docStruct = prefs
-							.getDocStrctTypeByName(getDocStructType(typeName));
-					return docStruct;
-				} else {
-					throw new JDOMException(
-							"No datafield 959 with subfield a found in marc document");
-				}
-			} catch (JDOMException e) {
-				LOGGER.error(
-						"Unable to retrieve document type information from datafield 959",
-						e);
+	private Element getDocStructEle(String docStructTitle) {
+		try {
+			String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
+			XPath xpath = XPath.newInstance(query);
+
+			@SuppressWarnings("unchecked")
+			List<Element> nodeList = xpath.selectNodes(mapDoc);
+			if (nodeList != null && !nodeList.isEmpty()) {
+				return nodeList.get(0);
 			}
-			return null;
+		} catch (JDOMException e) {
+			LOGGER.error(e);
 		}
+		return null;
+	}
+
+	private String getDocTypeFrom959(Document marcDoc) {
+		XPath xpath;
+		String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
+		try {
+			xpath = XPath.newInstance(query);
+			if (NS_MARC != null) {
+				xpath.addNamespace(NS_MARC);
+			}
+			@SuppressWarnings("unchecked")
+			List<Element> nodeList = xpath.selectNodes(marcDoc);
+			if (nodeList != null && !nodeList.isEmpty()
+					&& nodeList.get(0) instanceof Element) {
+				Element node = nodeList.get(0);
+				String typeName = node.getValue();
+				return typeName;
+			} else {
+				throw new JDOMException(
+						"No datafield 959 with subfield a found in marc document");
+			}
+		} catch (JDOMException e) {
+			LOGGER.error(
+					"Unable to retrieve document type information from datafield 959",
+					e);
+		}
+		return "Monographie";
 	}
 
 	@SuppressWarnings("unchecked")
 	public String getAchorID() {
-		if(this.info != null && !this.info.hasAnchor()) {
+		if (this.info != null && !this.info.hasAnchor()) {
 			return null;
 		}
 		XPath xpath;
@@ -580,7 +392,7 @@ public class Marc21Parser {
 			}
 			List<Element> nodeList = xpath.selectNodes(marcDoc);
 			if (nodeList == null || nodeList.isEmpty()) {
-				//try again with different field
+				// try again with different field
 				query = "/marc:record/marc:datafield[@tag=\"958\"][@ind2=\"2\"]/marc:subfield[@code=\"a\"]";
 				xpath = XPath.newInstance(query);
 				if (NS_MARC != null) {
@@ -593,9 +405,9 @@ public class Marc21Parser {
 				Element node = nodeList.get(0);
 				String id = node.getValue();
 				return id;
-			} else {				
-					throw new JDOMException(
-							"No datafield 453 with subfield a found in marc document");
+			} else {
+				throw new JDOMException(
+						"No datafield 453 with subfield a found in marc document");
 			}
 		} catch (JDOMException e) {
 			LOGGER.error("Unable to retrieve anchor record from datafield 453");
@@ -641,22 +453,22 @@ public class Marc21Parser {
 		writeToAnchor = writeToAnchor(metadataElement);
 		writeToChild = writeToChild(metadataElement);
 		String mdTypeName = getMetadataName(metadataElement);
-		if(mdTypeName.equals("Person")) {
+		if (mdTypeName.equals("Person")) {
 			List<Element> roleList = metadataElement.getChildren("Role");
-			for (Element roleElement : roleList) {				
+			for (Element roleElement : roleList) {
 				writePersonXPaths(getXPaths(metadataElement), roleElement);
 			}
 		} else {
-		MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
-		if (mdType == null) {
-			LOGGER.error("Unable To create metadata type " + mdTypeName);
-		}
-		if (mdType.getIsPerson()) {
-			writePersonXPaths(getXPaths(metadataElement), mdType);
-		} else {
-			writeMetadataXPaths(getXPaths(metadataElement), mdType,
-					!separateXPaths(metadataElement));
-		}
+			MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
+			if (mdType == null) {
+				LOGGER.error("Unable To create metadata type " + mdTypeName);
+			}
+			if (mdType.getIsPerson()) {
+				writePersonXPaths(getXPaths(metadataElement), mdType);
+			} else {
+				writeMetadataXPaths(getXPaths(metadataElement), mdType,
+						!separateXPaths(metadataElement));
+			}
 		}
 
 	}
@@ -747,23 +559,24 @@ public class Marc21Parser {
 							sb.append(separator);
 						}
 						nodeValueList = new LinkedList<String>();
-						nodeValueList.add(sb.substring(0, sb.length() - separator.length()));
+						nodeValueList.add(sb.substring(0, sb.length()
+								- separator.length()));
 					}
-						if (mergeXPaths) {
-							int count = 0;
-							for (String value : nodeValueList) {
-								if (value != null && valueList.size() <= count) {
-									valueList.add(value);
-								} else if (value != null && !value.trim().isEmpty()) {
-									value = valueList.get(count) + separator
-											+ value;
-									valueList.set(count, value);
-								}
-								count++;
+					if (mergeXPaths) {
+						int count = 0;
+						for (String value : nodeValueList) {
+							if (value != null && valueList.size() <= count) {
+								valueList.add(value);
+							} else if (value != null && !value.trim().isEmpty()) {
+								value = valueList.get(count) + separator
+										+ value;
+								valueList.set(count, value);
 							}
-						} else {
-							valueList.addAll(nodeValueList);
+							count++;
 						}
+					} else {
+						valueList.addAll(nodeValueList);
+					}
 				}
 
 			} catch (JDOMException e) {
@@ -796,33 +609,36 @@ public class Marc21Parser {
 	}
 
 	private void writeCurrentNoSort(String value) {
-		if(!dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
-		String sortingValue = createCurrentNoSort(value);
+		if (dsLogical != null && !dsLogical.hasMetadataType(prefs
+				.getMetadataTypeByName("CurrentNoSorting"))) {
+			String sortingValue = createCurrentNoSort(value);
 
-		try {
-			Metadata md = new Metadata(
-					prefs.getMetadataTypeByName("CurrentNoSorting"));
-			md.setValue(sortingValue);
-			writeMetadata(md);
-		} catch (MetadataTypeNotAllowedException e) {
-			LOGGER.error("Failed to create metadata CurrentNoSorting");
-		}
+			try {
+				Metadata md = new Metadata(
+						prefs.getMetadataTypeByName("CurrentNoSorting"));
+				md.setValue(sortingValue);
+				writeMetadata(md);
+			} catch (MetadataTypeNotAllowedException e) {
+				LOGGER.error("Failed to create metadata CurrentNoSorting");
+			}
 		}
 	}
 
 	private String createCurrentNoSort(String value) {
 		String sortingValue = value;
-		if (dsLogical.getType().getName().toLowerCase().contains("periodical")) {
+		if (dsLogical != null && dsLogical.getType().getName().toLowerCase().contains("periodical")) {
 			StringBuilder builder = new StringBuilder();
 			String[] parts = value.split(separator);
 			for (int i = 0; i < 3; i++) {
 				String partSort = "0000";
 				if (parts.length > i && !parts[i].isEmpty()) {
 					try {
-						if(parts[i].contains("/") || parts[i].contains("-")) {
+						if (parts[i].contains("/") || parts[i].contains("-")) {
 							String[] subparts = parts[i].split("[/-]");
-							if(subparts.length > 0) {									
-									partSort = noSortingFormat.format(Integer.valueOf(subparts[0].replaceAll("\\D", "")));
+							if (subparts.length > 0) {
+								partSort = noSortingFormat.format(Integer
+										.valueOf(subparts[0].replaceAll("\\D",
+												"")));
 							}
 						} else {
 							String sortedPart = parts[i].replaceAll("\\D", "");
@@ -844,27 +660,30 @@ public class Marc21Parser {
 
 	private String cleanValue(MetadataType mdType, String value) {
 		String returnValue = value;
-		if (mdType.getName().equals("shelfmarksource") || mdType.getName().equals("TitleDocMainShort")) {
+		if (mdType.getName().equals("shelfmarksource")
+				|| mdType.getName().equals("TitleDocMainShort")) {
 			returnValue = value.replaceAll("<<.+?>>", "").trim();
-		} else if(mdType.getName().equals("TitleDocMain")) {
+		} else if (mdType.getName().equals("TitleDocMain")) {
 			returnValue = value.replaceAll("<<|>>", "").trim();
-		} else if(mdType.getName().equals("CurrentNoSorting")) {
+		} else if (mdType.getName().equals("CurrentNoSorting")) {
 			returnValue = createCurrentNoSort(value);
 		}
 		return returnValue;
 	}
 
 	private void writeSortingTitle(String value) {
-		if(!dsLogical.hasMetadataType(prefs.getMetadataTypeByName("TitleDocMainShort"))) {
-		String sortedValue = value.replaceAll("<<.+?>>", "").trim();
-		try {
-			Metadata md = new Metadata(
-					prefs.getMetadataTypeByName("TitleDocMainShort"));
-			md.setValue(sortedValue);
-			writeMetadata(md);
-		} catch (MetadataTypeNotAllowedException e) {
-			LOGGER.error("Failed to create metadata TitleDocMainShort");
-		}
+		DocStruct myDs = dsLogical != null ? dsLogical : dsAnchor;
+		if ( myDs != null && !myDs.hasMetadataType(prefs
+				.getMetadataTypeByName("TitleDocMainShort"))) {
+			String sortedValue = value.replaceAll("<<.+?>>", "").trim();
+			try {
+				Metadata md = new Metadata(
+						prefs.getMetadataTypeByName("TitleDocMainShort"));
+				md.setValue(sortedValue);
+				writeMetadata(md);
+			} catch (MetadataTypeNotAllowedException e) {
+				LOGGER.error("Failed to create metadata TitleDocMainShort");
+			}
 		}
 
 	}
@@ -919,7 +738,7 @@ public class Marc21Parser {
 		}
 		return eleList;
 	}
-	
+
 	private List<Element> getSubfieldsByCode(Element parent, String code) {
 		List childNodes = null;
 		childNodes = parent.getChildren("subfield", NS_MARC);
@@ -927,7 +746,7 @@ public class Marc21Parser {
 		List<Element> eleList = new LinkedList<Element>();
 		for (Object node : childNodes) {
 			if (node instanceof Element) {
-				if(((Element) node).getAttributeValue("code").equals(code)) {					
+				if (((Element) node).getAttributeValue("code").equals(code)) {
 					eleList.add((Element) node);
 				}
 			}
@@ -954,7 +773,7 @@ public class Marc21Parser {
 			}
 		}
 	}
-	
+
 	private void writePersonXPaths(List<Element> eleXpathList,
 			Element roleElement) {
 
@@ -991,17 +810,18 @@ public class Marc21Parser {
 			String subfield = roleElement.getAttributeValue("subfield");
 			String subfieldValue = roleElement.getAttributeValue("value");
 			List<Element> subfieldList = getSubfieldsByCode(node, subfield);
-			if(subfieldValue == null || subfieldValue.isEmpty() && subfieldList.isEmpty()) {
-				write=true;
-			} else {				
+			if (subfieldValue == null || subfieldValue.isEmpty()
+					&& subfieldList.isEmpty()) {
+				write = true;
+			} else {
 				for (Element element : subfieldList) {
-					if(element.getValue().trim().equals(subfieldValue.trim())) {
-						write=true;
+					if (element.getValue().trim().equals(subfieldValue.trim())) {
+						write = true;
 						break;
 					}
 				}
 			}
-			if(write) {
+			if (write) {
 				returnList.add(node);
 			}
 		}
@@ -1022,22 +842,26 @@ public class Marc21Parser {
 		}
 		if (ind2 != null) {
 			query.append("[@ind2=\"" + ind2 + "\"]");
-		} else if(!"true".equals(eleXpath.getParentElement().getAttributeValue("child"))) {
+		} else if (!"true".equals(eleXpath.getParentElement()
+				.getAttributeValue("child"))) {
 			query.append("[not(@ind2=\"2\")]");
 		}
-//			//For MultiVolumes separate Volume and Anchor Metadata by Value of ind2
-//			if(treatAsMultiVolume) {
-//				String child = eleXpath.getParentElement().getAttributeValue("child");
-//				String anchor = eleXpath.getParentElement().getAttributeValue("anchor");
-//				if(docType == null && !"true".equals(child)) {
-//					//Volume
-//					query.append("[not(@ind2=\"2\")]");
-//				} else if(docType != null && !"true".equals(anchor)) {
-//					//MiltiVolume
-//					query.append("[not(@ind2=\"1\")]");
-//				}
-//			}
-//		}
+		// //For MultiVolumes separate Volume and Anchor Metadata by Value of
+		// ind2
+		// if(treatAsMultiVolume) {
+		// String child =
+		// eleXpath.getParentElement().getAttributeValue("child");
+		// String anchor =
+		// eleXpath.getParentElement().getAttributeValue("anchor");
+		// if(docType == null && !"true".equals(child)) {
+		// //Volume
+		// query.append("[not(@ind2=\"2\")]");
+		// } else if(docType != null && !"true".equals(anchor)) {
+		// //MiltiVolume
+		// query.append("[not(@ind2=\"1\")]");
+		// }
+		// }
+		// }
 		return query.toString();
 	}
 
@@ -1053,7 +877,8 @@ public class Marc21Parser {
 				&& nodeList != null
 				&& nodeList.size() > 1
 				&& ("999".equals(nodeList.get(0).getParentElement()
-						.getAttributeValue("tag")) || "999".equals(nodeList.get(0).getAttributeValue("tag")))) {
+						.getAttributeValue("tag")) || "999".equals(nodeList
+						.get(0).getAttributeValue("tag")))) {
 			return selectMatching999(nodeList);
 		} else {
 			return nodeList;
@@ -1196,7 +1021,7 @@ public class Marc21Parser {
 	private void writeMetadata(Metadata metadata) {
 
 		if (writeLogical) {
-			if (writeToChild) {
+			if (writeToChild && dsLogical != null) {
 				try {
 					dsLogical.addMetadata(metadata);
 				} catch (MetadataTypeNotAllowedException e) {
@@ -1250,7 +1075,7 @@ public class Marc21Parser {
 	private void writePerson(Person person) {
 
 		if (writeLogical) {
-			if (writeToChild) {
+			if (writeToChild && dsLogical != null) {
 				try {
 					dsLogical.addPerson(person);
 				} catch (MetadataTypeNotAllowedException e) {
@@ -1337,24 +1162,26 @@ public class Marc21Parser {
 
 	private boolean separateXPaths(Element metadataElement) {
 		Attribute attr = metadataElement.getAttribute("separateXPaths");
-//		if(attr == null) {
-//			attr = metadataElement.getParentElement().getAttribute("separateXPaths");
-//		}
+		// if(attr == null) {
+		// attr =
+		// metadataElement.getParentElement().getAttribute("separateXPaths");
+		// }
 		if (attr != null && attr.getValue().equals("true")) {
 			return true;
-		} else {			
+		} else {
 			return false;
 		}
 	}
 
 	private boolean separateOccurances(Element xpathElement) {
 		Attribute attr = xpathElement.getAttribute("separateOccurances");
-		if(attr == null) {
-			attr = xpathElement.getParentElement().getAttribute("separateOccurances");
+		if (attr == null) {
+			attr = xpathElement.getParentElement().getAttribute(
+					"separateOccurances");
 		}
 		if (attr != null && attr.getValue().equals("true")) {
 			return true;
-		} else {			
+		} else {
 			return false;
 		}
 	}
@@ -1379,11 +1206,10 @@ public class Marc21Parser {
 		return info;
 	}
 
-	public void setDocType(String docTypeName) {
-		this.docType = docTypeName;
-
+	public void setInfo(RecordInformation info) {
+		this.info = info;
 	}
-
+	
 	public String getIndividualIdentifier() {
 		return individualIdentifier;
 	}

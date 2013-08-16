@@ -1,13 +1,33 @@
 <map>
+<docstruct gattung="Aa" mapTo="Monograph">Monographie</docstruct>
+<docstruct gattung="Av" mapTo="Monograph">Stuecktitel</docstruct>
+<docstruct gattung="Af" mapTo="Volume" anchorType="MultiVolumeWork">Bandauffuehrung</docstruct>
+<docstruct gattung="Ab" mapTo="Periodical" childType="PeriodicalVolume">Zeitschrift</docstruct><!-- Map to anchor type so metadata is by default mapped to anchor, not the child -->
+<docstruct gattung="Ax" mapTo="SingleSheetMaterial">Einblattmaterial</docstruct>
+<metadata logical="true" child="true" separateOccurances="true" separateXPaths="true" separator=";">
+    <name>CurrentNoSorting</name>
+    <marcfield tag="455" subfields="a"></marcfield>
+    <marcfield tag="089" subfields="a"></marcfield>
+    <marcfield tag="090" subfields="a"></marcfield>
+    <marcfield tag="999" subfields="jvh" separateOccurances="false" ></marcfield>
+</metadata>
+<metadata logical="true" child="true" separateOccurances="true" separateXPaths="true" separator=";">
+    <name>CurrentNo</name>
+    <marcfield tag="455" subfields="a"></marcfield>
+    <marcfield tag="089" subfields="a"></marcfield>
+    <marcfield tag="090" subfields="a"></marcfield>
+    <marcfield tag="999" subfields="g" separateOccurances="false" ></marcfield>
+</metadata>
 <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="false" anchor="true">
     <name>TitleDocMain</name>
     <marcfield tag="331" ind1="-" subfields="abc" separateOccurances="true"></marcfield>
 </metadata>
 <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="true" anchor="false">
     <name>TitleDocMain</name>
-    <marcfield tag="331" ind1="-" subfields="abc" separateOccurances="true"></marcfield>
-    <marcfield tag="090"  subfields="a" separateOccurances="true"></marcfield>
-    <marcfield tag="999"  subfields="g" separateOccurances="true"></marcfield>
+    <marcfield tag="331" ind1="-" ind2="2" subfields="abc"></marcfield>
+    <marcfield tag="089"  subfields="a"></marcfield>
+    <marcfield tag="331" ind1="-" ind2="1" subfields="abc"></marcfield>
+    <marcfield tag="999"  subfields="g"></marcfield>
 </metadata>
 <!-- <metadata logical="true" anchor="true" child="false" separateXPaths="true" separator=" "> -->
 <!--     <name>TitleDocMain</name> -->
@@ -22,8 +42,20 @@
     <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield>
     <marcfield tag="531" subfields="a" separateOccurances="true"></marcfield>
 </metadata>
-<metadata logical="true" child="true">
-    <name>Author</name>
+<metadata logical="true" child="false" anchor="true">
+    <name>Person</name>
+    <Role subfield="b" value="">Author</Role>
+    <Role subfield="b" value="[Hrsg.]">Editor</Role>
+    <marcfield tag="100" ind2="2"></marcfield>
+    <marcfield tag="104" ind2="2"></marcfield>
+    <marcfield tag="108" ind2="2"></marcfield>
+    <marcfield tag="112" ind2="2"></marcfield>
+    <marcfield tag="116" ind2="2"></marcfield>
+</metadata>
+<metadata logical="true">
+    <name>Person</name>
+    <Role subfield="b" value="">Author</Role>
+    <Role subfield="b" value="[Hrsg.]">Editor</Role>
     <marcfield tag="100"></marcfield>
     <marcfield tag="104"></marcfield>
     <marcfield tag="108"></marcfield>
@@ -98,7 +130,7 @@
 <metadata logical="true" separateOccurances="true" separateXPaths="true">
     <name>AdditionalInformation</name>
     <marcfield tag="501" subfields="a" separateOccurances="true"></marcfield>
-    <marcfield tag="645" subfields="a" separateOccurances="true"></marcfield>
+<!--     <marcfield tag="645" subfields="a" separateOccurances="true"></marcfield> -->
 </metadata>
 <metadata logical="true" separateXPaths="true">
     <name>DateRecorded</name>
@@ -107,13 +139,6 @@
 <metadata logical="true">
     <name>Format</name>
     <marcfield tag="652" subfields="a" separateOccurances="true"></marcfield>
-</metadata>
-<metadata logical="true" child="true" separateOccurances="true" separateXPaths="true">
-    <name>CurrentNo</name>
-    <marcfield tag="455" subfields="a"></marcfield>
-    <marcfield tag="089" subfields="a"></marcfield>
-    <marcfield tag="090" subfields="a"></marcfield>
-    <marcfield tag="999" subfields="jvh" separateOccurances="false" separator="/"></marcfield>
 </metadata>
 <metadata logical="true" child="true">
     <name>InventoryNumber</name>
@@ -166,5 +191,13 @@
 <metadata logical="true">
     <name>IdentifierSeries</name>
     <marcfield tag="453" subfields="a" separateOccurances="true"></marcfield>
+</metadata>
+<metadata logical="true" separateXPaths="false" separateOccurances="false" separator="; ">
+    <name>CreatorsAllOrigin</name>
+    <marcfield tag="100" subfields="p"></marcfield>
+    <marcfield tag="104" subfields="p"></marcfield>
+    <marcfield tag="108" subfields="p"></marcfield>
+    <marcfield tag="112" subfields="p"></marcfield>
+    <marcfield tag="116" subfields="p"></marcfield>
 </metadata>
 </map>

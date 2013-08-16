@@ -50,6 +50,7 @@ import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
 import de.intranda.goobi.plugins.utils.Marc21Parser;
 import de.intranda.goobi.plugins.utils.Marc21Parser.ParserException;
+import de.intranda.goobi.plugins.utils.Marc21Parser.RecordInformation;
 import de.intranda.goobi.plugins.utils.SRUClient;
 import de.sub.goobi.config.ConfigMain;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
@@ -72,7 +73,7 @@ public class SruOpacImport implements IOpacPlugin {
         return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, null);
     }
     
-    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, String docTypeName) throws Exception {
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, RecordInformation info) throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
         Fileformat ff = new MetsMods(inPrefs);
@@ -92,17 +93,19 @@ public class SruOpacImport implements IOpacPlugin {
         File mapFile = new File(MARC_MAPPING_FILE);
         try {
             Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
-            parser.setDocType(docTypeName);
+            parser.setInfo(info);
             parser.setIndividualIdentifier(inSuchbegriff.trim());
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
             
+            gattung = parser.getInfo().getGattung();
+
             String anchorId = parser.getAchorID();
             if(anchorId != null) {
-                Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, parser.getInfo().getAnchorDs());
+            	RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
+                Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, anchorInfo);
                 attachToAnchor(dd, af);
             }
             
-            gattung = parser.getInfo().getGattung();
             
             createAtstsl(dd);
             ff.setDigitalDocument(dd);
