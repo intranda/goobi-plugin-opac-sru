@@ -956,9 +956,7 @@ public class Marc21Parser {
 					person.setLastname(lastName);
 					person.setDisplayname(displayName);
 					person.setAffiliation(affiliation);
-					person.setAutorityFileID(authorityID);
 					person.setInstitution(institution);
-					person.setIdentifier(identifier);
 					person.setRole(roleTerm);
 				} catch (MetadataTypeNotAllowedException e) {
 					LOGGER.error("Failed to create person metadata "
