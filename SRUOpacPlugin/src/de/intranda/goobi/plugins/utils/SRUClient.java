@@ -1,3 +1,23 @@
+/**
+ * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
+ * 
+ * Visit the websites for more information. 
+ *          - http://digiverso.com 
+ *          - http://www.intranda.com
+ * 
+ * Copyright 2013, intranda GmbH, Göttingen
+ * 
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * 
+ */
+
 package de.intranda.goobi.plugins.utils;
 
 import java.io.IOException;
@@ -8,7 +28,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -41,15 +60,8 @@ public class SRUClient {
         }
 
         if (cat != null) {
-            // ?version=1.1&operation=searchRetrieve&query=dinosaur&maximumRecords=5&recordSchema=marcxml
             String url = "http://";
-            //            if ((cat.getLogin() != null) && (cat.getLogin().length() > 0)) {
-            //                url += cat.getLogin();
-            //                if ((cat.getPassword() != null) && (cat.getPassword().length() > 0)) {
-            //                    url += ":" + cat.getPassword();
-            //                }
-            //                url += "@";
-            //            }
+
             url += cat.getAddress();
             url += ":" + cat.getPort();
             url += "/" + cat.getDatabase();
@@ -118,25 +130,4 @@ public class SRUClient {
             return null;
         }
     }
-
-    public static void main(String[] args) throws ConfigurationException, JDOMException, IOException {
-        //        DataManager manager = DataManager.getInstance();
-        //        manager.loadCatalogs(new File("resources/catalogs.xml").getAbsolutePath());
-        //        Catalog cat = manager.getCatalogByName("HU Berlin Aleph");
-        //        String query = "BV000388474";
-        //        String recordSchema = cat.getFormatString();
-        //        String answer = queryZ3950SRU(cat, query, recordSchema);
-        ////        System.out.println(answer);
-        //        Document marcXmlDoc = retrieveMarcRecord(answer);
-        ////        System.out.println(DocumentUtils.getStringFromDocument(marcXmlDoc, null));
-        //        File ruleset = new File("/opt/digiverso/goobi/rulesets/gdz.xml");
-        //        File mapFile = new File("resources/marc_map.xml");
-        //        try {
-        //            Marc21Parser parser = new Marc21Parser(ruleset, mapFile);
-        //            parser.parseMarcXml(marcXmlDoc);
-        //        } catch (ParserException e) {
-        //            logger.error(e);
-        //        }
-    }
-
 }

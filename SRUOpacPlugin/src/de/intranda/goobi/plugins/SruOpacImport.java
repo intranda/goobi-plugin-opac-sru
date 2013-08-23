@@ -1,32 +1,25 @@
-package de.intranda.goobi.plugins;
-
 /**
- * This file is part of the Goobi Application - a Workflow tool for the support of mass digitization.
+ * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
  * 
  * Visit the websites for more information. 
- * 			- http://digiverso.com 
- * 			- http://www.intranda.com
+ *          - http://digiverso.com 
+ *          - http://www.intranda.com
  * 
- * Copyright 2011, intranda GmbH, Göttingen
+ * Copyright 2013, intranda GmbH, Göttingen
  * 
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * 
- * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59
- * Temple Place, Suite 330, Boston, MA 02111-1307 USA
- * 
- * Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions
- * of the GNU General Public License cover the whole combination. As a special exception, the copyright holders of this library give you permission to
- * link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and
- * distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and
- * conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this
- * library, you may extend this exception to your version of the library, but you are not obliged to do so. If you do not wish to do so, delete this
- * exception statement from your version.
  */
+
+package de.intranda.goobi.plugins;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -72,8 +65,9 @@ public class SruOpacImport implements IOpacPlugin {
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
         return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, null);
     }
-    
-    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, RecordInformation info) throws Exception {
+
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, RecordInformation info)
+            throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
         Fileformat ff = new MetsMods(inPrefs);
@@ -82,7 +76,7 @@ public class SruOpacImport implements IOpacPlugin {
 
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if (marcXmlDoc == null) {
-            answer = SRUClient.querySRU(catalogue, "rec.id=" +inSuchbegriff, recordSchema);
+            answer = SRUClient.querySRU(catalogue, "rec.id=" + inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         }
         if (marcXmlDoc != null) {
@@ -96,21 +90,20 @@ public class SruOpacImport implements IOpacPlugin {
             parser.setInfo(info);
             parser.setIndividualIdentifier(inSuchbegriff.trim());
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
-            
+
             gattung = parser.getInfo().getGattung();
 
             String anchorId = parser.getAchorID();
-            if(anchorId != null) {
-            	RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
+            if (anchorId != null) {
+                RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
                 Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, anchorInfo);
                 attachToAnchor(dd, af);
             }
-            
-            
+
             createAtstsl(dd);
             ff.setDigitalDocument(dd);
-//            File tempFile = new File("/opt/digiverso/logs/aesorne.xml");
-//            ff.write(tempFile.getAbsolutePath());
+            //            File tempFile = new File("/opt/digiverso/logs/aesorne.xml");
+            //            ff.write(tempFile.getAbsolutePath());
         } catch (ParserException e) {
             myLogger.error(e);
         }
@@ -118,10 +111,10 @@ public class SruOpacImport implements IOpacPlugin {
     }
 
     private void attachToAnchor(DigitalDocument dd, Fileformat anchorFormat) throws PreferencesException, TypeNotAllowedAsChildException {
-        if(anchorFormat != null && anchorFormat.getDigitalDocument().getLogicalDocStruct().getType().isAnchor()) {
+        if (anchorFormat != null && anchorFormat.getDigitalDocument().getLogicalDocStruct().getType().isAnchor()) {
             myLogger.info("Retrieved anchor record ");
-            DocStruct topStruct =  dd.getLogicalDocStruct();
-            if(topStruct.getType().isAnchor()) {
+            DocStruct topStruct = dd.getLogicalDocStruct();
+            if (topStruct.getType().isAnchor()) {
                 topStruct = topStruct.getAllChildren().get(0);
             }
             DocStruct anchor = anchorFormat.getDigitalDocument().getLogicalDocStruct();
@@ -149,11 +142,11 @@ public class SruOpacImport implements IOpacPlugin {
         if (titleShortList != null && !titleShortList.isEmpty()) {
             title = titleShortList.get(0).getValue();
         } else {
-	        List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
-	        if (titleList != null && !titleList.isEmpty()) {
-	            title = titleList.get(0).getValue();
-	        }
-		}
+            List<? extends Metadata> titleList = logStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain"));
+            if (titleList != null && !titleList.isEmpty()) {
+                title = titleList.get(0).getValue();
+            }
+        }
         this.atstsl = createAtstsl(title, author).toLowerCase();
     }
 
