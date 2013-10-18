@@ -156,11 +156,6 @@
     <name>CatalogIDSource</name>
     <marcfield tag="527" subfields="9" separateOccurances="true"></marcfield>
 </metadata>
-<metadata logical="true">
-    <name>CatalogIDPeriodicalDB</name>
-<!--     <marcfield tag="025" int1="z" subfields="a" separateOccurances="true"></marcfield> -->
-    <marcfield tag="026" subfields="a" separateOccurances="true"></marcfield>
-</metadata>
 <metadata logical="true" separateXPaths="true">
     <name>IdentifierRelatedWork</name>
     <marcfield tag="453" subfields="a" separateOccurances="true"></marcfield>
