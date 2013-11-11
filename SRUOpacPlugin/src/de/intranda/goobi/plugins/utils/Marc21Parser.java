@@ -1,3 +1,23 @@
+/**
+ * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
+ * 
+ * Visit the websites for more information. 
+ *          - http://digiverso.com 
+ *          - http://www.intranda.com
+ * 
+ * Copyright 2013, intranda GmbH, Göttingen
+ * 
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * 
+ */
+
 package de.intranda.goobi.plugins.utils;
 
 import java.io.File;
@@ -9,8 +29,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,7 +41,6 @@ import org.jdom.xpath.XPath;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
-import ugh.dl.DocStructType;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Person;
@@ -199,35 +216,6 @@ public class Marc21Parser {
 						+ dsLogical.getType().getName());
 			}
 		}
-
-		// Add persons of anchor if none exist yet
-		// List<Person> logicalPersonList = dsLogical.getAllPersons();
-		// if((logicalPersonList == null || logicalPersonList.isEmpty()) &&
-		// dsAnchor != null) {
-		// List<Person> anchorPersonList = dsAnchor.getAllPersons();
-		// if(anchorPersonList != null) {
-		// for (Person person : anchorPersonList) {
-		// try {
-		// Person newPerson = new Person(person.getType());
-		// newPerson.setAffiliation(person.getAffiliation());
-		// newPerson.setAutorityFileID(person.getAuthorityFileID());
-		// newPerson.setCorporation(person.isCorporation());
-		// newPerson.setDisplayname(person.getDisplayname());
-		// newPerson.setFirstname(person.getFirstname());
-		// newPerson.setIdentifier(person.getIdentifier());
-		// newPerson.setIdentifierType(person.getIdentifierType());
-		// newPerson.setInstitution(person.getInstitution());
-		// newPerson.setLastname(person.getLastname());
-		// newPerson.setPersontype(person.getPersontype());
-		// newPerson.setRole(person.getRole());
-		// dsLogical.addPerson(newPerson);
-		// } catch (MetadataTypeNotAllowedException e) {
-		// LOGGER.error(e);
-		// }
-		//
-		// }
-		// }
-		// }
 	}
 
 	private String getMetadataValue(DocStruct ds, String metadataName) {
@@ -314,11 +302,6 @@ public class Marc21Parser {
 					NS_MARC);
 			if (leader != null) {
 				String leaderStr = leader.getValue();
-				// 03315 a2200733 450
-//				String typeString = leaderStr.substring(6, 7);
-//				String bibLevelString = leaderStr.substring(7, 8);
-//				String partLevelString = leaderStr.trim().substring(
-//						leaderStr.trim().length() - 1);
 				String dateString = "";
 				Element controlField005 = getControlfield(marcDoc, "005");
 				if (controlField005 != null) {
@@ -454,7 +437,8 @@ public class Marc21Parser {
 		writeToChild = writeToChild(metadataElement);
 		String mdTypeName = getMetadataName(metadataElement);
 		if (mdTypeName.equals("Person")) {
-			List<Element> roleList = metadataElement.getChildren("Role");
+			@SuppressWarnings("unchecked")
+            List<Element> roleList = metadataElement.getChildren("Role");
 			for (Element roleElement : roleList) {
 				writePersonXPaths(getXPaths(metadataElement), roleElement);
 			}
@@ -723,7 +707,8 @@ public class Marc21Parser {
 	}
 
 	private List<Element> getChildElements(Element parent, String name) {
-		List childNodes = null;
+		@SuppressWarnings("rawtypes")
+        List childNodes = null;
 		if (name != null) {
 			childNodes = parent.getChildren(name, NS_MARC);
 		} else {
@@ -740,8 +725,8 @@ public class Marc21Parser {
 	}
 
 	private List<Element> getSubfieldsByCode(Element parent, String code) {
-		List childNodes = null;
-		childNodes = parent.getChildren("subfield", NS_MARC);
+		@SuppressWarnings("rawtypes")
+        List childNodes = parent.getChildren("subfield", NS_MARC);
 
 		List<Element> eleList = new LinkedList<Element>();
 		for (Object node : childNodes) {
@@ -832,7 +817,7 @@ public class Marc21Parser {
 		String tag = eleXpath.getAttributeValue("tag");
 		String ind1 = eleXpath.getAttributeValue("ind1");
 		String ind2 = eleXpath.getAttributeValue("ind2");
-		String subfields = eleXpath.getAttributeValue("subfields");
+//		String subfields = eleXpath.getAttributeValue("subfields");
 		StringBuilder query = new StringBuilder("/marc:record/marc:datafield");
 		if (tag != null) {
 			query.append("[@tag=\"" + tag + "\"]");
@@ -846,22 +831,7 @@ public class Marc21Parser {
 				.getAttributeValue("child"))) {
 			query.append("[not(@ind2=\"2\")]");
 		}
-		// //For MultiVolumes separate Volume and Anchor Metadata by Value of
-		// ind2
-		// if(treatAsMultiVolume) {
-		// String child =
-		// eleXpath.getParentElement().getAttributeValue("child");
-		// String anchor =
-		// eleXpath.getParentElement().getAttributeValue("anchor");
-		// if(docType == null && !"true".equals(child)) {
-		// //Volume
-		// query.append("[not(@ind2=\"2\")]");
-		// } else if(docType != null && !"true".equals(anchor)) {
-		// //MiltiVolume
-		// query.append("[not(@ind2=\"1\")]");
-		// }
-		// }
-		// }
+		
 		return query.toString();
 	}
 
@@ -888,7 +858,8 @@ public class Marc21Parser {
 	private List<Element> selectMatching999(List<Element> nodeList) {
 		List<Element> newList = new ArrayList<Element>();
 		for (Element element : nodeList) {
-			List<Element> children = element.getChildren();
+			@SuppressWarnings("unchecked")
+            List<Element> children = element.getChildren();
 			for (Element child : children) {
 				if (individualIdentifier.equals(child.getValue().trim())) {
 					newList.add(element);
