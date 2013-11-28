@@ -367,17 +367,24 @@ public class Marc21Parser {
 			return null;
 		}
 		XPath xpath;
-		String query = "/marc:record/marc:datafield[@tag=\"453\"]/marc:subfield[@code=\"a\"]";
+		String query1=null;
+		String query2=null;
+		if(this.info.anchorDs.equals("MultiVolumeWork"))  {
+		    query1 = "/marc:record/marc:datafield[@tag=\"958\"][@ind2=\"2\"]/marc:subfield[@code=\"a\"]";
+		    query2 = "/marc:record/marc:datafield[@tag=\"010\"]/marc:subfield[@code=\"a\"]";
+		} else {
+		    query2 = "/marc:record/marc:datafield[@tag=\"958\"][@ind2=\"1\"]/marc:subfield[@code=\"a\"]";
+		    query1 = "/marc:record/marc:datafield[@tag=\"453\"]/marc:subfield[@code=\"a\"]";
+		}
 		try {
-			xpath = XPath.newInstance(query);
+			xpath = XPath.newInstance(query1);
 			if (NS_MARC != null) {
 				xpath.addNamespace(NS_MARC);
 			}
 			List<Element> nodeList = xpath.selectNodes(marcDoc);
 			if (nodeList == null || nodeList.isEmpty()) {
 				// try again with different field
-				query = "/marc:record/marc:datafield[@tag=\"958\"][@ind2=\"2\"]/marc:subfield[@code=\"a\"]";
-				xpath = XPath.newInstance(query);
+				xpath = XPath.newInstance(query2);
 				if (NS_MARC != null) {
 					xpath.addNamespace(NS_MARC);
 				}
