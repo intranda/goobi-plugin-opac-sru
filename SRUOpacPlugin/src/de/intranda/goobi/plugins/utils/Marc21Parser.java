@@ -116,10 +116,7 @@ public class Marc21Parser {
 	protected static final Logger LOGGER = Logger.getLogger(Marc21Parser.class);
 	private static final Namespace NS_MARC = Namespace.getNamespace("marc",
 			"http://www.loc.gov/MARC21/slim");
-	private static final NumberFormat noSortingFormat = new DecimalFormat(
-			"0000");
-	private static final NumberFormat noSubSortingFormat = new DecimalFormat(
-			"00");
+	private static final NumberFormat[] currentNoSortingFormats = {new DecimalFormat("0000"), new DecimalFormat("000"), new DecimalFormat("00")};
 
 	private Document marcDoc;
 	private Document mapDoc;
@@ -602,20 +599,21 @@ public class Marc21Parser {
 			StringBuilder builder = new StringBuilder();
 			String[] parts = value.split(separator);
 			for (int i = 0; i < 3; i++) {
-				String partSort = "0000";
+			    NumberFormat sortingFormat = currentNoSortingFormats[Math.min(i, currentNoSortingFormats.length-1)];
+				String partSort = sortingFormat.format(0);
 				if (parts.length > i && !parts[i].isEmpty()) {
 					try {
 						if (parts[i].contains("/") || parts[i].contains("-")) {
 							String[] subparts = parts[i].split("[/-]");
 							if (subparts.length > 0) {
-								partSort = noSortingFormat.format(Integer
+								partSort = sortingFormat.format(Integer
 										.valueOf(subparts[0].replaceAll("\\D",
 												"")));
 							}
 						} else {
 							String sortedPart = parts[i].replaceAll("\\D", "");
 							int no = Integer.valueOf(sortedPart);
-							partSort = noSortingFormat.format(no);
+							partSort = sortingFormat.format(no);
 						}
 					} catch (NumberFormatException e) {
 						LOGGER.error(e);
@@ -944,9 +942,9 @@ public class Marc21Parser {
 					person.setLastname(lastName);
 					person.setDisplayname(displayName);
 					person.setAffiliation(affiliation);
-					person.setAutorityFileID(authorityID);
+//					person.setAutorityFileID(authorityID);
 					person.setInstitution(institution);
-					person.setIdentifier(identifier);
+//					person.setIdentifier(identifier);
 					person.setRole(roleTerm);
 				} catch (MetadataTypeNotAllowedException e) {
 					LOGGER.error("Failed to create person metadata "
