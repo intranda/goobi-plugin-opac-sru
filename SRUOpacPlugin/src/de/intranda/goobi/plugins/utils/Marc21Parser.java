@@ -133,6 +133,8 @@ public class Marc21Parser {
 	private RecordInformation info;
 	private String individualIdentifier = null;
 	private boolean treatAsPeriodical = false;
+    private String normdataAuthority = "gnd";
+    private String normdataAuthorityURL = "http://d-nb.info/gnd/";
 
 	public Marc21Parser(Prefs prefs, File mapFile) throws ParserException {
 		this.prefs = prefs;
@@ -155,9 +157,20 @@ public class Marc21Parser {
 			mapDoc = null;
 			throw new ParserException("Map document is either invalid or empty");
 		}
+		setNormdataValues(mapDoc.getRootElement().getChild("normdata"));
 	}
 
-	@SuppressWarnings("unchecked")
+	private void setNormdataValues(Element element) {
+        if(element == null || element.getChild("authority") == null || element.getChild("authorityURL") == null) {
+            return;
+        } else {
+            this.normdataAuthority = element.getChildText("authority");
+            this.normdataAuthorityURL = element.getChildText("authorityURL");
+        }
+        
+    }
+
+    @SuppressWarnings("unchecked")
 	private List<Element> getMetadataList() {
 		if (mapDoc != null) {
 			return mapDoc.getRootElement().getChildren("metadata");
@@ -442,7 +455,16 @@ public class Marc21Parser {
 
 	}
 
-	private String getMetadataName(Element metadataElement) {
+	private String getNormdataFields(Element metadataElement) {
+        String string = metadataElement.getAttributeValue("normdataField");
+        if(string != null) {
+            return string;
+        } else {
+            return "";
+        }
+    }
+
+    private String getMetadataName(Element metadataElement) {
 		return metadataElement.getChildText("name");
 	}
 
@@ -869,7 +891,8 @@ public class Marc21Parser {
 			String termsOfAddress = "";
 			String date = "";
 			String affiliation = "";
-			String authorityID = "";
+			String authorityID = this.normdataAuthority;
+			String authorityURL = this.normdataAuthorityURL;
 			String institution = "";
 			String identifier = "";
 			String roleTerm = mdType.getName();
@@ -950,6 +973,11 @@ public class Marc21Parser {
 					LOGGER.error("Failed to create person metadata "
 							+ mdType.getName());
 				}
+				
+	            //create normdata
+	            if(identifier != null) {
+	                person.setAutorityFile(authorityID, authorityURL, identifier);
+	            }
 
 				if (person != null) {
 					writePerson(person);

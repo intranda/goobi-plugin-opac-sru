@@ -45,7 +45,7 @@ import de.intranda.goobi.plugins.utils.Marc21Parser;
 import de.intranda.goobi.plugins.utils.Marc21Parser.ParserException;
 import de.intranda.goobi.plugins.utils.Marc21Parser.RecordInformation;
 import de.intranda.goobi.plugins.utils.SRUClient;
-import de.sub.goobi.config.ConfigMain;
+import de.sub.goobi.config.ConfigurationHelper;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
@@ -59,7 +59,7 @@ public class SruOpacImport implements IOpacPlugin {
     private String atstsl;
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
-    public static final String MARC_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "marc_map.xml";
+    public static final String MARC_MAPPING_FILE = ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml";
 
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
