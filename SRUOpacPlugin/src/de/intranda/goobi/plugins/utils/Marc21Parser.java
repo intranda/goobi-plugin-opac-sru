@@ -940,10 +940,8 @@ public class Marc21Parser {
 						String[] name = getNameParts(eleSubField.getValue());
 						firstName = name[0];
 						lastName = name[1];
-					} else if ("9"
-							.equals(eleSubField.getAttributeValue("code"))) {
-						identifier = eleSubField.getValue();
-						;
+					} else if ("9".equals(eleSubField.getAttributeValue("code"))) {
+						identifier = eleSubField.getValue().trim().replaceAll("^\\(.+\\)", "");
 					}
 
 				}
