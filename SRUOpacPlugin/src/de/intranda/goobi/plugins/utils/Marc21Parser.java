@@ -13,12 +13,14 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jdom.Attribute;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import org.jdom.xpath.XPath;
+import org.jdom2.Attribute;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.filter.Filters;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -170,7 +172,6 @@ public class Marc21Parser {
         
     }
 
-    @SuppressWarnings("unchecked")
 	private List<Element> getMetadataList() {
 		if (mapDoc != null) {
 			return mapDoc.getRootElement().getChildren("metadata");
@@ -310,31 +311,22 @@ public class Marc21Parser {
 	}
 
 	private Element getDocStructEle(String docStructTitle) {
-		try {
 			String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
-			XPath xpath = XPath.newInstance(query);
+			XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element());
 
 			@SuppressWarnings("unchecked")
-			List<Element> nodeList = xpath.selectNodes(mapDoc);
+			List<Element> nodeList = xpath.evaluate(mapDoc);//electNodes(xpath, mapDoc);
 			if (nodeList != null && !nodeList.isEmpty()) {
 				return nodeList.get(0);
 			}
-		} catch (JDOMException e) {
-			LOGGER.error(e);
-		}
 		return null;
 	}
 
-	private String getDocTypeFrom959(Document marcDoc) {
-		XPath xpath;
+    private String getDocTypeFrom959(Document marcDoc) {
 		String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
 		try {
-			xpath = XPath.newInstance(query);
-			if (NS_MARC != null) {
-				xpath.addNamespace(NS_MARC);
-			}
-			@SuppressWarnings("unchecked")
-			List<Element> nodeList = xpath.selectNodes(marcDoc);
+		    XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
+			List<Element> nodeList = xpath.evaluate(marcDoc);//selectNodes(marcDoc);
 			if (nodeList != null && !nodeList.isEmpty()
 					&& nodeList.get(0) instanceof Element) {
 				Element node = nodeList.get(0);
@@ -351,13 +343,11 @@ public class Marc21Parser {
 		}
 		return "Monographie";
 	}
-
-	@SuppressWarnings("unchecked")
+    
 	public String getAchorID() {
 		if (this.info != null && !this.info.hasAnchor()) {
 			return null;
 		}
-		XPath xpath;
 		String query1=null;
 		String query2=null;
 		if(this.info.anchorDs.equals("MultiVolumeWork"))  {
@@ -368,18 +358,12 @@ public class Marc21Parser {
 		    query1 = "/marc:record/marc:datafield[@tag=\"453\"]/marc:subfield[@code=\"a\"]";
 		}
 		try {
-			xpath = XPath.newInstance(query1);
-			if (NS_MARC != null) {
-				xpath.addNamespace(NS_MARC);
-			}
-			List<Element> nodeList = xpath.selectNodes(marcDoc);
+			XPathExpression<Element> xpath = XPathFactory.instance().compile(query1, Filters.element(), null, NS_MARC);
+			List<Element> nodeList = xpath.evaluate(marcDoc);
 			if (nodeList == null || nodeList.isEmpty()) {
 				// try again with different field
-				xpath = XPath.newInstance(query2);
-				if (NS_MARC != null) {
-					xpath.addNamespace(NS_MARC);
-				}
-				nodeList = xpath.selectNodes(marcDoc);
+				xpath = XPathFactory.instance().compile(query2, Filters.element(), null, NS_MARC);
+				nodeList = xpath.evaluate(marcDoc);
 			}
 			if (nodeList != null && !nodeList.isEmpty()
 					&& nodeList.get(0) instanceof Element) {
@@ -435,7 +419,6 @@ public class Marc21Parser {
 		writeToChild = writeToChild(metadataElement);
 		String mdTypeName = getMetadataName(metadataElement);
 		if (mdTypeName.equals("Person")) {
-			@SuppressWarnings("unchecked")
             List<Element> roleList = metadataElement.getChildren("Role");
 			for (Element roleElement : roleList) {
 				writePersonXPaths(getXPaths(metadataElement), roleElement);
@@ -844,13 +827,8 @@ public class Marc21Parser {
 	}
 
 	private List<Element> getXpathNodes(String query) throws JDOMException {
-		XPath xpath;
-		xpath = XPath.newInstance(query);
-		if (NS_MARC != null) {
-			xpath.addNamespace(NS_MARC);
-		}
-		@SuppressWarnings("unchecked")
-		List<Element> nodeList = xpath.selectNodes(marcDoc);
+		XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
+		List<Element> nodeList = xpath.evaluate(marcDoc);
 		if (individualIdentifier != null
 				&& nodeList != null
 				&& nodeList.size() > 1
@@ -866,7 +844,6 @@ public class Marc21Parser {
 	private List<Element> selectMatching999(List<Element> nodeList) {
 		List<Element> newList = new ArrayList<Element>();
 		for (Element element : nodeList) {
-			@SuppressWarnings("unchecked")
             List<Element> children = element.getChildren();
 			for (Element child : children) {
 				if (individualIdentifier.equals(child.getValue().trim())) {
@@ -1170,7 +1147,6 @@ public class Marc21Parser {
 	}
 
 	private List<Element> getXPaths(Element metadataElement) {
-		@SuppressWarnings("unchecked")
 		List<Element> xPathElements = metadataElement.getChildren("marcfield");
 		return xPathElements;
 	}
