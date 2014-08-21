@@ -109,11 +109,11 @@
 				</chainedmapper>
 			</mapper>
 
-			<path>
+			<!--path>
 				<fileset dir="../Goobi/WEB-INF/lib">
 					<include name="**/*.jar" />
 				</fileset>
-			</path>
+			</path-->
 		</pathconvert>
 	</target>
 
