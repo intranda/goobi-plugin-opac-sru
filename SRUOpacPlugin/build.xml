@@ -82,7 +82,7 @@
 		<echo>Using jenkins compiler</echo>
 		<javac destdir="${dir.build}" includeantruntime="false">
 			<classpath refid="classpath" />
-			<compilerarg value="-Xlint" />
+			<compilerarg value="-Xlint:-path" />
 			<src path="src" />
 		</javac>
 	</target>
