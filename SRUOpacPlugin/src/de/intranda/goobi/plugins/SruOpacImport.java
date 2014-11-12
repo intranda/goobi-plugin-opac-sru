@@ -258,14 +258,13 @@ public class SruOpacImport implements IOpacPlugin {
         myAtsTsl = myAtsTsl.replaceAll("[\\W]", "");
         return myAtsTsl;
     }
-
+    
     @Override
     public void setAtstsl(String createAtstsl) {
-        this.atstsl = createAtstsl;
-        
+        atstsl = createAtstsl;
     }
 
-    @Override
+    
     public String getGattung() {
         return gattung;
     }
