@@ -80,7 +80,7 @@
 
 	<target name="compile-jenkins" if="${jenkins}">
 		<echo>Using jenkins compiler</echo>
-		<javac destdir="${dir.build}" includeantruntime="false">
+		<javac destdir="${dir.build}" includeantruntime="false" debug="true" debuglevel="lines,vars,source">
 			<classpath refid="classpath" />
 			<compilerarg value="-Xlint" />
 			<src path="src" />
@@ -92,7 +92,7 @@
 
 	<target name="compile-eclipse" unless="jenkins">
 		<echo>Using eclipse compiler</echo>
-		<javac destdir="${dir.build}" includeantruntime="false">
+		<javac destdir="${dir.build}" includeantruntime="false" debug="true" debuglevel="lines,vars,source">
 			<classpath refid="classpath" />
 			<compilerarg value="-Xlint" />
 			<src path="src" />
