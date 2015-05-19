@@ -41,9 +41,9 @@ import ugh.dl.Prefs;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
-import de.intranda.goobi.plugins.utils.Marc21Parser;
-import de.intranda.goobi.plugins.utils.Marc21Parser.ParserException;
-import de.intranda.goobi.plugins.utils.Marc21Parser.RecordInformation;
+import de.intranda.goobi.plugins.utils.MarcXmlParser;
+import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
+import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.SRUClient;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
@@ -73,7 +73,7 @@ public class SruOpacImport implements IOpacPlugin {
         Fileformat ff = new MetsMods(inPrefs);
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
-
+//        String answer = org.apache.commons.io.FileUtils.readFileToString(new File("samples/AC00677689.xml"));
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if (marcXmlDoc == null) {
             answer = SRUClient.querySRU(catalogue, "rec.id=" + inSuchbegriff, recordSchema);
@@ -86,7 +86,18 @@ public class SruOpacImport implements IOpacPlugin {
         }
         File mapFile = new File(MARC_MAPPING_FILE);
         try {
-            Marc21Parser parser = new Marc21Parser(inPrefs, mapFile);
+            MarcXmlParser parser = new MarcXmlParser(inPrefs, mapFile) {
+                
+                @Override
+                protected String getDocType(Document doc) {
+                    return null;
+                }
+                
+                @Override
+                protected String createCurrentNoSort(String value) {
+                    return value.replaceAll("\\D", "");
+                }
+            };
             parser.setInfo(info);
             parser.setIndividualIdentifier(inSuchbegriff.trim());
             DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);

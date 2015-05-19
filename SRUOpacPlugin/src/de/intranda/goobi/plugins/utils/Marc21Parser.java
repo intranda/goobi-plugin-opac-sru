@@ -427,6 +427,7 @@ public class Marc21Parser {
 			MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
 			if (mdType == null) {
 				LOGGER.error("Unable To create metadata type " + mdTypeName);
+				return;
 			}
 			if (mdType.getIsPerson()) {
 				writePersonXPaths(getXPaths(metadataElement), mdType);
