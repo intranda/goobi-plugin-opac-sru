@@ -784,7 +784,7 @@ public abstract class MarcXmlParser {
                     } else if ("d".equals(eleSubField.getAttributeValue("code"))) {
                         date = eleSubField.getValue();
                     } else if ("e".equals(eleSubField.getAttributeValue("code"))) {
-                        roleTerm = eleSubField.getValue();
+//                        roleTerm = eleSubField.getValue();
                     } else if ("u".equals(eleSubField.getAttributeValue("code"))) {
                         affiliation = eleSubField.getValue();
                     } else if ("0".equals(eleSubField.getAttributeValue("code"))) {
