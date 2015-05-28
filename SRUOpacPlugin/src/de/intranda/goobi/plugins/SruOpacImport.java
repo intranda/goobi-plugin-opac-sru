@@ -99,7 +99,12 @@ public class SruOpacImport implements IOpacPlugin {
 
     private void initSearchFieldMap() {
         searchFieldMap = new HashMap<String, String>();
-        SubnodeConfiguration mappings = config.configurationAt("searchFields");
+        SubnodeConfiguration mappings = null;
+        try {            
+            mappings = config.configurationAt("searchFields");
+        } catch(IllegalArgumentException e) {
+            myLogger.warn(e.getMessage());
+        }
 
         if (mappings == null || mappings.isEmpty()) {
             searchFieldMap.put("12", "rec.id");

@@ -20,7 +20,7 @@ import ugh.dl.Prefs;
 public class SruOpacImportTest {
     
     private static final String ruleset = "resources/ruleset-ubwien.xml";
-    private static final String configPath = "resources/plugin_SRUOpacImport.xml";
+    private static final String configPath = "resources/plugin_SruOpacImport.xml";
     private static final File output = new File("output");
     
     private Prefs prefs;
