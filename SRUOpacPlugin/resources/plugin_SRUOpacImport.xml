@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config_plugin>
+    <charset>utf-8</charset>
+    <mapping>/home/florian/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map.xml</mapping>
+    <searchFields>
+        <field>
+            <id>12</id>
+            <searchField>dc.id</searchField>
+        </field>
+        <field>
+            <id>4</id>
+            <searchField>dc.title</searchField>
+        </field>
+    </searchFields>
+</config_plugin>

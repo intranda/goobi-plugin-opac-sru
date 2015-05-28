@@ -57,7 +57,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/geronimo-jms_1.1_spec-1.1.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/goobi-api.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/gson-1.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/guava-11.0.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/htmLib.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-cache-4.4.jar"/>

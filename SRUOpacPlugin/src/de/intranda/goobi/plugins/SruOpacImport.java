@@ -22,11 +22,17 @@ package de.intranda.goobi.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.SubnodeConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
@@ -45,7 +51,9 @@ import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.SRUClient;
+import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
+import de.sub.goobi.helper.exceptions.ImportPluginException;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
@@ -54,15 +62,70 @@ import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 public class SruOpacImport implements IOpacPlugin {
     private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
+    private XMLConfiguration config;
     private int hitcount;
     private String gattung = "Aa";
     private String atstsl;
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
-    public static final String MARC_MAPPING_FILE = ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml";
+    private String inputEncoding;
+    private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
+
+    private Map<String, String> searchFieldMap;
+
+    public SruOpacImport() throws ImportPluginException {
+        this.config = ConfigPlugins.getPluginConfig(this);
+        init();
+    }
+
+    public SruOpacImport(XMLConfiguration config) throws ImportPluginException {
+        this.config = config;
+        init();
+    }
+
+    private void init() throws ImportPluginException {
+        this.inputEncoding = config.getString("charset", "utf-8");
+        String mappingPath = config.getString("mapping", "marc_map.xml");
+        if (mappingPath.startsWith("/")) {
+            marcMappingFile = new File(mappingPath);
+        } else {
+            marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder(), mappingPath);
+        }
+        if (!marcMappingFile.isFile()) {
+            throw new ImportPluginException("Cannot locate mods mapping file " + marcMappingFile.getAbsolutePath());
+        }
+        initSearchFieldMap();
+    }
+
+    private void initSearchFieldMap() {
+        searchFieldMap = new HashMap<String, String>();
+        SubnodeConfiguration mappings = config.configurationAt("searchFields");
+
+        if (mappings == null || mappings.isEmpty()) {
+            searchFieldMap.put("12", "rec.id");
+        } else {
+            List<SubnodeConfiguration> fieldConfigs = mappings.configurationsAt("field");
+            for (SubnodeConfiguration fieldConfig : fieldConfigs) {
+                String key = fieldConfig.getString("id");
+                String value = fieldConfig.getString("searchField");
+                searchFieldMap.put(key, value);
+            }
+        }
+
+    }
+
+    protected String getMappedSearchField(String fieldCode) {
+        String fieldName = searchFieldMap.get(fieldCode);
+        if (fieldName != null) {
+            return fieldName;
+        } else {
+            return fieldCode;
+        }
+    }
 
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
+        inSuchfeld = getMappedSearchField(inSuchfeld);
         return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, null);
     }
 
@@ -73,10 +136,10 @@ public class SruOpacImport implements IOpacPlugin {
         Fileformat ff = new MetsMods(inPrefs);
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
-//        String answer = org.apache.commons.io.FileUtils.readFileToString(new File("samples/AC00677689.xml"));
+        //        String answer = org.apache.commons.io.FileUtils.readFileToString(new File("samples/AC00677689.xml"));
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         if (marcXmlDoc == null) {
-            answer = SRUClient.querySRU(catalogue, "rec.id=" + inSuchbegriff, recordSchema);
+            answer = SRUClient.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         }
         if (marcXmlDoc != null) {
@@ -84,15 +147,14 @@ public class SruOpacImport implements IOpacPlugin {
         } else {
             throw new Exception("Unable to find record");
         }
-        File mapFile = new File(MARC_MAPPING_FILE);
         try {
-            MarcXmlParser parser = new MarcXmlParser(inPrefs, mapFile) {
-                
+            MarcXmlParser parser = new MarcXmlParser(inPrefs, marcMappingFile) {
+
                 @Override
                 protected String getDocType(Document doc) {
                     return null;
                 }
-                
+
                 @Override
                 protected String createCurrentNoSort(String value) {
                     return value.replaceAll("\\D", "");
@@ -269,13 +331,12 @@ public class SruOpacImport implements IOpacPlugin {
         myAtsTsl = myAtsTsl.replaceAll("[\\W]", "");
         return myAtsTsl;
     }
-    
+
     @Override
     public void setAtstsl(String createAtstsl) {
         atstsl = createAtstsl;
     }
 
-    
     public String getGattung() {
         return gattung;
     }
