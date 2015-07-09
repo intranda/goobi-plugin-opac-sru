@@ -61,7 +61,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-cache-4.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpcore-nio-4.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpmime-4.4.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ics-1.4.10.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/imgscalr-lib-4.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/intrandaChart_1.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/iText-2.1.5.jar"/>
@@ -106,7 +105,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lucene-core-3.0.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/marc4j.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/metadata-extractor-2.6.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mets-1.10.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mods_3-5.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mysql-connector-java-5.1.6.jar"/>

@@ -5,11 +5,13 @@
     <searchFields>
         <field>
             <id>12</id>
-            <searchField>dc.id</searchField>
+            <searchField catalogue="FU-BERLIN (SRU)">dc.id</searchField>
+            <searchField catalogue="BVB">marcxml.idn</searchField>
         </field>
         <field>
             <id>4</id>
-            <searchField>dc.title</searchField>
+            <searchField catalogue="FU-BERLIN (SRU)">dc.title</searchField>
+            <searchField catalogue="BVB">marcxml.title</searchField>
         </field>
     </searchFields>
 </config_plugin>
