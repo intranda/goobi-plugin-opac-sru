@@ -214,10 +214,6 @@ public class SruOpacImport implements IOpacPlugin {
         //query the catalogue, first without using a search field. recordSchema is always marcxml
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
-        try(FileOutputStream fos = new FileOutputStream(new File("output/marc.xml"))) {            
-            IOUtils.write(answer, fos);
-            System.out.println("Writen file " + new File("output/marc.xml").getAbsolutePath());
-        }
         //retrieve the marcXml document from the answer
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         //If no record was found, search again using the search field
