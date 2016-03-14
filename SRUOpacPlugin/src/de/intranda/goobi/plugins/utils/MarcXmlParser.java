@@ -123,28 +123,28 @@ public abstract class MarcXmlParser {
         public void setRecordIdentifier(String recordIdentifier) {
             this.recordIdentifier = recordIdentifier;
         }
-        
+
     }
 
     protected static final Logger LOGGER = Logger.getLogger(MarcXmlParser.class);
-    private static final Namespace NS_MARC = Namespace.getNamespace("slim", "http://www.loc.gov/MARC21/slim");
-    private static final NumberFormat noSortingFormat = new DecimalFormat("0000");
-    private static final NumberFormat noSubSortingFormat = new DecimalFormat("00");
+    protected static final Namespace NS_MARC = Namespace.getNamespace("slim", "http://www.loc.gov/MARC21/slim");
+    protected static final NumberFormat noSortingFormat = new DecimalFormat("0000");
+    protected static final NumberFormat noSubSortingFormat = new DecimalFormat("00");
 
-    private Document marcDoc;
-    private Document mapDoc;
-    private Prefs prefs;
+    protected Document marcDoc;
+    protected Document mapDoc;
+    protected Prefs prefs;
     private boolean writeLogical;
     private boolean writePhysical;
     private boolean writeToAnchor;
     private boolean writeToChild;
-    private DocStruct dsLogical;
+    protected DocStruct dsLogical;
     private DocStruct dsAnchor;
     private DocStruct dsPhysical;
     // private List<String> anchorMetadataList = new ArrayList<String>();
-    private String separator;
+    protected String separator;
     private RecordInformation info;
-    private String individualIdentifier = null;
+    protected String individualIdentifier = null;
     private boolean treatAsPeriodical = false;
 
     public MarcXmlParser(Prefs prefs, File mapFile) throws ParserException {
@@ -160,8 +160,8 @@ public abstract class MarcXmlParser {
         } catch (IOException e) {
             throw new ParserException("Failed to open file " + mapFile.getAbsolutePath());
         }
-        if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map")
-                || mapDoc.getRootElement().getChildren("metadata").isEmpty()) {
+        if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map") || mapDoc.getRootElement().getChildren(
+                "metadata").isEmpty()) {
             mapDoc = null;
             throw new ParserException("Map document is either invalid or empty");
         }
@@ -207,12 +207,16 @@ public abstract class MarcXmlParser {
             }
         }
         if(dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
+            if(StringUtils.isNotBlank(info.getRecordIdentifier())) {
             try {
                 Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
                 md.setValue(info.getRecordIdentifier());
                 dsLogical.addMetadata(md);
             } catch (MetadataTypeNotAllowedException e) {
                 LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
+            }
+            } else {
+                LOGGER.error("No value found for CatalogIDDigital for record ");
             }
         }
     }
@@ -276,7 +280,9 @@ public abstract class MarcXmlParser {
                 Element docStructEle = getDocStructEle(docStructTitle);
                 RecordInformation info = new RecordInformation(docStructEle);
                 info.setRecordDate(dateString);
-                info.setRecordIdentifier(controlField001.getText());
+                if (controlField001 != null) {
+                    info.setRecordIdentifier(controlField001.getText());
+                }
                 return info;
             }
         }
@@ -310,7 +316,7 @@ public abstract class MarcXmlParser {
         } else if (bibliographicLevel == 's') {
             //Periodical
             return "PeriodicalVolume";
-        } else if(bibliographicLevel == 'b') {
+        } else if (bibliographicLevel == 'b') {
             //Serial component
             return "ContainedWork";
         } else {
@@ -503,7 +509,11 @@ public abstract class MarcXmlParser {
                         }
                     }
                     if (mergeOccurances) {
-                        tempList.add(sb.substring(0, sb.length() - separator.length()));
+                        if(sb.length() > separator.length()) {                            
+                            tempList.add(sb.substring(0, sb.length() - separator.length()));
+                        } else {
+                            tempList.add(sb.toString());
+                        }
                     }
                     nodeValueList = tempList;
 
@@ -784,7 +794,7 @@ public abstract class MarcXmlParser {
                     } else if ("d".equals(eleSubField.getAttributeValue("code"))) {
                         date = eleSubField.getValue();
                     } else if ("e".equals(eleSubField.getAttributeValue("code"))) {
-//                        roleTerm = eleSubField.getValue();
+                        //                        roleTerm = eleSubField.getValue();
                     } else if ("u".equals(eleSubField.getAttributeValue("code"))) {
                         affiliation = eleSubField.getValue();
                     } else if ("0".equals(eleSubField.getAttributeValue("code"))) {

@@ -2,21 +2,19 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Goobi"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jspf.core-1.0.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ugh-1.10.jar" sourcepath="/ugh_new"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jdom-2.0.5.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-4.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpcore-4.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/fluent-hc-4.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/a2jruntime.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/activemq-core-5.5.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/affinity-2.1.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/afterdark-1.0.10.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/antlr-2.7.7.jar"/>
@@ -24,7 +22,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/avalon-framework-4.2.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/barcode4j-fop-ext-complete.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/batik-all-1.7.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/c3p0-0.9.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/cglib-2.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-3.2.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-logger-1.0.1.jar"/>
@@ -33,10 +30,8 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-beanutils-1.7.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-codec-1.9.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-compress-1.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-dbcp2-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-dbutils-1.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-dbutils-1.6-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-digester-1.8.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-discovery-0.4.jar"/>
@@ -53,8 +48,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/el-impl-2.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/fontbox-1.7.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/fop-0.9.5.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/geronimo-jms_1.1_spec-1.1.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/goobi-api.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/guava-11.0.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/htmLib.jar"/>
@@ -76,23 +69,13 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jcommon-1.0.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jdom.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jempbox-1.7.1.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-bundle-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-client-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-core-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-json-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-multipart-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-server-1.12.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jersey-servlet-1.12.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jfreechart-1.0.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jgravatar.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jna-4.1.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jna-platform-4.1.0.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/joda-time-1.6.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jsf-api-2.2.5.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jsf-impl-2.2.5.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jsr305-1.3.9.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jstl-api-1.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jstl-impl-1.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jta-1.1.jar"/>
@@ -101,13 +84,10 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ki-jzkit-z3950-1_2_3.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ki-util.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lang-6.4.6.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lucene-analyzers-3.0.2.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lucene-core-3.0.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/marc4j.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mets-1.10.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mods_3-5.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/mysql-connector-java-5.1.6.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/oscache-2.3.2.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/pdfbox-1.7.1.jar"/>
@@ -139,5 +119,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/xmlgraphics-commons-1.3.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/xpp3-1.1.3.3.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/xstream-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ugh-3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

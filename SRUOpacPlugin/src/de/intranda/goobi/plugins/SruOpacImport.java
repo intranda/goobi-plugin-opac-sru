@@ -34,6 +34,7 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
@@ -52,7 +53,9 @@ import ugh.fileformats.mets.MetsMods;
 import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
+import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
 import de.intranda.goobi.plugins.utils.SRUClient;
+import de.schlichtherle.io.FileOutputStream;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
@@ -211,13 +214,17 @@ public class SruOpacImport implements IOpacPlugin {
         //query the catalogue, first without using a search field. recordSchema is always marcxml
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
-
+        try(FileOutputStream fos = new FileOutputStream(new File("output/marc.xml"))) {            
+            IOUtils.write(answer, fos);
+            System.out.println("Writen file " + new File("output/marc.xml").getAbsolutePath());
+        }
         //retrieve the marcXml document from the answer
         Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         //If no record was found, search again using the search field
         if (marcXmlDoc == null) {
             answer = SRUClient.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+
         }
         
         //throw exception if not exactly one record was found
@@ -228,29 +235,11 @@ public class SruOpacImport implements IOpacPlugin {
         }
         
         //set up a default MarcXmlParser.
-        MarcXmlParser parser = new MarcXmlParser(inPrefs, marcMappingFile) {
-
-            /**
-             * DocType is determined by marc leader characters 
-             */
-            @Override
-            protected String getDocType(Document doc) {
-                return null;
-            }
-
-            /**
-             * Volume number for sorting is simply created by removing any non-numerical values from the volume number
-             */
-            @Override
-            protected String createCurrentNoSort(String value) {
-                return value.replaceAll("\\D", "");
-            }
-        };
+        MarcXmlParser parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         //parse the marcXml record
         DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
-
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
         gattung = parser.getInfo().getGattung();
 
