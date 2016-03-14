@@ -28,16 +28,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -45,7 +38,6 @@ import org.jdom2.JDOMException;
 
 import de.intranda.goobi.plugins.SruOpacImport;
 import de.intranda.utils.DocumentUtils;
-import de.sub.goobi.helper.HttpClientHelper;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 
 public class SRUClient {
@@ -80,59 +72,27 @@ public class SRUClient {
             url += "&recordSchema=" + recordSchema;
 
             logger.debug("SRU URL: " + url);
-            int timeout = 2;//sec
-            RequestConfig config = RequestConfig.custom()
-                    .setConnectTimeout(timeout * 1000)
-                    .setConnectionRequestTimeout(timeout * 1000)
-                    .setSocketTimeout(timeout * 1000).build();
-                  CloseableHttpClient client = 
-                    HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-            HttpGet method = new HttpGet(url);
+
+            HttpClient client = new HttpClient();
+            GetMethod method = new GetMethod(url);
             try {
-                ret = client.execute(method, stringResponseHandler);
-                
+                client.executeMethod(method);
+                ret = method.getResponseBodyAsString();
+                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
+                    // If response XML is not UTF-8, re-encode
+                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
+                }
+            } catch (HttpException e) {
+                logger.error(e.getMessage(), e);
             } catch (IOException e) {
-                logger.error("Cannot execute URL " + url, e);
+                logger.error(e.getMessage(), e);
             } finally {
                 method.releaseConnection();
-
-                if (client != null) {
-                    try {
-                        client.close();
-                    } catch (IOException e) {
-                        logger.error(e);
-                    }
-                }
             }
         }
 
         return ret;
     }
-    
-    
-    public static ResponseHandler<String> stringResponseHandler = new ResponseHandler<String>() {
-        @Override
-        public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                logger.error("Wrong status code : " + response.getStatusLine().getStatusCode());
-                return null;
-            }
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                String value = EntityUtils.toString(entity);
-                // TODO encoding testen
-                
-//                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
-//                    // If response XML is not UTF-8, re-encode
-//                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
-//                }
-                
-                return value;
-            } else {
-                return null;
-            }
-        }
-    };
 
     /**
      * Converts a <code>String</code> from one given encoding to the other.

@@ -427,7 +427,6 @@ public class SruOpacImport implements IOpacPlugin {
         }
     }
 
-    @Override
     public void setAtstsl(String createAtstsl) {
         atstsl = createAtstsl;
     }
