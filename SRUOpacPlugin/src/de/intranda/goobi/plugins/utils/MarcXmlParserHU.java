@@ -21,6 +21,7 @@ public class MarcXmlParserHU extends MarcXmlParser {
     
     private static final Logger logger = Logger.getLogger(MarcXmlParserHU.class);
     protected static final Namespace NS_MARC = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
+    protected static final Namespace NS_SLIM = Namespace.getNamespace("slim", "http://www.loc.gov/MARC21/slim");
     private static final NumberFormat[] currentNoSortingFormats = {new DecimalFormat("0000"), new DecimalFormat("000"), new DecimalFormat("00")};
 
 
@@ -32,7 +33,7 @@ public class MarcXmlParserHU extends MarcXmlParser {
     protected String getDocType(Document doc) {
         String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
         try {
-            XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
+            XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC, NS_SLIM);
             List<Element> nodeList = xpath.evaluate(marcDoc);//selectNodes(marcDoc);
             if(nodeList != null) {
                 StringBuilder sb = new StringBuilder();
@@ -92,8 +93,9 @@ public class MarcXmlParserHU extends MarcXmlParser {
         return sortingValue;
     }
     
-    private List<Element> getXpathNodes(String query) throws JDOMException {
-        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
+    @Override
+    protected List<Element> getXpathNodes(String query) throws JDOMException {
+        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC, NS_SLIM);
         List<Element> nodeList = xpath.evaluate(marcDoc);
         if (individualIdentifier != null
                 && nodeList != null

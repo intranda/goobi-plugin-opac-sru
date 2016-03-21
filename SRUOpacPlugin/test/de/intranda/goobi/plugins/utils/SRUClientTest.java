@@ -34,6 +34,7 @@ public class SRUClientTest {
         try {
             ConfigOpacCatalogue cat = new ConfigOpacCatalogue("test", "none", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
             String query = "BV040552415";
+//            String query = "BV041701500";
             String recordSchema = "marcxml";
             String ret = SRUClient.querySRU(cat, query, recordSchema);
             System.out.println(ret);

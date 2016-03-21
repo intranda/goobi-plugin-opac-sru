@@ -756,7 +756,7 @@ public abstract class MarcXmlParser {
         return query.toString();
     }
 
-    private List<Element> getXpathNodes(String query) throws JDOMException {
+    protected List<Element> getXpathNodes(String query) throws JDOMException {
 
         XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
         List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(marcDoc));

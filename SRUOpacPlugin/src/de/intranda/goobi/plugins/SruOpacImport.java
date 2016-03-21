@@ -55,6 +55,7 @@ import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
 import de.intranda.goobi.plugins.utils.SRUClient;
+import de.intranda.utils.DocumentUtils;
 import de.schlichtherle.io.FileOutputStream;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
@@ -74,6 +75,7 @@ public class SruOpacImport implements IOpacPlugin {
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
     private String inputEncoding;
+    protected Document marcXmlDoc;
     private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
 
     private Map<String, Map<String, String>> searchFieldMap;
@@ -215,7 +217,7 @@ public class SruOpacImport implements IOpacPlugin {
         String recordSchema = "marcxml";
         String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
         //retrieve the marcXml document from the answer
-        Document marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+        marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
         //If no record was found, search again using the search field
         if (marcXmlDoc == null) {
             answer = SRUClient.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);

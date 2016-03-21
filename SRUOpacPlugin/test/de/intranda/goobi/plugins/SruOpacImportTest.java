@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.intranda.utils.DocumentUtils;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import ugh.dl.Fileformat;
 import ugh.dl.Prefs;
@@ -76,7 +77,9 @@ public class SruOpacImportTest {
     public void testSearchHU() throws Exception {
         prefs.loadPrefs(rulesetHU);
         SruOpacImport importer = new SruOpacImport(config);
-        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
+//        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
+        Fileformat ff = importer.search("12", "DE-11-001852167", catalogueHU, prefs);
+        DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
         File outputFile = new File(output, "meta.xml");
         ff.write(outputFile.getAbsolutePath());
     }
