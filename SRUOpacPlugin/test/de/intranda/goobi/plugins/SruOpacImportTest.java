@@ -39,7 +39,7 @@ public class SruOpacImportTest {
     public void setUp() throws Exception {
         prefs = new Prefs();
         prefs.loadPrefs(ruleset);
-        catalogue = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, "utf-8", null, null, "SRU");
+        catalogue = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, "utf-8", null, null, "SRU", "http://");
         config = new XMLConfiguration(new File(configPath));
         FileUtils.deleteDirectory(output);
         output.mkdir();
