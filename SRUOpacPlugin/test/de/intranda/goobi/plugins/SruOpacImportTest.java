@@ -20,11 +20,14 @@ import ugh.dl.Prefs;
 public class SruOpacImportTest {
     
     private static final String ruleset = "resources/ruleset-ubwien.xml";
+    private static final String rulesetHU = "resources/HU-monographie.xml";
     private static final String configPath = "resources/plugin_SruOpacImport.xml";
     private static final File output = new File("output");
     
     private Prefs prefs;
-    private ConfigOpacCatalogue catalogue;
+    private ConfigOpacCatalogue catalogueFU;
+    private ConfigOpacCatalogue catalogueBVB;
+    private ConfigOpacCatalogue catalogueHU;
     private XMLConfiguration config;
 
     @BeforeClass
@@ -39,7 +42,11 @@ public class SruOpacImportTest {
     public void setUp() throws Exception {
         prefs = new Prefs();
         prefs.loadPrefs(ruleset);
-        catalogue = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, "utf-8", null, null, "SRU", "http://");
+
+        catalogueFU = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, null, "SRU");
+        catalogueBVB = new ConfigOpacCatalogue("BVB", "BVB", "bvbr.bib-bvb.de", "bvb01sru", null, 5661, null, "SRU");
+        catalogueHU = new ConfigOpacCatalogue("HU-Berlin", "HU-Berlin", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
+
         config = new XMLConfiguration(new File(configPath));
         FileUtils.deleteDirectory(output);
         output.mkdir();
@@ -50,9 +57,28 @@ public class SruOpacImportTest {
     }
 
     @Test
-    public void testSearch() throws Exception {
+    public void testSearchFU() throws Exception {
         SruOpacImport importer = new SruOpacImport(config);
-        Fileformat ff = importer.search("12", "BV006015701", catalogue, prefs);
+        Fileformat ff = importer.search("12", "BV006015701", catalogueFU, prefs);
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        
+    }
+    
+    @Test
+    public void testSearchBVB() throws Exception {
+        SruOpacImport importer = new SruOpacImport(config);
+        Fileformat ff = importer.search("12", "BV006015701", catalogueBVB, prefs);
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        
+    }
+    
+    @Test
+    public void testSearchHU() throws Exception {
+        prefs.loadPrefs(rulesetHU);
+        SruOpacImport importer = new SruOpacImport(config);
+        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
         File outputFile = new File(output, "meta.xml");
         ff.write(outputFile.getAbsolutePath());
     }
@@ -60,8 +86,14 @@ public class SruOpacImportTest {
     @Test 
     public void testInit() throws Exception {
         SruOpacImport importer = new SruOpacImport(config);
-        assertEquals(importer.getMappedSearchField("12"), "dc.id");
-        assertEquals(importer.getMappedSearchField("4"), "dc.title");
+        assertEquals(importer.getMappedSearchField("12", null), "dc.id");
+        assertEquals(importer.getMappedSearchField("4", null), "dc.title");
+        
+        assertEquals(importer.getMappedSearchField("12", "FU-BERLIN (SRU)"), "dc.id");
+        assertEquals(importer.getMappedSearchField("4", "FU-BERLIN (SRU)"), "dc.title");
+        
+        assertEquals(importer.getMappedSearchField("12", "BVB"), "marcxml.idn");
+        assertEquals(importer.getMappedSearchField("4", "BVB"), "marcxml.title");
     }
 
 }

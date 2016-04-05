@@ -1,16 +1,13 @@
 <map>
-<normdata>
-    <authority>gnd</authority>
-    <authorityURL>http://d-nb.info/gnd/</authorityURL>
-</normdata>
 <docstruct gattung="Aa" mapTo="Monograph">Monographie</docstruct>
 <docstruct gattung="Av" mapTo="Monograph">Stuecktitel</docstruct>
 <docstruct gattung="Af" mapTo="Volume" anchorType="MultiVolumeWork">Bandauffuehrung</docstruct>
 <docstruct gattung="Ab" mapTo="Periodical" childType="PeriodicalVolume">Zeitschrift</docstruct><!-- Map to anchor type so metadata is by default mapped to anchor, not the child -->
 <docstruct gattung="Ax" mapTo="SingleSheetMaterial">Einblattmaterial</docstruct>
+<docstruct gattung="Ay" mapTo="SingleSheetPart" anchorType="SingleSheetMultiPart">Einblattmaterial|Bandauffuehrung</docstruct>
 <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="false" anchor="true">
     <name>TitleDocMain</name>
-    <marcfield tag="331" subfields="abc" separateOccurances="true"></marcfield>
+    <marcfield tag="331" ind2="2" subfields="abc" separateOccurances="true"></marcfield>
 </metadata>
 <!--<metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="true" anchor="false">
     <name>TitleDocMainShort</name>
@@ -26,10 +23,6 @@
     <marcfield tag="331" ind2="1" subfields="abc"></marcfield>
     <marcfield tag="999"  subfields="g"></marcfield>
 </metadata>
-<!-- <metadata logical="true" anchor="true" child="false" separateXPaths="true" separator=" "> -->
-<!--     <name>TitleDocMain</name> -->
-<!--     <marcfield tag="451"  subfields="a" separateOccurances="true"></marcfield> -->
-<!-- </metadata> -->
 <metadata logical="true">
     <name>TitleDocSub1</name>
     <marcfield tag="335" subfields="a" separateOccurances="true"></marcfield>
@@ -59,10 +52,15 @@
     <marcfield tag="112"></marcfield>
     <marcfield tag="116"></marcfield>
 </metadata>
-<metadata logical="true" separateXPaths="true">
+<metadata logical="true" separateXPaths="true" anchor="false">
     <name>CatalogIDDigital</name>
-    <marcfield tag="958" subfields="a" separateOccurances="true"></marcfield>
-    <marcfield tag="026" subfields="a" separateOccurances="true"></marcfield>
+    <marcfield tag="958" ind2="1" subfields="a" separateOccurances="true"></marcfield>
+    <marcfield tag="026" ind2="1" subfields="a" separateOccurances="true"></marcfield>
+</metadata>
+<metadata logical="true" separateXPaths="true" anchor="true">
+    <name>CatalogIDDigital</name>
+    <marcfield tag="958" ind2="2" subfields="a" separateOccurances="true"></marcfield>
+    <marcfield tag="026" ind2="2" subfields="a" separateOccurances="true"></marcfield>
 </metadata>
 <metadata logical="true" child="true">
     <name>CatalogIDDigital</name>
@@ -95,7 +93,7 @@
     <marcfield tag="415" subfields="a"></marcfield>
     <marcfield tag="416" subfields="a"></marcfield>
 </metadata>
-<metadata logical="true" child="true" separateOccurances="true" separator=", ">
+<metadata logical="true" anchor="true" separateOccurances="true" separator=", ">
     <name>PublisherName</name>
     <marcfield tag="412" subfields="a"></marcfield>
     <marcfield tag="200" subfields="kh"></marcfield>
