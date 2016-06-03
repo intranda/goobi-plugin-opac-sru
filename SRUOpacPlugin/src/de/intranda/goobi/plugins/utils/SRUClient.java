@@ -28,9 +28,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -73,25 +79,34 @@ public class SRUClient {
 
             logger.debug("SRU URL: " + url);
 
-            HttpClient client = new HttpClient();
-            GetMethod method = new GetMethod(url);
-            try {
-                client.executeMethod(method);
-                ret = method.getResponseBodyAsString();
-                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
-                    // If response XML is not UTF-8, re-encode
-                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
+            
+            HttpGet httpGet = new HttpGet(url);
+            ResponseHandler<String> handler = new BasicResponseHandler();
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()){
+                CloseableHttpResponse response = httpclient.execute(httpGet);
+                ret = handler.handleResponse(response);
+                Charset charset = getCharset(response);
+                charset = Charset.forName("ISO-8859-15");
+                if(charset != null) {                    
+                    ret = convertStringEncoding(ret, charset.name() , ENCODING);
                 }
-            } catch (HttpException e) {
-                logger.error(e.getMessage(), e);
+//                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
+//                    // If response XML is not UTF-8, re-encode
+//                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
+//                }
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
-            } finally {
-                method.releaseConnection();
             }
         }
 
         return ret;
+    }
+
+    private static Charset getCharset(CloseableHttpResponse response) {
+        HttpEntity entity = response.getEntity();
+        ContentType contentType = ContentType.getOrDefault(entity);
+        Charset charset = contentType.getCharset();
+        return charset;
     }
 
     /**
