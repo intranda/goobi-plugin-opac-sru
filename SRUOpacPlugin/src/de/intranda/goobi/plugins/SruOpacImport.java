@@ -397,7 +397,6 @@ public class SruOpacImport implements IOpacPlugin {
         return "SRU";
     }
 
-    @Override
     public String getDescription() {
         return "SRU";
     }

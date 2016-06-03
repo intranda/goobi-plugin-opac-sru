@@ -20,6 +20,7 @@
 
 package de.intranda.goobi.plugins.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -28,7 +29,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.http.Header;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,6 +38,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -79,27 +81,39 @@ public class SRUClient {
 
             logger.debug("SRU URL: " + url);
 
-            
             HttpGet httpGet = new HttpGet(url);
-            ResponseHandler<String> handler = new BasicResponseHandler();
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()){
+//            ResponseHandler<String> handler = new BasicResponseHandler();
+            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 CloseableHttpResponse response = httpclient.execute(httpGet);
-                ret = handler.handleResponse(response);
+//                ret = handler.handleResponse(response);
+                byte[] bytes = getBytes(response);
                 Charset charset = getCharset(response);
-                charset = Charset.forName("ISO-8859-15");
-                if(charset != null) {                    
-                    ret = convertStringEncoding(ret, charset.name() , ENCODING);
+                if (charset == null) {
+                    charset = Charset.forName("ISO-8859-15");
+//                    charset = Charset.forName("UTF-8");
                 }
-//                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
-//                    // If response XML is not UTF-8, re-encode
-//                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
-//                }
+//                ret  = EntityUtils.toString(response.getEntity());
+                ret = encodeAsString(bytes, charset);
+                ret = StringEscapeUtils.unescapeHtml(ret);
+//                ret = convertStringEncoding(ret, charset.name(), ENCODING);
+                //                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
+                //                    // If response XML is not UTF-8, re-encode
+                //                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
+                //                }
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
         }
 
         return ret;
+    }
+
+    private static byte[] getBytes(CloseableHttpResponse response) throws IOException {
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            response.getEntity().writeTo(baos);
+            return baos.toByteArray();
+        }
     }
 
     private static Charset getCharset(CloseableHttpResponse response) {
@@ -109,6 +123,18 @@ public class SRUClient {
         return charset;
     }
 
+    public static String encodeAsString(byte[] bytes, Charset charset) {
+        try {
+            CharsetDecoder decoder = charset.newDecoder();
+            CharBuffer cbuf = decoder.decode(ByteBuffer.wrap(bytes));
+            return cbuf.toString();
+        } catch (CharacterCodingException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return new String(bytes);
+    }
+    
     /**
      * Converts a <code>String</code> from one given encoding to the other.
      * 
@@ -136,9 +162,8 @@ public class SRUClient {
     public static Document retrieveMarcRecord(String input) throws JDOMException, IOException {
         Document wholeDoc = DocumentUtils.getDocumentFromString(input, null);
         try {
-            Element record =
-                    wholeDoc.getRootElement().getChild("records", null).getChild("record", null).getChild("recordData", null)
-                            .getChild("record", null);
+            Element record = wholeDoc.getRootElement().getChild("records", null).getChild("record", null).getChild("recordData", null).getChild(
+                    "record", null);
             Document outDoc = new Document((Element) record.detach());
             return outDoc;
         } catch (NullPointerException e) {
