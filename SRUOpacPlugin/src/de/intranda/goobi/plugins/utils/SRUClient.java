@@ -92,14 +92,8 @@ public class SRUClient {
                     charset = Charset.forName("ISO-8859-15");
 //                    charset = Charset.forName("UTF-8");
                 }
-//                ret  = EntityUtils.toString(response.getEntity());
                 ret = encodeAsString(bytes, charset);
-                ret = StringEscapeUtils.unescapeHtml(ret);
-//                ret = convertStringEncoding(ret, charset.name(), ENCODING);
-                //                if (!method.getResponseCharSet().equalsIgnoreCase(ENCODING)) {
-                //                    // If response XML is not UTF-8, re-encode
-                //                    ret = convertStringEncoding(ret, method.getResponseCharSet(), ENCODING);
-                //                }
+//                ret = StringEscapeUtils.unescapeHtml(ret);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
