@@ -32,26 +32,46 @@
 <!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
     <marcfield tag="527" subfields="a" separateOccurances="true"></marcfield>
 </metadata>
-<metadata logical="true" child="false" anchor="true">
-    <name>Person</name>
-    <Role subfield="b" value="">Author</Role>
-    <Role subfield="b" value="[Hrsg.]">Editor</Role>
-    <marcfield tag="100" ind2="2"></marcfield>
-    <marcfield tag="104" ind2="2"></marcfield>
-    <marcfield tag="108" ind2="2"></marcfield>
-    <marcfield tag="112" ind2="2"></marcfield>
-    <marcfield tag="116" ind2="2"></marcfield>
+<metadata logical="true" separateXPaths="true">
+    <name>PublicationStart</name>
+<!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
+    <marcfield tag="649" subfields="f" separateOccurances="true" ignore="^\[?\d+\]?$|\[|\]|-\d+"></marcfield>
 </metadata>
-<metadata logical="true">
-    <name>Person</name>
-    <Role subfield="b" value="">Author</Role>
-    <Role subfield="b" value="[Hrsg.]">Editor</Role>
+<metadata logical="true" separateXPaths="true">
+    <name>PublicationEnd</name>
+<!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
+    <marcfield tag="649" subfields="f" separateOccurances="true" ignore="^\[?\d+\]?$|\[|\]|\d+-"></marcfield>
+</metadata>
+<metadata logical="true" separateXPaths="false">
+    <name>Subject</name>
+<!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
+    <marcfield tag="711" subfields="ab" separateOccurances="false"></marcfield>
+</metadata>
+<!-- <metadata logical="true" child="false" anchor="true"> -->
+<!--     <name>Person</name> -->
+<!--     <Role subfield="4" value="">Author</Role> -->
+<!--     <Role subfield="4" value="[Hrsg.]">Editor</Role> -->
+<!--     <Role subfield="4" value="ill">IllustratorArtist</Role> -->
+<!--     <Role subfield="4" value="*">OtherPerson</Role> -->
+<!--     <marcfield tag="100" ind2="2"></marcfield> -->
+<!--     <marcfield tag="104" ind2="2"></marcfield> -->
+<!--     <marcfield tag="108" ind2="2"></marcfield> -->
+<!--     <marcfield tag="112" ind2="2"></marcfield> -->
+<!--     <marcfield tag="116" ind2="2"></marcfield> -->
+<!-- </metadata> -->
+<person logical="true">
+    <name>Creator</name>
+    <Role subfield="4" value="">Author</Role>
+    <Role subfield="4" value="ill">IllustratorArtist</Role>
+<!--     <Role subfield="4" value="[Hrsg.]">Editor</Role> -->
+<!--     <Role subfield="4" value="ill">IllustratorArtist</Role> -->
+<!--     <Role subfield="4" value="trl">Translator</Role> -->
     <marcfield tag="100"></marcfield>
     <marcfield tag="104"></marcfield>
     <marcfield tag="108"></marcfield>
     <marcfield tag="112"></marcfield>
     <marcfield tag="116"></marcfield>
-</metadata>
+</person>
 <metadata logical="true" separateXPaths="true" anchor="false">
     <name>CatalogIDDigital</name>
     <marcfield tag="958" ind2="1" subfields="a" separateOccurances="true"></marcfield>

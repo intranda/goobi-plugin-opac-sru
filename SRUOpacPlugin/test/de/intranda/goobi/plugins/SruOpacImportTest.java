@@ -78,7 +78,8 @@ public class SruOpacImportTest {
         prefs.loadPrefs(rulesetHU);
         SruOpacImport importer = new SruOpacImport(config);
 //        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
-        Fileformat ff = importer.search("12", "DE-11-001852167", catalogueHU, prefs);
+//        Fileformat ff = importer.search("12", "DE-11-001852167", catalogueHU, prefs);
+        Fileformat ff = importer.search("12", "BV043593684", catalogueHU, prefs);
         DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
         File outputFile = new File(output, "meta.xml");
         ff.write(outputFile.getAbsolutePath());

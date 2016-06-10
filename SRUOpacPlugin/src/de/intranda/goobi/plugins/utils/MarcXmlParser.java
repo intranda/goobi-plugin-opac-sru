@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Attribute;
@@ -175,12 +176,25 @@ public abstract class MarcXmlParser {
             return new ArrayList<Element>();
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    private List<Element> getPersonList() {
+        if (mapDoc != null) {
+            return mapDoc.getRootElement().getChildren("person");
+        } else {
+            return new ArrayList<Element>();
+        }
+    }
+
 
     public DigitalDocument parseMarcXml(Document marcDoc) throws ParserException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
         for (Element metadataElement : getMetadataList()) {
-            writeElementToDD(metadataElement, dd);
+            writeElementToDD(metadataElement, dd, false);
+        } 
+        for (Element metadataElement : getPersonList()) {
+            writeElementToDD(metadataElement, dd, true);
         }
         addMissingMetadata(dd);
         return dd;
@@ -388,19 +402,21 @@ public abstract class MarcXmlParser {
         return null;
     }
 
-    private void writeElementToDD(Element metadataElement, DigitalDocument dd) {
+    private void writeElementToDD(Element metadataElement, DigitalDocument dd, boolean person) {
         writeLogical = writeLogical(metadataElement);
         writePhysical = writePhysical(metadataElement);
         separator = getSeparator(metadataElement);
         writeToAnchor = writeToAnchor(metadataElement);
         writeToChild = writeToChild(metadataElement);
         String mdTypeName = getMetadataName(metadataElement);
-        if (mdTypeName.equals("Person")) {
+        if (person) {
             @SuppressWarnings("unchecked")
             List<Element> roleList = metadataElement.getChildren("Role");
+            List<Element> allPersons = new ArrayList<Element>();
             for (Element roleElement : roleList) {
-                writePersonXPaths(getXPaths(metadataElement), roleElement);
+               allPersons.addAll(writePersonXPaths(getXPaths(metadataElement), roleElement));
             }
+            writePersonXPaths(getXPaths(metadataElement), getMetadataName(metadataElement), allPersons);
         } else {
             MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
             if (mdType == null) {
@@ -415,6 +431,7 @@ public abstract class MarcXmlParser {
         }
 
     }
+
 
     private String getMetadataName(Element metadataElement) {
         return metadataElement.getChildText("name");
@@ -685,9 +702,30 @@ public abstract class MarcXmlParser {
             }
         }
     }
+    
+    private void writePersonXPaths(List<Element> eleXpathList, String metadataName, List<Element> usedNodes) {
+        for (Element eleXpath : eleXpathList) {
+            try {
+                String query = generateQuery(eleXpath);
+                List<Element> nodeList = getXpathNodes(query);
+                nodeList = ListUtils.subtract(nodeList, usedNodes);
+                MetadataType mdType = prefs.getMetadataTypeByName(metadataName);
+                if (nodeList != null && mdType != null) {
+                    writePersonNodeValues(nodeList, mdType);
+                }
+//                usedNodes.addAll(nodeList);
 
-    private void writePersonXPaths(List<Element> eleXpathList, Element roleElement) {
+            } catch (JDOMException e) {
+                LOGGER.error("Error parsing mods section for node " + eleXpath.getTextTrim(), e);
+                continue;
+            }
+        }
+        
+    }
 
+
+    private List<Element> writePersonXPaths(List<Element> eleXpathList, Element roleElement) {
+        List<Element> usedNodes = new ArrayList<Element>();
         for (Element eleXpath : eleXpathList) {
             try {
                 String query = generateQuery(eleXpath);
@@ -697,12 +735,14 @@ public abstract class MarcXmlParser {
                 if (nodeList != null && mdType != null) {
                     writePersonNodeValues(nodeList, mdType);
                 }
+                usedNodes.addAll(nodeList);
 
             } catch (JDOMException e) {
                 LOGGER.error("Error parsing mods section for node " + eleXpath.getTextTrim(), e);
                 continue;
             }
         }
+        return usedNodes;
     }
 
     private MetadataType getPersonType(Element roleElement) {
@@ -836,7 +876,7 @@ public abstract class MarcXmlParser {
                     person.setAffiliation(affiliation);
                     //					person.setAutorityFileID(authorityID);
                     person.setInstitution(institution);
-                    //					person.setIdentifier(identifier);
+                    setAuthority(person, identifier);
                     person.setRole(roleTerm);
                 } catch (MetadataTypeNotAllowedException e) {
                     LOGGER.error("Failed to create person metadata " + mdType.getName());
@@ -848,6 +888,23 @@ public abstract class MarcXmlParser {
             }
         }
 
+    }
+
+    private void setAuthority(Person per, String content) {
+        if (content.contains("/")) {
+            String catalogue = content.substring(0, content.indexOf("/"));
+            String identifier = content.substring(content.indexOf("/") + 1);
+            if (catalogue.equals("gnd")) {
+                per.setAutorityFile(catalogue, "http://d-nb.info/gnd/", identifier);
+            }
+        } else if (content.matches("gnd\\.+")) {
+            per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replace("gnd", ""));
+        } else if (content.matches("\\(.*\\).+")) {
+            per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(.*\\)", ""));
+        } else {
+            per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content);
+        }
+        
     }
 
     private String[] getNameParts(String name) {
