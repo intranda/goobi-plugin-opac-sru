@@ -42,10 +42,10 @@
 <!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
     <marcfield tag="649" subfields="f" separateOccurances="true" ignore="^\[?\d+\]?$|\[|\]|\d+-"></marcfield>
 </metadata>
-<metadata logical="true" separateXPaths="false">
+<metadata logical="true" separateXPaths="false" separator="#">
     <name>Subject</name>
 <!--    <marcfield tag="304" subfields="a" separateOccurances="true"></marcfield> -->
-    <marcfield tag="711" subfields="ab" separateOccurances="false"></marcfield>
+    <marcfield tag="711" subfields="ab" separateOccurances="true" separateSubfields="false"></marcfield>
 </metadata>
 <!-- <metadata logical="true" child="false" anchor="true"> -->
 <!--     <name>Person</name> -->

@@ -495,6 +495,7 @@ public abstract class MarcXmlParser {
         for (Element eleXpath : eleXpathList) {
             try {
                 boolean mergeOccurances = !separateOccurances(eleXpath);
+                boolean mergeSubfields = !separateSubfields(eleXpath);
                 String query = generateQuery(eleXpath);
                 String subfields = eleXpath.getAttributeValue("subfields");
                 List<Element> nodeList = getXpathNodes(query);
@@ -507,7 +508,7 @@ public abstract class MarcXmlParser {
 
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
-                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeOccurances);
+                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields);
 
                     List<String> tempList = new ArrayList<String>();
                     StringBuilder sb = new StringBuilder();
@@ -1054,6 +1055,20 @@ public abstract class MarcXmlParser {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    private boolean separateSubfields(Element xpathElement) {
+        Attribute attr = xpathElement.getAttribute("separateSubfields");
+        if (attr == null) {
+            attr = xpathElement.getParentElement().getAttribute("separateSubfields");
+        }
+        if (attr != null && attr.getValue().equals("true")) {
+            return true;
+        }    else if (attr != null && attr.getValue().equals("false")) {
+                return false;
+        } else {
+            return separateOccurances(xpathElement);
         }
     }
 
