@@ -79,8 +79,11 @@ public class SruOpacImportTest {
         SruOpacImport importer = new SruOpacImport(config);
 //        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
 //        Fileformat ff = importer.search("12", "DE-11-001852167", catalogueHU, prefs);
-        Fileformat ff = importer.search("12", "BV043593684", catalogueHU, prefs);
+        Fileformat ff = importer.search("12", "BV043598460", catalogueHU, prefs);
         DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
+        if(importer.marcXmlDocVolume != null) {            
+            DocumentUtils.getFileFromDocument(new File("output", "marc-volume.xml"), importer.marcXmlDocVolume);
+        }
         File outputFile = new File(output, "meta.xml");
         ff.write(outputFile.getAbsolutePath());
     }

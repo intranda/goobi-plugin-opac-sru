@@ -4,6 +4,7 @@
 <docstruct gattung="Af" mapTo="Volume" anchorType="MultiVolumeWork">Bandauffuehrung</docstruct>
 <docstruct gattung="Ab" mapTo="Periodical" childType="PeriodicalVolume">Zeitschrift</docstruct><!-- Map to anchor type so metadata is by default mapped to anchor, not the child -->
 <docstruct gattung="Ax" mapTo="SingleSheetMaterial">Einblattmaterial</docstruct>
+<docstruct gattung="Ax" mapTo="SingleSheetMaterial">Einblattmaterial|Monographie</docstruct>
 <docstruct gattung="Ay" mapTo="SingleSheetPart" anchorType="SingleSheetMultiPart">Einblattmaterial|Bandauffuehrung</docstruct>
 <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="false" anchor="true">
     <name>TitleDocMain</name>
@@ -16,12 +17,17 @@
     <marcfield tag="090"  subfields="a"></marcfield>
     <marcfield tag="999"  subfields="g"></marcfield>
 </metadata> -->
+<!-- <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="true" anchor="false"> -->
+<!--     <name>TitleDocMain</name> -->
+<!--     <marcfield tag="331" ind2="2"  subfields="abc"></marcfield> -->
+<!--     <marcfield tag="089"  subfields="a"></marcfield> -->
+<!--     <marcfield tag="331" ind2="1" subfields="abc"></marcfield> -->
+<!--     <marcfield tag="999"  subfields="g"></marcfield> -->
+<!-- </metadata> -->
 <metadata logical="true" separateOccurances="true" separateXPaths="false" separator=", " child="true" anchor="false">
-    <name>TitleDocMain</name>
-    <marcfield tag="331" ind2="2"  subfields="abc"></marcfield>
-    <marcfield tag="089"  subfields="a"></marcfield>
-    <marcfield tag="331" ind2="1" subfields="abc"></marcfield>
-    <marcfield tag="999"  subfields="g"></marcfield>
+<name>TitleDocMain</name>
+<marcfield tag="331" ind2="2" subfields="abc"></marcfield>
+<marcfield tag="089" subfields="np" separateSubfields="false"></marcfield>
 </metadata>
 <metadata logical="true">
     <name>TitleDocSub1</name>

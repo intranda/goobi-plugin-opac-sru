@@ -76,6 +76,7 @@ public class SruOpacImport implements IOpacPlugin {
     private Prefs prefs;
     private String inputEncoding;
     protected Document marcXmlDoc;
+    protected Document marcXmlDocVolume;
     private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
 
     private Map<String, Map<String, String>> searchFieldMap;
@@ -245,6 +246,7 @@ public class SruOpacImport implements IOpacPlugin {
         String anchorId = parser.getAchorID();
         if (anchorId != null) {
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
+            this.marcXmlDocVolume = this.marcXmlDoc;
             Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, anchorInfo);
             attachToAnchor(dd, af);
         }

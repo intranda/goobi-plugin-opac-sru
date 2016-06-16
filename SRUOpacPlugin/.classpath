@@ -106,5 +106,9 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/ugh-3.0.jar" sourcepath="/ugh_new"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-4.4.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-collections-3.2.2.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-logger-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-logger-log4j-1-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lang-6.4.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -176,7 +176,7 @@ public abstract class MarcXmlParser {
             return new ArrayList<Element>();
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private List<Element> getPersonList() {
         if (mapDoc != null) {
@@ -186,13 +186,12 @@ public abstract class MarcXmlParser {
         }
     }
 
-
     public DigitalDocument parseMarcXml(Document marcDoc) throws ParserException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
         for (Element metadataElement : getMetadataList()) {
             writeElementToDD(metadataElement, dd, false);
-        } 
+        }
         for (Element metadataElement : getPersonList()) {
             writeElementToDD(metadataElement, dd, true);
         }
@@ -201,8 +200,8 @@ public abstract class MarcXmlParser {
     }
 
     private void addMissingMetadata(DigitalDocument dd) {
-        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo"))
-                && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
+        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo")) && !dsLogical.hasMetadataType(prefs
+                .getMetadataTypeByName("CurrentNoSorting"))) {
             try {
                 Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
                 md.setValue(dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo")).get(0).getValue());
@@ -211,24 +210,24 @@ public abstract class MarcXmlParser {
                 LOGGER.error("Cannot add CurrentNoSorting: Not allowed for ds " + dsLogical.getType().getName());
             }
         }
-        if(dsAnchor != null && !dsAnchor.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
+        if (dsAnchor != null && !dsAnchor.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
             try {
                 Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
-                md.setValue(""+System.currentTimeMillis());
+                md.setValue("" + System.currentTimeMillis());
                 dsAnchor.addMetadata(md);
             } catch (MetadataTypeNotAllowedException e) {
                 LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsAnchor.getType().getName());
             }
         }
-        if(dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
-            if(StringUtils.isNotBlank(info.getRecordIdentifier())) {
-            try {
-                Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
-                md.setValue(info.getRecordIdentifier());
-                dsLogical.addMetadata(md);
-            } catch (MetadataTypeNotAllowedException e) {
-                LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
-            }
+        if (dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
+            if (StringUtils.isNotBlank(info.getRecordIdentifier())) {
+                try {
+                    Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
+                    md.setValue(info.getRecordIdentifier());
+                    dsLogical.addMetadata(md);
+                } catch (MetadataTypeNotAllowedException e) {
+                    LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
+                }
             } else {
                 LOGGER.error("No value found for CatalogIDDigital for record ");
             }
@@ -275,7 +274,7 @@ public abstract class MarcXmlParser {
         return dd;
     }
 
-    private RecordInformation getRecordInfo(Document marcDoc) {
+    private RecordInformation getRecordInfo(Document marcDoc) throws ParserException {
         if (marcDoc != null && marcDoc.hasRootElement()) {
             Element leader = marcDoc.getRootElement().getChild("leader", NS_MARC);
             if (leader != null) {
@@ -292,6 +291,9 @@ public abstract class MarcXmlParser {
                     docStructTitle = getDocTypeFromLeader(leaderStr);
                 }
                 Element docStructEle = getDocStructEle(docStructTitle);
+                if (docStructEle == null) {
+                    throw new ParserException("Cannot find configuration for " + docStructTitle);
+                }
                 RecordInformation info = new RecordInformation(docStructEle);
                 info.setRecordDate(dateString);
                 if (controlField001 != null) {
@@ -300,7 +302,7 @@ public abstract class MarcXmlParser {
                 return info;
             }
         }
-        return null;
+        throw new ParserException("Cannot parse marc record");
     }
 
     private String getDocTypeFromLeader(String leaderStr) {
@@ -414,7 +416,7 @@ public abstract class MarcXmlParser {
             List<Element> roleList = metadataElement.getChildren("Role");
             List<Element> allPersons = new ArrayList<Element>();
             for (Element roleElement : roleList) {
-               allPersons.addAll(writePersonXPaths(getXPaths(metadataElement), roleElement));
+                allPersons.addAll(writePersonXPaths(getXPaths(metadataElement), roleElement));
             }
             writePersonXPaths(getXPaths(metadataElement), getMetadataName(metadataElement), allPersons);
         } else {
@@ -431,7 +433,6 @@ public abstract class MarcXmlParser {
         }
 
     }
-
 
     private String getMetadataName(Element metadataElement) {
         return metadataElement.getChildText("name");
@@ -527,7 +528,7 @@ public abstract class MarcXmlParser {
                         }
                     }
                     if (mergeOccurances) {
-                        if(sb.length() > separator.length()) {                            
+                        if (sb.length() > separator.length()) {
                             tempList.add(sb.substring(0, sb.length() - separator.length()));
                         } else {
                             tempList.add(sb.toString());
@@ -703,7 +704,7 @@ public abstract class MarcXmlParser {
             }
         }
     }
-    
+
     private void writePersonXPaths(List<Element> eleXpathList, String metadataName, List<Element> usedNodes) {
         for (Element eleXpath : eleXpathList) {
             try {
@@ -714,16 +715,15 @@ public abstract class MarcXmlParser {
                 if (nodeList != null && mdType != null) {
                     writePersonNodeValues(nodeList, mdType);
                 }
-//                usedNodes.addAll(nodeList);
+                //                usedNodes.addAll(nodeList);
 
             } catch (JDOMException e) {
                 LOGGER.error("Error parsing mods section for node " + eleXpath.getTextTrim(), e);
                 continue;
             }
         }
-        
-    }
 
+    }
 
     private List<Element> writePersonXPaths(List<Element> eleXpathList, Element roleElement) {
         List<Element> usedNodes = new ArrayList<Element>();
@@ -905,7 +905,7 @@ public abstract class MarcXmlParser {
         } else {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content);
         }
-        
+
     }
 
     private String[] getNameParts(String name) {
@@ -1057,7 +1057,7 @@ public abstract class MarcXmlParser {
             return false;
         }
     }
-    
+
     private boolean separateSubfields(Element xpathElement) {
         Attribute attr = xpathElement.getAttribute("separateSubfields");
         if (attr == null) {
@@ -1065,8 +1065,8 @@ public abstract class MarcXmlParser {
         }
         if (attr != null && attr.getValue().equals("true")) {
             return true;
-        }    else if (attr != null && attr.getValue().equals("false")) {
-                return false;
+        } else if (attr != null && attr.getValue().equals("false")) {
+            return false;
         } else {
             return separateOccurances(xpathElement);
         }
