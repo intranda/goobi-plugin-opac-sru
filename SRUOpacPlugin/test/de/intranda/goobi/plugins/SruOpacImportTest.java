@@ -22,6 +22,7 @@ public class SruOpacImportTest {
     private static final String ruleset = "resources/ruleset-ubwien.xml";
     private static final String rulesetHU = "resources/HU-monographie.xml";
     private static final String configPath = "resources/plugin_SruOpacImport.xml";
+    private static final String configPathHU = "resources/plugin_SruOpacImport_HU.xml";
     private static final File output = new File("output");
     
     private Prefs prefs;
@@ -29,6 +30,7 @@ public class SruOpacImportTest {
     private ConfigOpacCatalogue catalogueBVB;
     private ConfigOpacCatalogue catalogueHU;
     private XMLConfiguration config;
+    private XMLConfiguration configHU;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -48,6 +50,7 @@ public class SruOpacImportTest {
         catalogueHU = new ConfigOpacCatalogue("HU-Berlin", "HU-Berlin", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
 
         config = new XMLConfiguration(new File(configPath));
+        configHU = new XMLConfiguration(new File(configPathHU));
         FileUtils.deleteDirectory(output);
         output.mkdir();
     }
@@ -77,8 +80,8 @@ public class SruOpacImportTest {
     @Test
     public void testSearchHU() throws Exception {
         prefs.loadPrefs(rulesetHU);
-        SruOpacImport importer = new SruOpacImport(config);
-        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
+        SruOpacImport importer = new SruOpacImport(configHU);
+        Fileformat ff = importer.search("12", "DE-11-002060192", catalogueHU, prefs);
         File outputFile = new File(output, "meta.xml");
         ff.write(outputFile.getAbsolutePath());
     }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config_plugin>
+    <charset>utf-8</charset>
+    <mapping>/home/florian/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map_hu.xml</mapping>
+    <searchFields>
+        <field>
+            <id>12</id>
+            <searchField catalogue="FU-BERLIN (SRU)">dc.id</searchField>
+            <searchField catalogue="BVB">marcxml.idn</searchField>
+        </field>
+        <field>
+            <id>4</id>
+            <searchField catalogue="FU-BERLIN (SRU)">dc.title</searchField>
+            <searchField catalogue="BVB">marcxml.title</searchField>
+        </field>
+    </searchFields>
+</config_plugin>

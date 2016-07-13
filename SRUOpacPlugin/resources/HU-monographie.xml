@@ -744,8 +744,8 @@
     <metadata num="*">OtherTitle</metadata>
     <metadata num="1m">CurrentNo</metadata>
     <metadata num="1m">CurrentNoSorting</metadata>
-    <metadata num="*">PublicationYear</metadata>
-    <metadata num="*">PublicationYearDisplay</metadata>
+    <metadata num="1o">PublicationYear</metadata>
+    <metadata num="1o">PublicationYearDisplay</metadata>
     <metadata num="*">TitleDocParallel</metadata>
     <metadata num="1o">shelfmarksource</metadata>
     <metadata num="*">DocLanguage</metadata>
@@ -973,8 +973,8 @@
     <metadata num="1o">PublicationRun</metadata>
     <metadata num="1o">PlaceOfPublication</metadata>
     <metadata num="1o">PublisherName</metadata>
-    <metadata num="+">PublicationStart</metadata>
-    <metadata num="*">PublicationEnd</metadata>
+    <metadata num="1m">PublicationStart</metadata>
+    <metadata num="1o">PublicationEnd</metadata>
     <metadata num="*">TitleDocParallel</metadata>
     <metadata num="*">ISSN</metadata>
     <metadata num="*">shelfmarksource</metadata>
