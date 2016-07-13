@@ -116,9 +116,9 @@
 </metadata>
 <metadata logical="true" child="true" separateXPaths="true" separateOccurances="true">
     <name>PublicationYearDisplay</name>
+    <marcfield tag="999" subfields="j"></marcfield>
     <marcfield tag="649" ind1="c" ind2="1" subfields="f"></marcfield>
     <marcfield tag="419" ind2="1" subfields="c"></marcfield>
-    <marcfield tag="999" subfields="j"></marcfield>
 </metadata>
 
 <metadata logical="true" separateXPaths="true">

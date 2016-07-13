@@ -23,6 +23,7 @@ public class SruOpacImportTest {
     private static final String ruleset = "resources/ruleset-ubwien.xml";
     private static final String rulesetHU = "resources/HU-monographie.xml";
     private static final String configPath = "resources/plugin_SruOpacImport.xml";
+    private static final String configPathHU = "resources/plugin_SruOpacImport_HU.xml";
     private static final File output = new File("output");
     
     private Prefs prefs;
@@ -30,6 +31,7 @@ public class SruOpacImportTest {
     private ConfigOpacCatalogue catalogueBVB;
     private ConfigOpacCatalogue catalogueHU;
     private XMLConfiguration config;
+    private XMLConfiguration configHU;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -47,6 +49,7 @@ public class SruOpacImportTest {
         catalogueBVB = new ConfigOpacCatalogue("BVB", "BVB", "bvbr.bib-bvb.de", "bvb01sru", null, 5661, null, "SRU");
         catalogueHU = new ConfigOpacCatalogue("HU-Berlin", "HU-Berlin", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
         config = new XMLConfiguration(new File(configPath));
+        configHU = new XMLConfiguration(new File(configPathHU));
         FileUtils.deleteDirectory(output);
         output.mkdir();
     }
