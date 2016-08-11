@@ -79,7 +79,7 @@ public class SruOpacImportTest {
     @Test
     public void testSearchHU() throws Exception {
         prefs.loadPrefs(rulesetHU);
-        SruOpacImport importer = new SruOpacImport(config);
+        SruOpacImport importer = new SruOpacImport(configHU);
 //        Fileformat ff = importer.search("12", "BV042478174", catalogueHU, prefs);
 //        Fileformat ff = importer.search("12", "DE-11-001852167", catalogueHU, prefs);
         Fileformat ff = importer.search("12", "DE-11-002060192", catalogueHU, prefs);

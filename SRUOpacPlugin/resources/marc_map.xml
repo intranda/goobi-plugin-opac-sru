@@ -18,8 +18,8 @@
         <name>ISBN</name>
         <marcfield tag="020" subfields="a" />
     </metadata>
-    <metadata logical="true" anchor="true">
-        <name>Person</name>
+    <person logical="true" anchor="true">
+        <name>Author</name>
         <Role subfield="e" value="">Author</Role>
         <Role subfield="e" value="Autor">Author</Role>
         <Role subfield="e" value="Hrsg.">Editor</Role>
@@ -29,7 +29,7 @@
         <marcfield tag="112" />
         <marcfield tag="116" />
         <marcfield tag="700" />
-    </metadata>
+    </person>
     <metadata logical="true"  anchor="true" separateOccurances="true" separateXPaths="true">
         <name>PublisherName</name>
         <marcfield tag="110" subfields="ag" />

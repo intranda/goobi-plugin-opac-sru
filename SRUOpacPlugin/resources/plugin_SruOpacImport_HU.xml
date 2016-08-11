@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config_plugin>
     <charset>utf-8</charset>
-    <mapping>/home/florian/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map_hu.xml</mapping>
+    <mapping>/opt/digiverso/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map_hu.xml</mapping>
+    <marcXmlParserType>HU</marcXmlParserType>
     <searchFields>
         <field>
             <id>12</id>

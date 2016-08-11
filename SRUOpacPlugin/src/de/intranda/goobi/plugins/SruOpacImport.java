@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
@@ -231,7 +232,19 @@ public class SruOpacImport implements IOpacPlugin {
         if("HU".equalsIgnoreCase(this.marcXmlParserType)) {            
             parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
         } else {
-            parser = new MarcX
+            parser = new MarcXmlParser(inPrefs, marcMappingFile) {
+                
+                @Override
+                protected String getDocType(Document doc) {
+                    return null;
+                }
+                
+                @Override
+                protected String createCurrentNoSort(String value) {
+                    value = value.replaceAll("\\D", "");
+                    return value;
+                }
+            };
         }
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
