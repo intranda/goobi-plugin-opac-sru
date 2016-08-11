@@ -287,7 +287,7 @@ public abstract class MarcXmlParser {
                 }
 
                 String docStructTitle = getDocType(mapDoc);
-                if (docStructTitle == null) {
+                if (StringUtils.isBlank(docStructTitle)) {
                     docStructTitle = getDocTypeFromLeader(leaderStr);
                 }
                 Element docStructEle = getDocStructEle(docStructTitle);

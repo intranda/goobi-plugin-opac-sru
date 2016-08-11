@@ -58,7 +58,7 @@ public class SruOpacImportTest {
     public void tearDown() throws Exception {
     }
 
-//    @Test
+    @Test
     public void testSearchFU() throws Exception {
         SruOpacImport importer = new SruOpacImport(config);
         Fileformat ff = importer.search("12", "BV006015701", catalogueFU, prefs);
@@ -67,7 +67,7 @@ public class SruOpacImportTest {
         
     }
     
-//    @Test
+    @Test
     public void testSearchBVB() throws Exception {
         SruOpacImport importer = new SruOpacImport(config);
         Fileformat ff = importer.search("12", "BV006015701", catalogueBVB, prefs);

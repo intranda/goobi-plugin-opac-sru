@@ -32,7 +32,9 @@ public class SRUClientTest {
     @Test
     public void testQuerySru() {
         try {
-            ConfigOpacCatalogue cat = new ConfigOpacCatalogue("test", "none", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
+            ConfigOpacCatalogue cat =
+                    new ConfigOpacCatalogue("test", "none", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, "utf-8", null, null, "SRU", "http://");
+
             String query = "BV040552415";
 //            String query = "BV041701500";
             String recordSchema = "marcxml";
