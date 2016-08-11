@@ -23,24 +23,29 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import net.xeoh.plugins.base.annotations.PluginImplementation;
-
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.jdom2.Document;
 
+import de.intranda.goobi.plugins.utils.MarcXmlParser;
+import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
+import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
+import de.intranda.goobi.plugins.utils.SRUClient;
+import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.config.ConfigurationHelper;
+import de.sub.goobi.helper.exceptions.ImportPluginException;
+import de.unigoettingen.sub.search.opac.ConfigOpac;
+import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
+import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
+import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.Fileformat;
@@ -50,19 +55,6 @@ import ugh.dl.Prefs;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
-import de.intranda.goobi.plugins.utils.MarcXmlParser;
-import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
-import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
-import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
-import de.intranda.goobi.plugins.utils.SRUClient;
-import de.intranda.utils.DocumentUtils;
-import de.schlichtherle.io.FileOutputStream;
-import de.sub.goobi.config.ConfigPlugins;
-import de.sub.goobi.config.ConfigurationHelper;
-import de.sub.goobi.helper.exceptions.ImportPluginException;
-import de.unigoettingen.sub.search.opac.ConfigOpac;
-import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
-import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 
 @PluginImplementation
 public class SruOpacImport implements IOpacPlugin {
@@ -78,6 +70,7 @@ public class SruOpacImport implements IOpacPlugin {
     protected Document marcXmlDoc;
     protected Document marcXmlDocVolume;
     private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
+    private String marcXmlParserType = null;
 
     private Map<String, Map<String, String>> searchFieldMap;
 
@@ -109,6 +102,7 @@ public class SruOpacImport implements IOpacPlugin {
      */
     private void init() throws ImportPluginException {
         this.inputEncoding = config.getString("charset", "utf-8");
+        this.marcXmlParserType = config.getString("marcXmlParserType", "");
         String mappingPath = config.getString("mapping", "marc_map.xml");
         if (mappingPath == null) {
             throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
@@ -233,8 +227,12 @@ public class SruOpacImport implements IOpacPlugin {
             throw new Exception("Unable to find record");
         }
         
-        //set up a default MarcXmlParser.
-        MarcXmlParser parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
+        MarcXmlParser parser;
+        if("HU".equalsIgnoreCase(this.marcXmlParserType)) {            
+            parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
+        } else {
+            parser = new MarcX
+        }
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         //parse the marcXml record
