@@ -24,6 +24,7 @@ import org.jdom2.filter.Filters;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 
+import de.intranda.utils.DocumentUtils;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
@@ -34,9 +35,8 @@ import ugh.exceptions.IncompletePersonObjectException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
-import de.intranda.utils.DocumentUtils;
 
-public abstract class MarcXmlParser {
+public class MarcXmlParser {
 
     private static final Logger logger = Logger.getLogger(MarcXmlParser.class);
 
@@ -341,7 +341,9 @@ public abstract class MarcXmlParser {
         }
     }
 
-    protected abstract String getDocType(Document doc);
+    protected String getDocType(Document doc) {
+        return null;
+    }
 
     private Element getDocStructEle(String docStructTitle) {
         String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
@@ -594,7 +596,12 @@ public abstract class MarcXmlParser {
         }
     }
 
-    protected abstract String createCurrentNoSort(String value);
+    protected String createCurrentNoSort(String value) {
+        if(value != null) {
+            value = value.replaceAll("\\D", "");
+        }
+        return value;
+    }
 
     private String cleanValue(MetadataType mdType, String value) {
         String returnValue = value;
