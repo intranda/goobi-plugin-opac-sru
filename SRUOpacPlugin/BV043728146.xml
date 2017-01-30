@@ -1,0 +1,36 @@
+<zs:record>
+  <leader>00626nam a2200169 u 4500</leader>
+  <controlfield tag="001">BV043728146</controlfield>
+  <controlfield tag="005">00000000000000.0</controlfield>
+  <controlfield tag="007">tu|||||||||||||||||||||</controlfield>
+  <controlfield tag="008">t                      r     |||        </controlfield>
+  <datafield tag="245" ind1="0" ind2="0">
+    <subfield code="a">M. Tullii Ciceronis De officiis libri tres: nach Text und Kommentar getrennte Ausgabe f&#xFC;r den Schulgebrauch ; 1. Abteilung: Text ; [2. Abteilung: Kommentar]</subfield>
+    <subfield code="c">von P. Dettweiler</subfield>
+  </datafield>
+  <datafield tag="246" ind1=" " ind2="3">
+    <subfield code="a">De officiis</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="a">Gotha</subfield>
+    <subfield code="b">Perthes</subfield>
+    <subfield code="c">1890, 1890</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">VIII, 108, 116 S.</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Cicero, Marcus Tullius</subfield>
+  </datafield>
+  <datafield tag="700" ind1="1" ind2=" ">
+    <subfield code="a">Dettweiler, Peter</subfield>
+  </datafield>
+  <datafield tag="900" ind1=" " ind2=" ">
+    <subfield code="a">FU Berlin: UB </subfield>
+    <subfield code="b">Signatur: 98/2016/ 41013</subfield>
+    <subfield code="m">BOOK</subfield>
+  </datafield>
+  <datafield tag="041" ind1=" " ind2=" ">
+    <subfield code="a">gerlat</subfield>
+  </datafield>
+</record>

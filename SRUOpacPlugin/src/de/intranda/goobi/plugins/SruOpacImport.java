@@ -246,6 +246,9 @@ public class SruOpacImport implements IOpacPlugin {
                 }
             };
         }
+        parser.setNamespace(
+        		this.config.getString("namespace.prefix", MarcXmlParser.NS_DEFAULT.getPrefix()),
+        		this.config.getString("namespace.url", MarcXmlParser.NS_DEFAULT.getURI()));
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         //parse the marcXml record
@@ -420,21 +423,15 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public ConfigOpacDoctype getOpacDocType() {
-        try {
-            ConfigOpac co = new ConfigOpac();
+            ConfigOpac co = ConfigOpac.getInstance();
             ConfigOpacDoctype cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
             if (cod == null) {
 
-                cod = new ConfigOpac().getAllDoctypes().get(0);
+                cod = co.getAllDoctypes().get(0);
                 this.gattung = cod.getMappings().get(0);
 
             }
             return cod;
-        } catch (IOException e) {
-            myLogger.error("OpacDoctype unknown", e);
-
-            return null;
-        }
     }
 
     public void setAtstsl(String createAtstsl) {

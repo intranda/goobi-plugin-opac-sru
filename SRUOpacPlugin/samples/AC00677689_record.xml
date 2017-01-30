@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+                <record>
+                    <!-- Indicator length at offset 10 should hold a digit. Assuming 2 -->
+                    <!-- Identifier length at offset 11 should hold a digit. Assuming 2 -->
+                    <!-- Length implementation at offset 22 should hold a digit. Assuming 0 -->
+                    <leader>00857 am2200289 450 </leader>
+                    <controlfield tag="001">$$aAC00677689</controlfield>
+                    <controlfield tag="005">20150331134500.0</controlfield>
+                    <datafield tag="036" ind1="a" ind2=" ">
+                        <subfield code="a">AT</subfield>
+                    </datafield>
+                    <datafield tag="037" ind1="b" ind2=" ">
+                        <subfield code="a">ger</subfield>
+                    </datafield>
+                    <datafield tag="100" ind1="b" ind2=" ">
+                        <subfield code="p">Skrzeszewski, Adolf &lt;&lt;von&gt;&gt;</subfield>
+                        <subfield code="9">(DE-588)129099295</subfield>
+                    </datafield>
+                    <datafield tag="331" ind1=" " ind2=" ">
+                        <subfield code="a">Umgebung von Bad Gastein und Rundschau vom Gamskahr-Kogel</subfield>
+                    </datafield>
+                    <datafield tag="359" ind1=" " ind2=" ">
+                        <subfield code="a">aufgenommen und gezeichnet von Adolf von Skreszewski</subfield>
+                    </datafield>
+                    <datafield tag="410" ind1=" " ind2=" ">
+                        <subfield code="a">Wien</subfield>
+                    </datafield>
+                    <datafield tag="412" ind1=" " ind2=" ">
+                        <subfield code="a">Hl&#x332;zel</subfield>
+                    </datafield>
+                    <datafield tag="425" ind1=" " ind2=" ">
+                        <subfield code="a">[ca. 1900]</subfield>
+                    </datafield>
+                    <datafield tag="425" ind1="a" ind2=" ">
+                        <subfield code="a">1900</subfield>
+                    </datafield>
+                    <datafield tag="433" ind1=" " ind2=" ">
+                        <subfield code="a">2 Kt.</subfield>
+                    </datafield>
+                    <datafield tag="451" ind1=" " ind2=" ">
+                        <subfield code="a">Hl&#x332;zel's General-, Hand- und Reisekarten ; 13</subfield>
+                    </datafield>
+                    <datafield tag="700" ind1="f" ind2=" ">
+                        <subfield code="a">74.20</subfield>
+                        <subfield code="b">Deutschland, sterreich, Schweiz &lt;Geographie&gt;</subfield>
+                    </datafield>
+                    <datafield tag="902" ind1=" " ind2=" ">
+                        <subfield code="g">Gastein</subfield>
+                        <subfield code="z">Region</subfield>
+                        <subfield code="9">(DE-588)4315943-6</subfield>
+                    </datafield>
+                    <datafield tag="902" ind1=" " ind2=" ">
+                        <subfield code="f">Karte</subfield>
+                    </datafield>
+                    <datafield tag="904" ind1="a" ind2=" ">
+                        <subfield code="a">UBS</subfield>
+                    </datafield>
+                    <datafield tag="907" ind1=" " ind2=" ">
+                        <subfield code="g">Gamskarkogel</subfield>
+                        <subfield code="9">(DE-588)4527503-8</subfield>
+                    </datafield>
+                    <datafield tag="907" ind1=" " ind2=" ">
+                        <subfield code="s">Panorama</subfield>
+                        <subfield code="9">(DE-588)4173182-7</subfield>
+                    </datafield>
+                    <datafield tag="908" ind1=" " ind2=" ">
+                        <subfield code="a">21</subfield>
+                    </datafield>
+                    <datafield tag="909" ind1="a" ind2=" ">
+                        <subfield code="a">UBS</subfield>
+                    </datafield>
+                    <datafield tag="930" ind1="-" ind2="1">
+                        <subfield code="A">FB Geographie u. Regionalf.</subfield>
+                        <subfield code="B">Kartensammlung 3</subfield>
+                    </datafield>
+                </record>
+

@@ -14,4 +14,8 @@
             <searchField catalogue="BVB">marcxml.title</searchField>
         </field>
     </searchFields>
+    <namespace>
+    	<prefix></prefix>
+    	<url>http://www.loc.gov/MARC21/slim</url>
+    </namespace>
 </config_plugin>

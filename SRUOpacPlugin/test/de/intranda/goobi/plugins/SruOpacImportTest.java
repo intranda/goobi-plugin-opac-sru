@@ -45,9 +45,9 @@ public class SruOpacImportTest {
     public void setUp() throws Exception {
         prefs = new Prefs();
         prefs.loadPrefs(ruleset);
-        catalogueFU = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, null, "SRU");
-        catalogueBVB = new ConfigOpacCatalogue("BVB", "BVB", "bvbr.bib-bvb.de", "bvb01sru", null, 5661, null, "SRU");
-        catalogueHU = new ConfigOpacCatalogue("HU-Berlin", "HU-Berlin", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU");
+        catalogueFU = new ConfigOpacCatalogue("FU-Berlin (SRU)", "SRU-Schnittstelle der FU-Berlin", "aleph-www.ub.fu-berlin.de", "fub01_usm", null, 80, null, "SRU", null);
+        catalogueBVB = new ConfigOpacCatalogue("BVB", "BVB", "bvbr.bib-bvb.de", "bvb01sru", null, 5661, null, "SRU", null);
+        catalogueHU = new ConfigOpacCatalogue("HU-Berlin", "HU-Berlin", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, null, "SRU", null);
         config = new XMLConfiguration(new File(configPath));
         configHU = new XMLConfiguration(new File(configPathHU));
         FileUtils.deleteDirectory(output);

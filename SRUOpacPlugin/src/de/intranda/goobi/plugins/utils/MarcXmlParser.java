@@ -128,7 +128,7 @@ public class MarcXmlParser {
     }
 
     protected static final Logger LOGGER = Logger.getLogger(MarcXmlParser.class);
-    protected static final Namespace NS_MARC = Namespace.getNamespace("slim", "http://www.loc.gov/MARC21/slim");
+    public static final Namespace NS_DEFAULT = Namespace.getNamespace("slim", "http://www.loc.gov/MARC21/slim");
     protected static final NumberFormat noSortingFormat = new DecimalFormat("0000");
     protected static final NumberFormat noSubSortingFormat = new DecimalFormat("00");
 
@@ -147,6 +147,7 @@ public class MarcXmlParser {
     private RecordInformation info;
     protected String individualIdentifier = null;
     private boolean treatAsPeriodical = false;
+    private Namespace namespace = NS_DEFAULT;
 
     public MarcXmlParser(Prefs prefs, File mapFile) throws ParserException {
         this.prefs = prefs;
@@ -276,7 +277,7 @@ public class MarcXmlParser {
 
     private RecordInformation getRecordInfo(Document marcDoc) throws ParserException {
         if (marcDoc != null && marcDoc.hasRootElement()) {
-            Element leader = marcDoc.getRootElement().getChild("leader", NS_MARC);
+            Element leader = marcDoc.getRootElement().getChild("leader", namespace);
             if (leader != null) {
                 String leaderStr = leader.getValue();
                 String dateString = "";
@@ -364,18 +365,18 @@ public class MarcXmlParser {
         String query1 = null;
         String query2 = null;
         if (this.info.anchorDs.equals("MultiVolumeWork")) {
-            query1 = "/slim:record/slim:datafield[@tag=\"958\"][@ind2=\"2\"]/slim:subfield[@code=\"a\"]";
-            query2 = "/slim:record/slim:datafield[@tag=\"010\"]/slim:subfield[@code=\"a\"]";
+            query1 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"958\"][@ind2=\"2\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
+            query2 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"010\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
         } else {
-            query2 = "/slim:record/slim:datafield[@tag=\"958\"][@ind2=\"1\"]/slim:subfield[@code=\"a\"]";
-            query1 = "/slim:record/slim:datafield[@tag=\"453\"]/slim:subfield[@code=\"a\"]";
+            query2 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"958\"][@ind2=\"1\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
+            query1 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"453\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
         }
         try {
-            xpath = XPathFactory.instance().compile(query1, Filters.element(), null, NS_MARC);
+            xpath = XPathFactory.instance().compile(query1, Filters.element(), null, namespace);
             List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(marcDoc));
             if (nodeList == null || nodeList.isEmpty()) {
                 // try again with different field
-                xpath = XPathFactory.instance().compile(query2, Filters.element(), null, NS_MARC);
+                xpath = XPathFactory.instance().compile(query2, Filters.element(), null, namespace);
                 nodeList = new ArrayList<Element>(xpath.evaluate(marcDoc));
             }
             if (nodeList != null && !nodeList.isEmpty() && nodeList.get(0) instanceof Element) {
@@ -394,7 +395,7 @@ public class MarcXmlParser {
     private Element getControlfield(Document marcDoc, String tag) {
         if (marcDoc != null && marcDoc.hasRootElement()) {
             @SuppressWarnings("rawtypes")
-            List controlfields = marcDoc.getRootElement().getChildren("controlfield", NS_MARC);
+            List controlfields = marcDoc.getRootElement().getChildren("controlfield", namespace);
             for (Object object : controlfields) {
                 if (object instanceof Element) {
                     if (tag.equals(((Element) object).getAttributeValue("tag"))) {
@@ -666,7 +667,7 @@ public class MarcXmlParser {
         @SuppressWarnings("rawtypes")
         List childNodes = null;
         if (name != null) {
-            childNodes = parent.getChildren(name, NS_MARC);
+            childNodes = parent.getChildren(name, namespace);
         } else {
             childNodes = parent.getChildren();
         }
@@ -682,7 +683,7 @@ public class MarcXmlParser {
 
     private List<Element> getSubfieldsByCode(Element parent, String code) {
         @SuppressWarnings("rawtypes")
-        List childNodes = parent.getChildren("subfield", NS_MARC);
+        List childNodes = parent.getChildren("subfield", namespace);
 
         List<Element> eleList = new LinkedList<Element>();
         for (Object node : childNodes) {
@@ -788,7 +789,7 @@ public class MarcXmlParser {
         String ind1 = eleXpath.getAttributeValue("ind1");
         String ind2 = eleXpath.getAttributeValue("ind2");
         //		String subfields = eleXpath.getAttributeValue("subfields");
-        StringBuilder query = new StringBuilder("/slim:record/slim:datafield");
+        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield");
         if (tag != null) {
             query.append("[@tag=\"" + tag + "\"]");
         }
@@ -804,9 +805,17 @@ public class MarcXmlParser {
         return query.toString();
     }
 
-    protected List<Element> getXpathNodes(String query) throws JDOMException {
+    private String getNamespacePrefix() {
+    	if(StringUtils.isNotBlank(getNamespace().getPrefix())) {
+    				return getNamespace().getPrefix() + ":";
+    	} else {
+    		return "";
+    	}
+	}
 
-        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC);
+	protected List<Element> getXpathNodes(String query) throws JDOMException {
+
+        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, namespace);
         List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(marcDoc));
         return nodeList;
     }
@@ -1122,5 +1131,26 @@ public class MarcXmlParser {
     public void setIndividualIdentifier(String individualIdentifier) {
         this.individualIdentifier = individualIdentifier;
     }
+    
+    public Namespace getNamespace() {
+		return namespace;
+	}
+    
+    public void setNamespace(Namespace namespace) {
+		this.namespace = namespace;
+	}
+    
+    public void setNamespace(String prefix, String url) {
+    	if(StringUtils.isBlank(prefix)) {
+    		this.namespace = Namespace.XML_NAMESPACE;
+    	} else {    		
+    		try {    		
+    			this.namespace = Namespace.getNamespace(prefix, url);
+    		}catch(IllegalArgumentException e) {
+    			e.printStackTrace();
+    			this.namespace = Namespace.XML_NAMESPACE;
+    		}
+    	}
+	}
 
 }
