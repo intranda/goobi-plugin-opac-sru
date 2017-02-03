@@ -5,7 +5,7 @@
     <searchFields>
         <field>
             <id>12</id>
-            <searchField catalogue="FU-BERLIN (SRU)">dc.id</searchField>
+            <searchField catalogue="FU-Berlin (SRU)">other_system_number</searchField>
             <searchField catalogue="BVB">marcxml.idn</searchField>
         </field>
         <field>
@@ -14,8 +14,11 @@
             <searchField catalogue="BVB">marcxml.title</searchField>
         </field>
     </searchFields>
-    <namespace>
+    <namespace catalogue="FU-Berlin (SRU)">
     	<prefix></prefix>
-    	<url>http://www.loc.gov/MARC21/slim</url>
+    	<uri></uri>
     </namespace>
+    <sru>
+    	<version>1.2</version>
+    </sru>
 </config_plugin>

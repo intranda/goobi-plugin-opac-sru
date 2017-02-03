@@ -22,14 +22,17 @@ package de.intranda.goobi.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.ServerRuntimeException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
@@ -40,6 +43,7 @@ import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
 import de.intranda.goobi.plugins.utils.SRUClient;
+import de.intranda.goobi.plugins.utils.SRUClient.SRUException;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
@@ -104,6 +108,7 @@ public class SruOpacImport implements IOpacPlugin {
     private void init() throws ImportPluginException {
         this.inputEncoding = config.getString("charset", "utf-8");
         this.marcXmlParserType = config.getString("marcXmlParserType", "");
+        this.config.setExpressionEngine(new XPathExpressionEngine());
         String mappingPath = config.getString("mapping", "marc_map.xml");
         if (mappingPath == null) {
             throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
@@ -141,12 +146,12 @@ public class SruOpacImport implements IOpacPlugin {
             for (SubnodeConfiguration fieldConfig : fieldConfigs) {
                 String key = fieldConfig.getString("id");
                 Map<String, String> catalogFieldMap = new LinkedHashMap<String, String>();
-                int countFields = fieldConfig.getMaxIndex("searchField");
-                for (int i = 0; i <= countFields; i++) {
-                    String value = fieldConfig.getString("searchField(" + i + ")");
-                    String catalogue = fieldConfig.getString("searchField(" + i + ")[@catalogue]");
-                    catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
-                }
+                List<Configuration> searchFields = fieldConfig.configurationsAt("searchField");
+                for (Configuration searchFieldConfig : searchFields) {
+					String value = searchFieldConfig.getString("");
+					String catalogue = searchFieldConfig.getString("@catalogue");
+					catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
+				}
                 searchFieldMap.put(key, catalogFieldMap);
             }
         }
@@ -205,20 +210,26 @@ public class SruOpacImport implements IOpacPlugin {
             throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
+        
+        SRUClient client = new SRUClient();
+        String version =this.config.getString("sru[@catalogue='" + catalogue.getTitle() + "']/version",
+				this.config.getString("sru[not(@catalogue)]/version", client.getSruVersion()));
+        client.setSruVersion(version);
       
         //create a new empty fileformat
         Fileformat ff = new MetsMods(inPrefs);
         
         //query the catalogue, first without using a search field. recordSchema is always marcxml
         String recordSchema = "marcxml";
-        String answer = SRUClient.querySRU(catalogue, inSuchbegriff, recordSchema);
+        String answer = client.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
         //retrieve the marcXml document from the answer
-        marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-        //If no record was found, search again using the search field
-        if (marcXmlDoc == null) {
-            answer = SRUClient.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
-            marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-
+        try {        	
+        	marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+        } catch(SRUException e ) {
+        	//If no record was found, search again using the search field     		
+        	answer = client.querySRU(catalogue, inSuchbegriff, recordSchema);
+        	marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+        	
         }
         
         //throw exception if not exactly one record was found
@@ -246,9 +257,11 @@ public class SruOpacImport implements IOpacPlugin {
                 }
             };
         }
-        parser.setNamespace(
-        		this.config.getString("namespace.prefix", MarcXmlParser.NS_DEFAULT.getPrefix()),
-        		this.config.getString("namespace.url", MarcXmlParser.NS_DEFAULT.getURI()));
+        String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix",
+				this.config.getString("namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
+        String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri",
+				this.config.getString("namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
+        parser.setNamespace(prefix, uri);
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         //parse the marcXml record
@@ -423,7 +436,13 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public ConfigOpacDoctype getOpacDocType() {
-            ConfigOpac co = ConfigOpac.getInstance();
+            ConfigOpac co;
+			try {
+				co = new ConfigOpac();
+			} catch (IOException e) {
+				myLogger.error(e.getMessage(), e);
+				return null;
+			}
             ConfigOpacDoctype cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
             if (cod == null) {
 

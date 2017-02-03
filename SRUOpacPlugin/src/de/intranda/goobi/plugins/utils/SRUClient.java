@@ -52,6 +52,8 @@ public class SRUClient {
 
     private static final Logger logger = Logger.getLogger(SruOpacImport.class);
     private static final String ENCODING = "UTF-8";
+    
+    private String sruVersion  = "1.1";
 
     /**
      * Queries the given catalog via Z.3950 (SRU) and returns its response.
@@ -61,7 +63,7 @@ public class SRUClient {
      * @param recordSchema The expected record schema.
      * @return Query result XML string.
      */
-    public static String querySRU(ConfigOpacCatalogue cat, String query, String recordSchema) {
+    public String querySRU(ConfigOpacCatalogue cat, String query, String recordSchema) {
         String ret = null;
         if (query != null && !query.isEmpty()) {
             query = query.trim();
@@ -73,7 +75,7 @@ public class SRUClient {
             url += cat.getAddress();
             url += ":" + cat.getPort();
             url += "/" + cat.getDatabase();
-            url += "?version=1.1";
+            url += "?version=" + sruVersion;
             url += "&operation=searchRetrieve";
             url += "&query=" + query;
             url += "&maximumRecords=5";
@@ -153,7 +155,7 @@ public class SRUClient {
         return string;
     }
 
-    public static Document retrieveMarcRecord(String input) throws JDOMException, IOException {
+    public static Document retrieveMarcRecord(String input) throws JDOMException, IOException, SRUException {
         Document wholeDoc = DocumentUtils.getDocumentFromString(input, null);
         try {
             Element record = wholeDoc.getRootElement().getChild("records", null).getChild("record", null).getChild("recordData", null).getChild(
@@ -161,7 +163,37 @@ public class SRUClient {
             Document outDoc = new Document((Element) record.detach());
             return outDoc;
         } catch (NullPointerException e) {
-            return null;
+        	Element diagnosticsEle = wholeDoc.getRootElement().getChild("diagnostics", null);
+        	if(diagnosticsEle != null && diagnosticsEle.getChild("diagnostic", null) != null) {
+        		throw new SRUException(diagnosticsEle.getChild("diagnostic", null).getChildText("message", null));
+        	}
+            throw new SRUException("No parsable response from SRU server");
         }
+    }
+    
+    public String getSruVersion() {
+		return sruVersion;
+	}
+    
+    public void setSruVersion(String sruVersion) {
+		this.sruVersion = sruVersion;
+	}
+    
+    public static class SRUException extends Exception {
+		public SRUException() {
+			super();
+		}
+		public SRUException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
+			super(arg0, arg1, arg2, arg3);
+		}
+		public SRUException(String arg0, Throwable arg1) {
+			super(arg0, arg1);
+		}
+		public SRUException(String arg0) {
+			super(arg0);
+		}
+		public SRUException(Throwable arg0) {
+			super(arg0);
+		}
     }
 }

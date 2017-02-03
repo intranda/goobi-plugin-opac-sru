@@ -69,11 +69,25 @@ public class MarcXmlParser {
         }
 
         private Date createDate(String dateString) {
-            String year = dateString.substring(0, 4);
-            String month = dateString.substring(4, 6);
-            String day = dateString.substring(6);
+        	if(StringUtils.isBlank(dateString)) {
+        		LOGGER.warn("No date string found. Using current date");
+                return new Date();
+        	}
+        	String year, month, day;
+        	if(dateString.length() >= 8) {        		
+        		year = dateString.substring(0, 4);
+        		month = dateString.substring(4, 6);
+        		day = dateString.substring(6);
+        	} else if(dateString.length() >= 6) {
+        		year = dateString.substring(0, 2);
+        		month = dateString.substring(2, 4);
+        		day = dateString.substring(4);
+        	} else {
+        		LOGGER.error("Unable to convert date String into actual date. Using current date");
+                return new Date();
+        	}
             try {
-                GregorianCalendar calendar = new GregorianCalendar(Integer.valueOf(year), Integer.valueOf(month), Integer.valueOf(day));
+                GregorianCalendar calendar = new GregorianCalendar(Integer.valueOf(year), Integer.valueOf(month)-1, Integer.valueOf(day));
                 return calendar.getTime();
             } catch (NumberFormatException e) {
                 LOGGER.error("Unable to convert date String into actual date. Using current date");
@@ -283,8 +297,11 @@ public class MarcXmlParser {
                 String dateString = "";
                 Element controlField005 = getControlfield(marcDoc, "005");
                 Element controlField001 = getControlfield(marcDoc, "001");
+                Element controlField008 = getControlfield(marcDoc, "008");
                 if (controlField005 != null) {
                     dateString = controlField005.getText().substring(0, 8);
+                } else if(controlField008 != null) {
+                	dateString = controlField008.getText().substring(0, 6);
                 }
 
                 String docStructTitle = getDocType(mapDoc);
@@ -1142,13 +1159,13 @@ public class MarcXmlParser {
     
     public void setNamespace(String prefix, String url) {
     	if(StringUtils.isBlank(prefix)) {
-    		this.namespace = Namespace.XML_NAMESPACE;
+    		this.namespace = Namespace.NO_NAMESPACE;
     	} else {    		
     		try {    		
     			this.namespace = Namespace.getNamespace(prefix, url);
     		}catch(IllegalArgumentException e) {
     			e.printStackTrace();
-    			this.namespace = Namespace.XML_NAMESPACE;
+    			this.namespace = Namespace.NO_NAMESPACE;
     		}
     	}
 	}
