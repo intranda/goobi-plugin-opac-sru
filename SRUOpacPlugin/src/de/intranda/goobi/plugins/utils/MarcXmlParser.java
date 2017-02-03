@@ -960,7 +960,7 @@ public class MarcXmlParser {
     private void writeMetadata(Metadata metadata) {
 
         if (writeLogical) {
-            if (writeToChild && dsLogical != null) {
+            if ((writeToChild || dsAnchor == null) && dsLogical != null) {
                 try {
                     dsLogical.addMetadata(metadata);
                 } catch (MetadataTypeNotAllowedException e) {

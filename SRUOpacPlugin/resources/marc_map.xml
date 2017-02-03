@@ -8,6 +8,7 @@
     <docstruct gattung="Aj" mapTo="ContainedWork" anchorType="SerialVolume" >ContainedWork</docstruct>
     <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="false">
         <name>CatalogIDDigital</name>
+        <marcfield tag="035" subfields="a" />
         <marcfield tag="016" subfields="2a" prefix="ZDB" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
