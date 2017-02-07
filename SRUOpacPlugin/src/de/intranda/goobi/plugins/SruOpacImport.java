@@ -488,7 +488,7 @@ public class SruOpacImport implements IOpacPlugin {
     public ConfigOpacDoctype getOpacDocType() {
             ConfigOpac co;
 			try {
-				co = ConfigOpac.getInstance();
+				co = new ConfigOpac();
 			} catch (Throwable e) {
 				myLogger.error(e.getMessage(), e);
 				return null;
