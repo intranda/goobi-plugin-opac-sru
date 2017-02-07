@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mets:mets OBJID="" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd" xmlns:mets="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   <mets:metsHdr CREATEDATE="2017-01-30T14:21:27Z">
+   <mets:metsHdr CREATEDATE="2017-02-03T11:54:20Z">
       <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
-         <mets:name>Goobi - ugh-3.0-ugh-2.0.0-30-g6d40b80 - 21−December−2016</mets:name>
+         <mets:name>Goobi - ugh-3.0-ugh-2.0.0-29-g3b6efe1 - 21−December−2016</mets:name>
          <mets:note>Goobi</mets:note>
       </mets:agent>
    </mets:metsHdr>
@@ -12,20 +12,19 @@
             <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
                <mods:extension>
                   <goobi:goobi xmlns:goobi="http://meta.goobi.org/v1.5.1/">
-                     <goobi:metadata name="CatalogIDDigital">$$aAC00677689</goobi:metadata>
+                     <goobi:metadata name="PublisherName">Oldenbourg</goobi:metadata>
+                     <goobi:metadata name="PlaceOfPublication">München</goobi:metadata>
+                     <goobi:metadata name="PublicationYear">1984</goobi:metadata>
+                     <goobi:metadata name="TitleDocMain">Literaturverfilmungen</goobi:metadata>
+                     <goobi:metadata name="TitleDocMainShort">Literaturverfilmungen</goobi:metadata>
+                     <goobi:metadata name="SizeSourcePrint">91 S.</goobi:metadata>
+                     <goobi:metadata name="CatalogIDDigital">BV006015701</goobi:metadata>
                      <goobi:metadata name="Author" type="person">
-                        <goobi:lastName>Skrzeszewski</goobi:lastName>
-                        <goobi:firstName>Adolf &lt;&lt;von&gt;&gt;</goobi:firstName>
+                        <goobi:lastName>Adam</goobi:lastName>
+                        <goobi:firstName>Gerhard</goobi:firstName>
                         <goobi:authorityID>gnd</goobi:authorityID>
                         <goobi:authorityURI>http://d-nb.info/gnd/</goobi:authorityURI>
-                        <goobi:authorityValue>129099295</goobi:authorityValue>
-                        <goobi:displayName>Skrzeszewski, Adolf &lt;&lt;von&gt;&gt;</goobi:displayName>
-                     </goobi:metadata>
-                     <goobi:metadata name="Author" type="person">
-                        <goobi:lastName>74.20</goobi:lastName>
-                        <goobi:authorityID>gnd</goobi:authorityID>
-                        <goobi:authorityURI>http://d-nb.info/gnd/</goobi:authorityURI>
-                        <goobi:displayName>74.20</goobi:displayName>
+                        <goobi:displayName>Adam, Gerhard</goobi:displayName>
                      </goobi:metadata>
                   </goobi:goobi>
                </mods:extension>

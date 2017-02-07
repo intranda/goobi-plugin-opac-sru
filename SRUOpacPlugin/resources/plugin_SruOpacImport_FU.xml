@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config_plugin>
+    <charset>utf-8</charset>
+    <mapping catalogue="FU-BERLIN (ALMA)">/opt/digiverso/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map_alma.xml</mapping>
+    <mapping>/opt/digiverso/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map.xml</mapping>
+    <marcXmlParserType >FU</marcXmlParserType>
+    <searchFields>
+        <field>
+            <id>12</id>
+            <searchField catalogue="FU-Berlin (SRU)">dc.id</searchField>
+            <searchField catalogue="BVB">marcxml.idn</searchField>
+            <searchField catalogue="FU-BERLIN (ALMA)">other_system_number</searchField>
+        </field>
+        <field>
+            <id>4</id>
+            <searchField catalogue="FU-BERLIN (SRU)">dc.title</searchField>
+            <searchField catalogue="BVB">marcxml.title</searchField>
+        </field>
+    </searchFields>
+    <namespace catalogue="FU-BERLIN (ALMA)">
+    	<prefix></prefix>
+    	<uri></uri>
+    </namespace>
+    <namespace catalogue="BVB">
+    	<prefix>slim</prefix>
+    	<uri>http://www.loc.gov/MARC21/slim</uri>
+    </namespace>
+    <sru>
+    	<version>1.2</version>
+    </sru>
+</config_plugin>

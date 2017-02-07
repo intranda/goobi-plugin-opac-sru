@@ -6,10 +6,9 @@
     <docstruct gattung="Aa" mapTo="Map" >Map</docstruct>
     <docstruct gattung="Ah" mapTo="Manuscript" >Manuscript</docstruct>
     <docstruct gattung="Aj" mapTo="ContainedWork" anchorType="SerialVolume" >ContainedWork</docstruct>
-    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="true">
+    <metadata logical="true" anchor="false" child="true" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
-        <marcfield tag="016" subfields="2a" prefix="ZDB" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
-        <marcfield tag="001" subfields="a" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
+        <marcfield tag="035" subfields="a" ignore="(\(DE-600\)\s?[\w-]+)|\(DE-\d{3}\)" />
     </metadata>
     <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
@@ -23,7 +22,7 @@
         <name>ISBN</name>
         <marcfield tag="020" subfields="a" />
     </metadata>
-    <person logical="true" anchor="true">
+    <person logical="true" anchor="true" child="true">
       <name>Author</name>
       <Role subfield="e" value="">Author</Role>
       <Role subfield="e" value="Autor">Author</Role>
@@ -36,6 +35,14 @@
       <marcfield tag="116" />
       <marcfield tag="700" />
     </person>
+    <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
+        <name>CurrentNo</name>
+        <marcfield tag="245" subfields="n" ignore="[.,;:/]$"/>
+    </metadata>
+    <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
+        <name>CurrentNoSorting</name>
+        <marcfield tag="245" subfields="n" ignore="\D"/>
+    </metadata>
     <metadata logical="true"  anchor="true" separateOccurances="true" separateXPaths="true">
         <name>PublisherName</name>
         <marcfield tag="110" subfields="ag" />
@@ -74,6 +81,12 @@
         <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
 <!--         <marcfield tag="245" subfields="b" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/> -->
     </metadata>
+    <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
+        <name>TitleDocSub1</name>
+<!--         <marcfield tag="245" subfields="a" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/> -->
+        <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
+        <marcfield tag="245" subfields="b" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/>
+    </metadata>
         <metadata logical="true" separateOccurances="true" separateXPaths="false">
         <name>FormatSourcePrint</name>
         <marcfield tag="300" subfields="c" />
@@ -87,7 +100,7 @@
         <marcfield tag="300" subfields="b" />
         <marcfield tag="500" subfields="a" />
     </metadata>
-    <metadata logical="true" separateOccurances="true" separateXPaths="true">
+    <metadata logical="true" physical="true" child="true" separateOccurances="true" separateXPaths="true">
         <name>shelfmarksource</name>
         <marcfield tag="900" subfields="b" />
         <marcfield tag="AVA" subfields="d" />
@@ -124,20 +137,6 @@
         <name>CatalogIDSource</name>
         <marcfield tag="775" subfields="w" prefix="ZDB" ignore="(\(DE-600\)[\w-]+)|\(DE-\d{3}\)" />
         <marcfield tag="775" subfields="t" ignore="\s.*" />
-    </metadata>
-        <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
-        <name>TitleDocSub1</name>
-<!--         <marcfield tag="245" subfields="a" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/> -->
-        <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
-        <marcfield tag="245" subfields="b" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/>
-    </metadata>
-    <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
-        <name>CurrentNo</name>
-        <marcfield tag="245" subfields="n" ignore="[.,;:/]$"/>
-    </metadata>
-    <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
-        <name>CurrentNoSorting</name>
-        <marcfield tag="245" subfields="n" ignore="\D"/>
     </metadata>
 
 </map>

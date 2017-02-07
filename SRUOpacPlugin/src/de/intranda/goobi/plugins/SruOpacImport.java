@@ -41,6 +41,7 @@ import org.jdom2.Document;
 
 import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
+import de.intranda.goobi.plugins.utils.MarcXmlParserFU;
 import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
 import de.intranda.goobi.plugins.utils.SRUClient;
 import de.intranda.goobi.plugins.utils.SRUClient.SRUException;
@@ -55,6 +56,7 @@ import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
+import ugh.dl.MetadataType;
 import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.exceptions.PreferencesException;
@@ -71,11 +73,11 @@ public class SruOpacImport implements IOpacPlugin {
     private String atstsl;
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
-    private String inputEncoding;
+//    private String inputEncoding;
     protected Document marcXmlDoc;
     protected Document marcXmlDocVolume;
-    private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
-    private String marcXmlParserType = null;
+//    private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
+//    private String marcXmlParserType = null;
 
     private Map<String, Map<String, String>> searchFieldMap;
 
@@ -106,21 +108,10 @@ public class SruOpacImport implements IOpacPlugin {
      * @throws ImportPluginException no metadata mapping file could be found
      */
     private void init() throws ImportPluginException {
-        this.inputEncoding = config.getString("charset", "utf-8");
-        this.marcXmlParserType = config.getString("marcXmlParserType", "");
+//        this.inputEncoding = config.getString("charset", "utf-8");
+//        this.marcXmlParserType = config.getString("marcXmlParserType", "");
         this.config.setExpressionEngine(new XPathExpressionEngine());
-        String mappingPath = config.getString("mapping", "marc_map.xml");
-        if (mappingPath == null) {
-            throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
-        } else if (mappingPath.startsWith("/")) {
-            marcMappingFile = new File(mappingPath);
-        } else {
-            marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder(), mappingPath);
-        }
-        if (!marcMappingFile.isFile()) {
-            throw new ImportPluginException("Cannot locate mods mapping file " + marcMappingFile.getAbsolutePath());
-        }
-        initSearchFieldMap();
+        
     }
 
     /**
@@ -190,11 +181,77 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
-        inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
-        return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, null);
+        File marcMappingFile = initMappingFile(catalogue);
+        initSearchFieldMap();
+    	inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
+    	
+    	String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
+    	
+        MarcXmlParser parser;
+        if("HU".equalsIgnoreCase(marcParserType)) {            
+            parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
+        } else if("FU".equalsIgnoreCase(marcParserType)) {
+        	parser = new MarcXmlParserFU(inPrefs, marcMappingFile);
+        } else {
+            parser = new MarcXmlParser(inPrefs, marcMappingFile) {
+                
+                @Override
+                protected String getDocType(Document doc) {
+                    return null;
+                }
+                
+                @Override
+                protected String createCurrentNoSort(String value) {
+                    value = value.replaceAll("\\D", "");
+                    return value;
+                }
+            };
+        }
+        
+        return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, parser, marcMappingFile, null);
     }
 
-    /**
+    private File initMappingFile(ConfigOpacCatalogue catalogue) throws ImportPluginException {
+    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
+    	File marcMappingFile;
+        if (mappingPath == null) {
+            throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
+        } else if (mappingPath.startsWith("/")) {
+            marcMappingFile = new File(mappingPath);
+        } else {
+            marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder(), mappingPath);
+        }
+        if (!marcMappingFile.isFile()) {
+            throw new ImportPluginException("Cannot locate mods mapping file " + marcMappingFile.getAbsolutePath());
+        }
+        initSearchFieldMap();
+		return marcMappingFile;
+	}
+
+	private String getConfigString(String query, String catalogue, String subQuery, String defaultValue) {
+		
+		StringBuilder queryBuilder = new StringBuilder();
+		queryBuilder.append(query)
+		.append("[@catalogue='")
+		.append(catalogue)
+		.append("']");
+		if(StringUtils.isNotBlank(subQuery)) {
+			queryBuilder.append("/")
+			.append(subQuery);
+		}
+		
+		StringBuilder defaultQueryBuilder = new StringBuilder();
+		defaultQueryBuilder.append(query)
+		.append("[not(@catalogue)]");
+		if(StringUtils.isNotBlank(subQuery)) {
+			defaultQueryBuilder.append("/")
+			.append(subQuery);
+		}
+		
+		return config.getString(queryBuilder.toString(), config.getString(defaultQueryBuilder.toString(), defaultValue));
+	}
+
+	/**
      * Performs the sru search and creates a Goobi fileformat representing the result Also used internally to create an anchor fileformat for a part
      * of a work
      * 
@@ -206,7 +263,7 @@ public class SruOpacImport implements IOpacPlugin {
      * @return The query result as Goobi fileformat
      * @throws Exception If no unique query result could be found and parsed successfully
      */
-    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, RecordInformation info)
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, MarcXmlParser parser, File marcMappingFile, RecordInformation info)
             throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
@@ -239,24 +296,6 @@ public class SruOpacImport implements IOpacPlugin {
             throw new Exception("Unable to find record");
         }
         
-        MarcXmlParser parser;
-        if("HU".equalsIgnoreCase(this.marcXmlParserType)) {            
-            parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
-        } else {
-            parser = new MarcXmlParser(inPrefs, marcMappingFile) {
-                
-                @Override
-                protected String getDocType(Document doc) {
-                    return null;
-                }
-                
-                @Override
-                protected String createCurrentNoSort(String value) {
-                    value = value.replaceAll("\\D", "");
-                    return value;
-                }
-            };
-        }
         String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix",
 				this.config.getString("namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
         String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri",
@@ -271,10 +310,21 @@ public class SruOpacImport implements IOpacPlugin {
 
         //If the record contains a reference to an anchor, retrieve the anchor record
         String anchorId = parser.getAchorID();
+        if(anchorId == null && info == null) {
+        	if(dd.getLogicalDocStruct().getType().isAnchor()) {
+        		MetadataType catalogId = prefs.getMetadataTypeByName("CatalogIDDigital");
+        		if(catalogId != null) {        			
+        			List<? extends Metadata> mds = dd.getLogicalDocStruct().getAllMetadataByType(catalogId);
+        			if(!mds.isEmpty()) {
+        				anchorId = mds.get(0).getValue();
+        			}
+        		}
+        	}
+        }
         if (anchorId != null) {
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
             this.marcXmlDocVolume = this.marcXmlDoc;
-            Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, anchorInfo);
+            Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
             attachToAnchor(dd, af);
         }
 
@@ -438,8 +488,8 @@ public class SruOpacImport implements IOpacPlugin {
     public ConfigOpacDoctype getOpacDocType() {
             ConfigOpac co;
 			try {
-				co = new ConfigOpac();
-			} catch (IOException e) {
+				co = ConfigOpac.getInstance();
+			} catch (Throwable e) {
 				myLogger.error(e.getMessage(), e);
 				return null;
 			}

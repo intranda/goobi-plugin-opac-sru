@@ -821,6 +821,25 @@ public class MarcXmlParser {
 
         return query.toString();
     }
+    
+    protected String generateQuery(String tag, String ind1, String ind2, String subfield) {
+        //		String subfields = eleXpath.getAttributeValue("subfields");
+        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield");
+        if (tag != null) {
+            query.append("[@tag=\"" + tag + "\"]");
+        }
+        if (ind1 != null) {
+            query.append("[@ind1=\"" + ind1 + "\"]");
+        }
+        if (ind2 != null) {
+            query.append("[@ind2=\"" + ind2 + "\"]");
+        }
+        if(subfield != null) {
+        	query.append("/").append(getNamespacePrefix()).append("subfield[@code='").append(subfield).append("']");
+        }
+
+        return query.toString();
+    }
 
     private String getNamespacePrefix() {
     	if(StringUtils.isNotBlank(getNamespace().getPrefix())) {
@@ -969,7 +988,7 @@ public class MarcXmlParser {
                     LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
                 }
             }
-            if (writeToAnchor && dsAnchor != null) {
+            if ((writeToAnchor || dsLogical == null) && dsAnchor != null) {
                 // if (dsAnchor != null && (anchorMetadataList == null ||
                 // anchorMetadataList.contains(metadata.getType().getName()))) {
                 try {
@@ -1158,7 +1177,7 @@ public class MarcXmlParser {
 	}
     
     public void setNamespace(String prefix, String url) {
-    	if(StringUtils.isBlank(prefix)) {
+    	if(StringUtils.isBlank(prefix) && StringUtils.isBlank(url)) {
     		this.namespace = Namespace.NO_NAMESPACE;
     	} else {    		
     		try {    		
