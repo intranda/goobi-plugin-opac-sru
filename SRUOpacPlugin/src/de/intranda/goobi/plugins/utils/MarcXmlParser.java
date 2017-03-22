@@ -931,7 +931,10 @@ public class MarcXmlParser {
                     person = new Person(mdType);
                     person.setFirstname(firstName);
                     if(StringUtils.isBlank(lastName) && StringUtils.isNotBlank(termsOfAddress)) {
-                    	person.setLastname(termsOfAddress);
+                    	person.setLastname(termsOfAddress); 
+                    } else if(StringUtils.isBlank(firstName) && StringUtils.isNotBlank(termsOfAddress)) {
+                        	person.setLastname(termsOfAddress);
+                        	person.setFirstname(lastName);
                     } else {        	
                     	person.setLastname(lastName);
                     }
