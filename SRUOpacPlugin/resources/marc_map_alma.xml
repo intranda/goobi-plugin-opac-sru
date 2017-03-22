@@ -57,6 +57,10 @@
         <name>PlaceOfPublication</name>
         <marcfield tag="260" subfields="a" ignore="[:.,;]$"/>
     </metadata>
+    <metadata logical="true" anchor="true" separateOccurances="false" separateXPaths="false" separator=", ">
+        <name>CreatorsAllOrigin</name>
+        <marcfield tag="245" subfields="c" ignore="[.,;:/]$"/>
+    </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
         <name>PublicationYear</name>
         <marcfield tag="260" subfields="c"  ignore="(,.*)|(\D+)|(.*?\..+?)" />

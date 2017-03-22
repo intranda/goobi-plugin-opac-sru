@@ -431,6 +431,8 @@ public class MarcXmlParser {
         writeToAnchor = writeToAnchor(metadataElement);
         writeToChild = writeToChild(metadataElement);
         String mdTypeName = getMetadataName(metadataElement);
+    	logger.debug("Writing metadata " + mdTypeName);
+
         if (person) {
             @SuppressWarnings("unchecked")
             List<Element> roleList = metadataElement.getChildren("Role");
@@ -806,7 +808,11 @@ public class MarcXmlParser {
         String ind1 = eleXpath.getAttributeValue("ind1");
         String ind2 = eleXpath.getAttributeValue("ind2");
         //		String subfields = eleXpath.getAttributeValue("subfields");
-        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield");
+        String fieldType = "datafield";
+        if(tag.startsWith("00")) {
+        	fieldType="controlfield";
+        }
+        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+fieldType);
         if (tag != null) {
             query.append("[@tag=\"" + tag + "\"]");
         }
@@ -915,7 +921,7 @@ public class MarcXmlParser {
             // get displayName
             displayName = (firstName + " " + lastName + " " + nameNumeration).trim();
             if (!termsOfAddress.isEmpty()) {
-                displayName += ", " + termsOfAddress;
+                displayName += " " + termsOfAddress;
             }
 
             // create and write metadata
@@ -1071,6 +1077,13 @@ public class MarcXmlParser {
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+                if(StringUtils.isNotBlank(eleValue.getTextTrim())) {
+                	if (mergeOccurances) {
+                        value += eleValue.getTextTrim() + separator;
+                    } else {
+                        valueList.add(eleValue.getTextTrim());
+                    }
+                }
                 for (Element subfield : getChildElements(eleValue, "subfield")) {
                     String code = subfield.getAttributeValue("code");
                     if (subfields != null && subfields.contains(code)) {

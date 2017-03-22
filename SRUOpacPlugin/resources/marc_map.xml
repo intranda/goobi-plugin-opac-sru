@@ -6,10 +6,10 @@
     <docstruct gattung="Aa" mapTo="Map" >Map</docstruct>
     <docstruct gattung="Ah" mapTo="Manuscript" >Manuscript</docstruct>
     <docstruct gattung="Aj" mapTo="ContainedWork" anchorType="SerialVolume" >ContainedWork</docstruct>
-    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="true">
+    <metadata logical="true" anchor="false" child="false" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
         <marcfield tag="016" subfields="2a" prefix="ZDB" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
-        <marcfield tag="001" subfields="a" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
+        <marcfield tag="001" ignore="(\(DE-600\)\s?[\w-]+)|(DE-\d{3})" />
     </metadata>
     <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
@@ -26,6 +26,7 @@
     <person logical="true" anchor="true">
       <name>Author</name>
       <Role subfield="e" value="">Author</Role>
+      <Role subfield="e" value="Verfasser">Author</Role>
       <Role subfield="e" value="Autor">Author</Role>
       <Role subfield="e" value="Hrsg.">Editor</Role>
       <Role subfield="e" value="Übers.">Translator</Role>
