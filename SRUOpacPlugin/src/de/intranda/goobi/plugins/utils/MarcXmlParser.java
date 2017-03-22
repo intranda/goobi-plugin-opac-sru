@@ -930,7 +930,11 @@ public class MarcXmlParser {
                 try {
                     person = new Person(mdType);
                     person.setFirstname(firstName);
-                    person.setLastname(lastName);
+                    if(StringUtils.isBlank(lastName) && StringUtils.isNotBlank(termsOfAddress)) {
+                    	person.setLastname(termsOfAddress);
+                    } else {        	
+                    	person.setLastname(lastName);
+                    }
                     person.setDisplayname(displayName);
                     person.setAffiliation(affiliation);
                     //					person.setAutorityFileID(authorityID);
