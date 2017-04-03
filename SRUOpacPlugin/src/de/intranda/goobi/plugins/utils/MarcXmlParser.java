@@ -340,8 +340,9 @@ public class MarcXmlParser {
                 case 't':
                     return "Manuscript";
                 default:
-                    throw new IllegalArgumentException("Cannot associate marc leader character 06 '" + typeOfRecord
-                            + "\' with any known type of record");
+                	return "Monograph";
+//                    throw new IllegalArgumentException("Cannot associate marc leader character 06 '" + typeOfRecord
+//                            + "\' with any known type of record");
 
             }
         } else if (bibliographicLevel == 'a') {
