@@ -872,7 +872,7 @@ public class MarcXmlParser {
             String termsOfAddress = "";
             String date = "";
             String affiliation = "";
-            String authorityID = "";
+            List<String> authorityIDs = new ArrayList<>();
             String institution = "";
             String identifier = "";
             String roleTerm = mdType.getName();
@@ -898,7 +898,7 @@ public class MarcXmlParser {
                     } else if ("u".equals(eleSubField.getAttributeValue("code"))) {
                         affiliation = eleSubField.getValue();
                     } else if ("0".equals(eleSubField.getAttributeValue("code"))) {
-                        authorityID = eleSubField.getValue();
+                        authorityIDs.add(eleSubField.getValue());
                     } else if ("5".equals(eleSubField.getAttributeValue("code"))) {
                         institution = eleSubField.getValue();
                     } else if ("q".equals(eleSubField.getAttributeValue("code"))) {
@@ -912,8 +912,8 @@ public class MarcXmlParser {
                         firstName = name[0];
                         lastName = name[1];
                     } else if ("9".equals(eleSubField.getAttributeValue("code"))) {
+                    	authorityIDs.add(eleSubField.getValue());
                         identifier = eleSubField.getValue();
-                        ;
                     }
 
                 }
@@ -941,9 +941,14 @@ public class MarcXmlParser {
                     }
                     person.setDisplayname(displayName);
                     person.setAffiliation(affiliation);
-                    //					person.setAutorityFileID(authorityID);
+                    if(authorityIDs.isEmpty()) {                    	
+                    } else {
+                    		setAuthority(person, identifier, true);
+                    	for (String id : authorityIDs) {
+                    		setAuthority(person, id, false);
+						}
+                    }
                     person.setInstitution(institution);
-                    setAuthority(person, identifier);
                     person.setRole(roleTerm);
                 } catch (MetadataTypeNotAllowedException e) {
                     LOGGER.error("Failed to create person metadata " + mdType.getName());
@@ -957,18 +962,20 @@ public class MarcXmlParser {
 
     }
 
-    private void setAuthority(Person per, String content) {
+    private void setAuthority(Person per, String content, boolean forceSet) {
         if (content.contains("/")) {
             String catalogue = content.substring(0, content.indexOf("/"));
             String identifier = content.substring(content.indexOf("/") + 1);
             if (catalogue.equals("gnd")) {
                 per.setAutorityFile(catalogue, "http://d-nb.info/gnd/", identifier);
             }
-        } else if (content.matches("gnd\\.+")) {
+        } else if (content.matches("gnd.+")) {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replace("gnd", ""));
-        } else if (content.matches("\\(.*\\).+")) {
+        } else if(content.matches("^\\(DE-588\\).*")) {
+        	per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(DE-\\d{3}\\)", ""));
+        } else if (forceSet && content.matches("\\(.*\\).+")) {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(.*\\)", ""));
-        } else {
+        } else if(forceSet){
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content);
         }
 
