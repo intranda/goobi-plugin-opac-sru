@@ -54,6 +54,9 @@ public class MarcXmlParser {
             String anchor = element.getAttributeValue("anchorType");
             String child = element.getAttributeValue("childType");
             String ds = element.getAttributeValue("mapTo");
+            if(ds == null) {
+            	ds = element.getTextTrim();
+            }
 
             this.gattung = gattung;
             this.ds = ds;
@@ -306,7 +309,7 @@ public class MarcXmlParser {
 
                 String docStructTitle = getDocType(mapDoc);
                 if (StringUtils.isBlank(docStructTitle)) {
-                    docStructTitle = getDocTypeFromLeader(leaderStr);
+                    docStructTitle = getDocTypeFromLeader(leaderStr, mapDoc);
                 }
                 Element docStructEle = getDocStructEle(docStructTitle);
                 if (docStructEle == null) {
@@ -322,8 +325,41 @@ public class MarcXmlParser {
         }
         throw new ParserException("Cannot parse marc record");
     }
+    
+    private String getDocTypeFromLeader(String leaderStr, Document mapDoc) throws ParserException {
+    	char typeOfRecord = leaderStr.charAt(6);
+        char bibliographicLevel = leaderStr.charAt(7);
+        char archival = leaderStr.charAt(8);
+        
+        String baseQuery = "map/docstruct";
+        String leader06Query = "[@leader06='" + typeOfRecord + "']";
+        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
+        String leader08Query = "[@leader08='" + archival + "']";
+        
+        try {
+			List<Element> docstructElements = getXpathNodes(baseQuery + leader06Query + leader07Query + leader08Query, mapDoc, null);
+			if(docstructElements.isEmpty()) {
+				docstructElements = getXpathNodes(baseQuery + leader06Query + leader07Query, mapDoc, null);
+			}
+			if(docstructElements.isEmpty()) {
+				docstructElements = getXpathNodes(baseQuery + leader06Query, mapDoc, null);
+			}
+			if(docstructElements.isEmpty()) {
+				docstructElements = getXpathNodes(baseQuery, mapDoc, null);
+			}
+			if(docstructElements.isEmpty()) {
+				throw new ParserException("Found no docstruct elements in mapping document");
+			} else {
+				return docstructElements.get(0).getTextTrim();
+			}
+		} catch (JDOMException e) {
+			throw new ParserException("Unable to parse mapping document for doctypes");
+		}
+        
+    }
 
-    private String getDocTypeFromLeader(String leaderStr) {
+    @Deprecated
+    private String getDocTypeFromLeaderOld(String leaderStr) {
         char typeOfRecord = leaderStr.charAt(6);
         char bibliographicLevel = leaderStr.charAt(7);
         if (bibliographicLevel == 'm') {
@@ -858,8 +894,19 @@ public class MarcXmlParser {
 
 	protected List<Element> getXpathNodes(String query) throws JDOMException {
 
-        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, namespace);
-        List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(marcDoc));
+		return getXpathNodes(query, marcDoc, namespace);
+    }
+	
+	protected List<Element> getXpathNodes(String query, Document doc, Namespace namespace) throws JDOMException {
+
+		
+        XPathExpression<Element> xpath;
+        if(namespace != null) {
+        	 xpath = XPathFactory.instance().compile(query, Filters.element(), null, namespace);
+        } else {
+        	 xpath = XPathFactory.instance().compile(query, Filters.element());
+        }
+        List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(doc));
         return nodeList;
     }
 

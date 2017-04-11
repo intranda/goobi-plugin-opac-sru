@@ -70,6 +70,7 @@ public class SruOpacImport implements IOpacPlugin {
     private XMLConfiguration config;
     private int hitcount;
     private String gattung = "Aa";
+    private String docType = null;
     private String atstsl;
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
@@ -307,6 +308,7 @@ public class SruOpacImport implements IOpacPlugin {
         DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
         gattung = parser.getInfo().getGattung();
+        docType = parser.getInfo().getDocStructType();
 
         //If the record contains a reference to an anchor, retrieve the anchor record
         String anchorId = parser.getAchorID();
@@ -493,9 +495,16 @@ public class SruOpacImport implements IOpacPlugin {
 				myLogger.error(e.getMessage(), e);
 				return null;
 			}
-            ConfigOpacDoctype cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
+			ConfigOpacDoctype cod = null;
+			if(this.gattung != null) {				
+				cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
+			} else {
+				cod = co.getDoctypeByName(this.docType);
+				if(cod == null) {
+					cod = co.getDoctypeByName(this.docType.toLowerCase());
+				}
+			}
             if (cod == null) {
-
                 cod = co.getAllDoctypes().get(0);
                 this.gattung = cod.getMappings().get(0);
 
