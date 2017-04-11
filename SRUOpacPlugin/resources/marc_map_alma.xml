@@ -1,20 +1,13 @@
 <map>
-<!--     <docstruct gattung="Ab" mapTo="PeriodicalVolume" anchorType="Periodical">PeriodicalVolume</docstruct> -->
-<!--     <docstruct gattung="Af" mapTo="Volume" anchorType="MultiVolumeWork">Volume</docstruct> -->
-<!--     <docstruct gattung="Aa" mapTo="Monograph" >Monograph</docstruct> -->
-<!--     <docstruct gattung="Aa" mapTo="SheetMusic" >SheetMusic</docstruct> -->
-<!--     <docstruct gattung="Aa" mapTo="Map" >Map</docstruct> -->
-<!--     <docstruct gattung="Ah" mapTo="Manuscript" >Manuscript</docstruct> -->
-<!--     <docstruct gattung="Aj" mapTo="ContainedWork" anchorType="SerialVolume" >ContainedWork</docstruct> -->
 		<docstruct gattung="Aa" leader06="m">Monograph</docstruct>
 		<docstruct gattung="Aa" leader06="m" leader07="c">SheetMusic</docstruct>
 		<docstruct gattung="Aa" leader06="m" leader07="d">SheetMusic</docstruct>
 		<docstruct gattung="Aa" leader06="m" leader07="e">Map</docstruct>
 		<docstruct gattung="Aa" leader06="m" leader07="f">Map</docstruct>
 		<docstruct gattung="Ah" leader06="m" leader07="t">Manuscript</docstruct>
-		<docstruct gattung="Af" leader06="a" parentType="MultiVolumeWork">Volume</docstruct>
-		<docstruct gattung="Ab" leader06="s" parentType="Periodical">PeriodicalVolume</docstruct>
-		<docstruct gattung="Aj" leader06="b" parentType="SerialVolume">ContainedWork</docstruct>
+		<docstruct gattung="Af" leader06="a" anchorType="MultiVolumeWork">Volume</docstruct>
+		<docstruct gattung="Ab" leader06="s" anchorType="Periodical">PeriodicalVolume</docstruct>
+		<docstruct gattung="Aj" leader06="b" anchorType="SerialVolume">ContainedWork</docstruct>
     <metadata logical="true" anchor="false" child="true" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
         <marcfield tag="035" subfields="a" ignore="(\(DE-600\)\s?[\w-]+)|\(DE-\d{3}\)" />

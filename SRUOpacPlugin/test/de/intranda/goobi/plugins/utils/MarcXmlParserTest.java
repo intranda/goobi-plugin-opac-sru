@@ -15,7 +15,10 @@ import de.intranda.goobi.plugins.utils.MarcXmlParser.ParserException;
 import ugh.dl.DigitalDocument;
 import ugh.dl.Fileformat;
 import ugh.dl.Prefs;
+import ugh.exceptions.DocStructHasNoTypeException;
+import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.PreferencesException;
+import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.WriteException;
 import ugh.fileformats.mets.MetsMods;
 
@@ -38,7 +41,7 @@ public class MarcXmlParserTest {
 	}
 
 	@Test
-	public void testParse() throws ParserException, JDOMException, IOException, PreferencesException, WriteException {
+	public void testParse() throws ParserException, JDOMException, IOException, PreferencesException, WriteException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
 		MarcXmlParser parser = new MarcXmlParser(prefs, mappingFile);
 		
 		SAXBuilder builder = new SAXBuilder();
@@ -46,7 +49,7 @@ public class MarcXmlParserTest {
 		
 		parser.setNamespace(Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
 		parser.setNamespace(Namespace.NO_NAMESPACE);
-		DigitalDocument digDoc = parser.parseMarcXml(marcDoc);
+		DigitalDocument digDoc = parser.parseMarcXml(marcDoc, null);
 		
 		Fileformat ff = new MetsMods(prefs);
 		ff.setDigitalDocument(digDoc);

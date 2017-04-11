@@ -82,6 +82,8 @@ public class SruOpacImport implements IOpacPlugin {
 
     private Map<String, Map<String, String>> searchFieldMap;
 
+	private DocStruct originalAnchor = null;
+
     /**
      * Constructor using the default plugin configuration profived by Goobi
      * 
@@ -305,7 +307,7 @@ public class SruOpacImport implements IOpacPlugin {
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         //parse the marcXml record
-        DigitalDocument dd = parser.parseMarcXml(marcXmlDoc);
+        DigitalDocument dd = parser.parseMarcXml(marcXmlDoc, this.originalAnchor);
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
         gattung = parser.getInfo().getGattung();
         docType = parser.getInfo().getDocStructType();
@@ -326,8 +328,10 @@ public class SruOpacImport implements IOpacPlugin {
         if (anchorId != null) {
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
             this.marcXmlDocVolume = this.marcXmlDoc;
-            Fileformat af = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
-            attachToAnchor(dd, af);
+            this.originalAnchor  = dd.getLogicalDocStruct();
+            ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
+            dd = ff.getDigitalDocument();
+//            attachToAnchor(dd, af);
         }
 
         createAtstsl(dd);

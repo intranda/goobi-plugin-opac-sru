@@ -31,6 +31,7 @@ import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Person;
 import ugh.dl.Prefs;
+import ugh.exceptions.DocStructHasNoTypeException;
 import ugh.exceptions.IncompletePersonObjectException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
@@ -204,9 +205,23 @@ public class MarcXmlParser {
         }
     }
 
-    public DigitalDocument parseMarcXml(Document marcDoc) throws ParserException {
+    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor) throws ParserException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
+        if(originalAnchor != null) {
+//        	if(originalAnchor.getAllMetadata() != null) {        		
+//        		for (Metadata md : originalAnchor.getAllMetadata()) {
+//        			dd.getLogicalDocStruct().addMetadata(md);
+//        		}
+//        	}
+//        	if(originalAnchor.getAllPersons() != null) {        		
+//        		for (Person person : originalAnchor.getAllPersons()) {
+//        			dd.getLogicalDocStruct().addPerson(person);
+//        		}
+//        	}
+        	dd.getLogicalDocStruct().addChild(originalAnchor.getAllChildren().get(0));
+        	this.dsLogical = dd.getLogicalDocStruct().getAllChildren().get(0);
+        }
         for (Element metadataElement : getMetadataList()) {
             writeElementToDD(metadataElement, dd, false);
         }
