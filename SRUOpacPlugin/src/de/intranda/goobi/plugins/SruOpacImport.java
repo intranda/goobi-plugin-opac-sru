@@ -21,8 +21,6 @@
 package de.intranda.goobi.plugins;
 
 import java.io.File;
-import java.io.IOException;
-import java.rmi.ServerRuntimeException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
