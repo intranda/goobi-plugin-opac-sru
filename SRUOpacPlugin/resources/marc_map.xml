@@ -63,19 +63,27 @@
         <name>Country</name>
         <marcfield tag="110" subfields="4" />
     </metadata>
-    <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
+    <metadata logical="true" anchor="false" separateOccurances="true" separateXPaths="false">
         <name>TitleDocMainShort</name>
         <marcfield tag="245" subfields="a" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
         <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
 <!--         <marcfield tag="245" subfields="b" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/> -->
     </metadata>
-    <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
+    <metadata logical="true" anchor="false" separateOccurances="true" separateXPaths="false">
         <name>TitleDocMain</name>
         <marcfield tag="245" subfields="a" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/>
         <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
 <!--         <marcfield tag="245" subfields="b" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/> -->
     </metadata>
-        <metadata logical="true" separateOccurances="true" separateXPaths="false">
+    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="false">
+        <name>TitleDocMain</name>
+            <marcfield tag="490" subfields="a"/>
+    </metadata>
+    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="false">
+        <name>TitleDocMainShort</name>
+        <marcfield tag="490" subfields="a" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
+    </metadata>
+   <metadata logical="true" separateOccurances="true" separateXPaths="false">
         <name>FormatSourcePrint</name>
         <marcfield tag="300" subfields="c" />
     </metadata>
@@ -132,13 +140,15 @@
         <!-- <marcfield tag="245" subfields="h" prefix="[" suffix="]"/> -->
         <marcfield tag="245" subfields="b" ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"/>
     </metadata>
+        <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
+        <name>CurrentNoSorting</name>
+        <marcfield tag="245" subfields="n" ignore="\D"/>
+        <marcfield tag="490" subfields="v" ignore="\D.*$"/>
+    </metadata>
     <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
         <name>CurrentNo</name>
         <marcfield tag="245" subfields="n" ignore="[.,;:/]$"/>
-    </metadata>
-    <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
-        <name>CurrentNoSorting</name>
-        <marcfield tag="245" subfields="n" ignore="\D"/>
+        <marcfield tag="490" subfields="v" ignore="[.,;:/]$"/>
     </metadata>
 
 </map>

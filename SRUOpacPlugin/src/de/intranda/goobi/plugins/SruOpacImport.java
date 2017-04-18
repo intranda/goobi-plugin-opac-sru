@@ -329,9 +329,13 @@ public class SruOpacImport implements IOpacPlugin {
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
             this.marcXmlDocVolume = this.marcXmlDoc;
             this.originalAnchor  = dd.getLogicalDocStruct();
-            ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
-            dd = ff.getDigitalDocument();
+            try {            	
+            	ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
+            	dd = ff.getDigitalDocument();
 //            attachToAnchor(dd, af);
+            } catch(SRUException e) {
+            	myLogger.warn("No anchor entry found for identifier " + anchorId);
+            }
         }
 
         createAtstsl(dd);

@@ -30,6 +30,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -167,6 +168,13 @@ public class SRUClient {
         	Element diagnosticsEle = wholeDoc.getRootElement().getChild("diagnostics", null);
         	if(diagnosticsEle != null && diagnosticsEle.getChild("diagnostic", null) != null) {
         		throw new SRUException(diagnosticsEle.getChild("diagnostic", null).getChildText("message", null));
+        	}
+        	Element recordsFoundEle = wholeDoc.getRootElement().getChild("numberOfRecords", null);
+        	if(recordsFoundEle != null) {
+        		String recordsFoundText = recordsFoundEle.getTextTrim();
+        		if(StringUtils.isNotBlank(recordsFoundText) && StringUtils.isNumeric(recordsFoundText) && Integer.parseInt(recordsFoundText) == 0) {
+        			throw new SRUException("No records found");
+        		}
         	}
             throw new SRUException("No parsable response from SRU server");
         }

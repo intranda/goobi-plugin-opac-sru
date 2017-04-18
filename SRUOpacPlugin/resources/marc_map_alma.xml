@@ -14,7 +14,8 @@
     </metadata>
     <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
-        <marcfield tag="773" subfields="w" ignore="\(DE-\d{3}\)" />
+        <marcfield tag="773" subfields="w" ind1="0" ignore="\(DE-\d{3}\)" />
+        <marcfield tag="035" subfields="a" ignore="(\(DE-600\)\s?[\w-]+)|\(DE-\d{3}\)" />
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="true">
         <name>DocLanguage</name>
