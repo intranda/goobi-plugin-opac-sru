@@ -5,6 +5,7 @@
 		<docstruct gattung="Aa" leader07="m" leader06="e">Map</docstruct>
 		<docstruct gattung="Aa" leader07="m" leader06="f">Map</docstruct>
 		<docstruct gattung="Ah" leader07="m" leader06="t">Manuscript</docstruct>
+		<docstruct gattung="Af" leader07="m" leader19="c" anchorType="MultiVolumeWork">Volume</docstruct>
 		<docstruct gattung="Af" leader07="a" anchorType="MultiVolumeWork">Volume</docstruct>
 		<docstruct gattung="Ab" leader07="s" anchorType="Periodical">PeriodicalVolume</docstruct>
 		<docstruct gattung="Aj" leader07="b" anchorType="SerialVolume">ContainedWork</docstruct>
@@ -26,7 +27,7 @@
         <name>ISBN</name>
         <marcfield tag="020" subfields="a" />
     </metadata>
-    <person logical="true" anchor="true" child="true">
+    <person logical="true">
       <name>Author</name>
       <Role subfield="e" value="">Author</Role>
       <Role subfield="e" value="Autor">Author</Role>
@@ -79,10 +80,20 @@
         <name>Country</name>
         <marcfield tag="110" subfields="4" />
     </metadata>
+    <metadata logical="true" anchor="false" separateOccurances="true" separateXPaths="false" separator=", ">
+        <name>TitleDocMainShort</name>
+        <marcfield tag="245" subfields="abc" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
+        <marcfield tag="245" subfields="npnpnp" separateSubfields="false" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
+    </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="true">
         <name>TitleDocMainShort</name>
         <marcfield tag="245" subfields="p" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
         <marcfield tag="245" subfields="a" ignore="(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)"/>
+    </metadata>
+    <metadata logical="true" anchor="false" separateOccurances="true" separateXPaths="false" separator=", ">
+        <name>TitleDocMain</name>
+        <marcfield tag="245" subfields="abc"  ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"></marcfield>
+	    <marcfield tag="245" subfields="npnpnp" separateSubfields="false"  ignore="[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)"></marcfield>
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="true">
         <name>TitleDocMain</name>

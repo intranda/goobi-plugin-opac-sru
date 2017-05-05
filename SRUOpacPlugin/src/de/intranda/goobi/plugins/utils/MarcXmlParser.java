@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -345,32 +348,66 @@ public class MarcXmlParser {
     	char typeOfRecord = leaderStr.charAt(6);
         char bibliographicLevel = leaderStr.charAt(7);
         char archival = leaderStr.charAt(8);
+        char multipart = leaderStr.charAt(19);
         
         String baseQuery = "map/docstruct";
-        String leader06Query = "[@leader06='" + typeOfRecord + "']";
-        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
-        String leader08Query = "[@leader08='" + archival + "']";
+//        String leader06Query = "[@leader06='" + typeOfRecord + "']";
+//        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
+//        String leader08Query = "[@leader08='" + archival + "']";
+//        String leader19Query = "[@leader19='" + multipart + "']";
         
         try {
-			List<Element> docstructElements = getXpathNodes(baseQuery + leader06Query + leader07Query + leader08Query, mapDoc, null);
-			if(docstructElements.isEmpty()) {
-				docstructElements = getXpathNodes(baseQuery + leader06Query + leader07Query, mapDoc, null);
-			}
-			if(docstructElements.isEmpty()) {
-				docstructElements = getXpathNodes(baseQuery + leader06Query, mapDoc, null);
-			}
-			if(docstructElements.isEmpty()) {
-				docstructElements = getXpathNodes(baseQuery, mapDoc, null);
+			List<Element> docstructElements = getXpathNodes(baseQuery, mapDoc, null);
+			Iterator<Element> iterator = docstructElements.iterator();
+			while(iterator.hasNext()) {
+			    Element ele = iterator.next();
+			    if(!attributeMatches(ele, "leader06", typeOfRecord)) {
+			        iterator.remove();
+			        continue;
+			    }
+			    if(!attributeMatches(ele, "leader07", bibliographicLevel)) {
+                    iterator.remove();
+                    continue;
+                }
+			    if(!attributeMatches(ele, "leader08", archival)) {
+                    iterator.remove();
+                    continue;
+                }
+			    if(!attributeMatches(ele, "leader19", multipart)) {
+                    iterator.remove();
+                    continue;
+                }
+			    
 			}
 			if(docstructElements.isEmpty()) {
 				throw new ParserException("Found no docstruct elements in mapping document");
 			} else {
+			    Collections.sort(docstructElements, new Comparator<Element>() {
+			        //sort the elements by number of attributes, descending
+                    @Override
+                    public int compare(Element o1, Element o2) {
+                        return Integer.compare(o2.getAttributes().size(), o1.getAttributes().size());
+                    }
+			    });
 				return docstructElements.get(0).getTextTrim();
 			}
 		} catch (JDOMException e) {
 			throw new ParserException("Unable to parse mapping document for doctypes");
 		}
         
+    }
+
+    /**
+     * Returns true if the given attribute does either not exist, is emtpy, or matches the given value
+     * 
+     * @param ele
+     * @param string
+     * @param typeOfRecord
+     * @return
+     */
+    private boolean attributeMatches(Element ele, String attributeName, char value) {
+        String attributeValue = ele.getAttributeValue(attributeName);
+        return StringUtils.isBlank(attributeValue) || attributeValue.equalsIgnoreCase(Character.toString(value));
     }
 
     @Deprecated
@@ -583,14 +620,11 @@ public class MarcXmlParser {
 
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
-                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields);
+                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex);
 
                     List<String> tempList = new ArrayList<String>();
                     StringBuilder sb = new StringBuilder();
                     for (String string : nodeValueList) {
-                        if (ignoreRegex != null) {
-                            string = string.replaceAll(ignoreRegex, "");
-                        }
                         sb.append((prefix != null) ? prefix : "");
                         sb.append(string);
                         sb.append((suffix != null) ? suffix : "");
@@ -1144,7 +1178,7 @@ public class MarcXmlParser {
     }
 
     private List<String> getMetadataNodeValues(@SuppressWarnings("rawtypes") List nodeList, String subfields, MetadataType mdType,
-            boolean mergeOccurances) {
+            boolean mergeOccurances, String ignoreRegex) {
 
         List<String> valueList = new ArrayList<String>();
         Set<String> codes = new HashSet<String>();
@@ -1155,19 +1189,27 @@ public class MarcXmlParser {
                 Element eleValue = (Element) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
                 if(StringUtils.isNotBlank(eleValue.getTextTrim())) {
+                    String string = eleValue.getTextTrim();
+                    if (ignoreRegex != null) {
+                        string = string.replaceAll(ignoreRegex, "");
+                    }
                 	if (mergeOccurances) {
-                        value += eleValue.getTextTrim() + separator;
+                        value += string + separator;
                     } else {
-                        valueList.add(eleValue.getTextTrim());
+                        valueList.add(string);
                     }
                 }
                 for (Element subfield : getChildElements(eleValue, "subfield")) {
                     String code = subfield.getAttributeValue("code");
                     if (subfields != null && subfields.contains(code)) {
+                        String string = subfield.getValue();
+                        if (ignoreRegex != null) {
+                            string = string.replaceAll(ignoreRegex, "");
+                        }
                         if (codes.add(code) || mergeOccurances) {
-                            value += subfield.getValue() + separator;
+                            value += string + separator;
                         } else {
-                            valueList.add(subfield.getValue());
+                            valueList.add(string);
                         }
                     }
                 }
@@ -1175,6 +1217,9 @@ public class MarcXmlParser {
                 Attribute atrValue = (Attribute) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + atrValue.getValue());
                 value = atrValue.getValue();
+                if (ignoreRegex != null) {
+                    value = value.replaceAll(ignoreRegex, "");
+                }
             }
             if (value.length() > separator.length()) {
                 value = value.substring(0, value.length() - separator.length());

@@ -21,6 +21,9 @@
 package de.intranda.goobi.plugins;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -402,6 +405,8 @@ public class SruOpacImport implements IOpacPlugin {
     @Override
     public String createAtstsl(String myTitle, String autor) {
         String myAtsTsl = "";
+        myTitle = Normalizer.normalize(myTitle, Form.NFC);
+        autor = Normalizer.normalize(autor, Form.NFC);
         if (autor != null && !autor.equals("")) {
             /* autor */
             if (autor.length() > 4) {
