@@ -618,6 +618,7 @@ public class MarcXmlParser {
                     ignoreRegex.replace("\\", "\\\\");
                 }
 
+
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
                     List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex);
@@ -999,14 +1000,16 @@ public class MarcXmlParser {
                         institution = eleSubField.getValue();
                     } else if ("q".equals(eleSubField.getAttributeValue("code"))) {
                         // name
-                        String[] name = getNameParts(eleSubField.getValue());
-                        firstName = name[0];
-                        lastName = name[1];
-                    } else if ("p".equals(eleSubField.getAttributeValue("code"))) {
-                        // name
-                        String[] name = getNameParts(eleSubField.getValue());
-                        firstName = name[0];
-                        lastName = name[1];
+                        if(StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)) {                            
+                            String[] name = getNameParts(eleSubField.getValue());
+                            firstName = name[0];
+                            lastName = name[1];
+                        }
+//                    } else if ("p".equals(eleSubField.getAttributeValue("code"))) {
+//                        // name
+//                        String[] name = getNameParts(eleSubField.getValue());
+//                        firstName = name[0];
+//                        lastName = name[1];
                     } else if ("9".equals(eleSubField.getAttributeValue("code"))) {
                     	authorityIDs.add(eleSubField.getValue());
                         identifier = eleSubField.getValue();

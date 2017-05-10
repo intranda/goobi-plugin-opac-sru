@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -31,11 +32,19 @@ public class MarcXmlParserHU extends MarcXmlParser {
 
     @Override
     protected String getDocType(Document doc) {
-        String query = "/marc:record/marc:datafield[@tag=\"959\"]/marc:subfield[@code=\"a\"]";
-        try {
-            XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC, NS_SLIM);
+        String nsPrefix = "";
+        if(getNamespace() != null && StringUtils.isNotBlank(getNamespace().getPrefix())) {
+            nsPrefix = getNamespace().getPrefix() + ":";
+        }
+        String query = "/"+nsPrefix+"record/"+nsPrefix+"datafield[@tag=\"959\"]/"+nsPrefix+"subfield[@code=\"a\"]";
+            XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, getNamespace());
             List<Element> nodeList = xpath.evaluate(marcDoc);//selectNodes(marcDoc);
-            if(nodeList != null) {
+            if(nodeList == null || nodeList.isEmpty()) {
+                query = "/"+nsPrefix+"record/"+nsPrefix+"datafield[@tag=\"655\"]/"+nsPrefix+"subfield[@code=\"a\"]";
+                xpath = XPathFactory.instance().compile(query, Filters.element(), null, getNamespace());
+                nodeList = xpath.evaluate(marcDoc);//selectNodes(marcDoc);
+            }
+            if(nodeList != null && !nodeList.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 for (Element element : nodeList) {
                     sb.append(element.getValue()).append("|");
@@ -45,16 +54,8 @@ public class MarcXmlParserHU extends MarcXmlParser {
                     typeName = typeName.substring(0, typeName.length()-1);
                 }
                 return typeName;
-            } else {
-                throw new JDOMException(
-                        "No datafield 959 with subfield a found in marc document");
             }
-        } catch (JDOMException e) {
-            LOGGER.error(
-                    "Unable to retrieve document type information from datafield 959",
-                    e);
-        }
-        return "Monographie";
+        return "";
     }
 
     @Override
