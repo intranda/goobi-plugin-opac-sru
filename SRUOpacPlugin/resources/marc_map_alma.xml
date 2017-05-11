@@ -1,5 +1,4 @@
 <map>
-		<docstruct gattung="Ay" mapTo="SingleSheetMaterial" >Flugblatt</docstruct>
 		<docstruct gattung="Aa" leader07="m">Monograph</docstruct>
 		<docstruct gattung="Aa" leader07="m" leader06="c">SheetMusic</docstruct>
 		<docstruct gattung="Aa" leader07="m" leader06="d">SheetMusic</docstruct>
@@ -8,9 +7,9 @@
 		<docstruct gattung="Ah" leader07="m" leader06="t">Manuscript</docstruct>
 		<docstruct gattung="Af" leader07="m" leader19="c" anchorType="MultiVolumeWork">Volume</docstruct>
 		<docstruct gattung="Af" leader07="a" anchorType="MultiVolumeWork">Volume</docstruct>
-		<docstruct gattung="Ab" leader07="s" anchorType="Periodical">PeriodicalVolume</docstruct>
+		<docstruct gattung="Ab" leader07="s" childType="PeriodicalVolume">Periodical</docstruct>
 		<docstruct gattung="Aj" leader07="b" anchorType="SerialVolume">ContainedWork</docstruct>
-     <metadata logical="true" anchor="false" child="true" separateOccurances="true" separateXPaths="true">
+     <metadata logical="true" separateOccurances="true" separateXPaths="true">
         <name>CatalogIDDigital</name>
         <marcfield tag="035" subfields="a" ignore="\(DE-\d{3}\)\s?[\w-]+" />
     </metadata>
@@ -36,27 +35,14 @@
     </metadata>
     <person logical="true">
       <name>Author</name>
-      <Role subfield="e" value="">Author</Role>
-      <Role subfield="e" value="Autor">Author</Role>
-      <Role subfield="e" value="Hrsg.">Editor</Role>
-      <Role subfield="e" value="Übers.">Translator</Role>
-      <marcfield tag="100" />
-      <marcfield tag="104" />
-      <marcfield tag="108" />
-      <marcfield tag="112" />
-      <marcfield tag="116" />
-    </person>
-     <person logical="true">
-      <name>Person</name>
+      <Role subfield="t" value=".+">NONE</Role>
       <Role subfield="4" value="aut">Author</Role>
-      <Role subfield="e" value="Autor">Author</Role>
-      <Role subfield="e" value="Hrsg.">Editor</Role>
-      <Role subfield="e" value="Übers.">Translator</Role>
-      <marcfield tag="700" />
+      <marcfield tag="700"></marcfield>
+      <marcfield tag="100"></marcfield>
     </person>
     <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="false" separator="; ">
         <name>CurrentNo</name>
-        <marcfield tag="245" subfields="np" separateSubfields="false" ignore="[.,;:/]$"/>
+        <marcfield tag="245" subfields="npn" separateSubfields="false" ignore="[.,;:/]$"/>
     </metadata>
     <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="false" separator="; ">
         <name>CurrentNo</name>

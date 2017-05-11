@@ -315,7 +315,7 @@ public class SruOpacImport implements IOpacPlugin {
 
         //If the record contains a reference to an anchor, retrieve the anchor record
         String anchorId = parser.getAchorID();
-        if(anchorId == null && info == null) {
+        if(!parser.isTreatAsPeriodical() &&  anchorId == null && info == null) {
         	if(dd.getLogicalDocStruct().getType().isAnchor()) {
         		MetadataType catalogId = prefs.getMetadataTypeByName("CatalogIDDigital");
         		if(catalogId != null) {        			

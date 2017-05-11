@@ -97,7 +97,7 @@ public class MarcXmlParserHU extends MarcXmlParser {
     @Override
     protected List<Element> getXpathNodes(String query) throws JDOMException {
         XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element(), null, NS_MARC, NS_SLIM);
-        List<Element> nodeList = xpath.evaluate(marcDoc);
+        List<Element> nodeList = new ArrayList<>(xpath.evaluate(marcDoc));
         if (individualIdentifier != null
                 && nodeList != null
                 && nodeList.size() > 1

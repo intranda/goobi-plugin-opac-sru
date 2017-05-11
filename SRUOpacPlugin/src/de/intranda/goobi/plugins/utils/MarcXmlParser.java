@@ -58,8 +58,8 @@ public class MarcXmlParser {
             String anchor = element.getAttributeValue("anchorType");
             String child = element.getAttributeValue("childType");
             String ds = element.getAttributeValue("mapTo");
-            if(ds == null) {
-            	ds = element.getTextTrim();
+            if (ds == null) {
+                ds = element.getTextTrim();
             }
 
             this.gattung = gattung;
@@ -76,25 +76,25 @@ public class MarcXmlParser {
         }
 
         private Date createDate(String dateString) {
-        	if(StringUtils.isBlank(dateString)) {
-        		LOGGER.warn("No date string found. Using current date");
+            if (StringUtils.isBlank(dateString)) {
+                LOGGER.warn("No date string found. Using current date");
                 return new Date();
-        	}
-        	String year, month, day;
-        	if(dateString.length() >= 8) {        		
-        		year = dateString.substring(0, 4);
-        		month = dateString.substring(4, 6);
-        		day = dateString.substring(6);
-        	} else if(dateString.length() >= 6) {
-        		year = dateString.substring(0, 2);
-        		month = dateString.substring(2, 4);
-        		day = dateString.substring(4);
-        	} else {
-        		LOGGER.error("Unable to convert date String into actual date. Using current date");
+            }
+            String year, month, day;
+            if (dateString.length() >= 8) {
+                year = dateString.substring(0, 4);
+                month = dateString.substring(4, 6);
+                day = dateString.substring(6);
+            } else if (dateString.length() >= 6) {
+                year = dateString.substring(0, 2);
+                month = dateString.substring(2, 4);
+                day = dateString.substring(4);
+            } else {
+                LOGGER.error("Unable to convert date String into actual date. Using current date");
                 return new Date();
-        	}
+            }
             try {
-                GregorianCalendar calendar = new GregorianCalendar(Integer.valueOf(year), Integer.valueOf(month)-1, Integer.valueOf(day));
+                GregorianCalendar calendar = new GregorianCalendar(Integer.valueOf(year), Integer.valueOf(month) - 1, Integer.valueOf(day));
                 return calendar.getTime();
             } catch (NumberFormatException e) {
                 LOGGER.error("Unable to convert date String into actual date. Using current date");
@@ -208,22 +208,23 @@ public class MarcXmlParser {
         }
     }
 
-    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor) throws ParserException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
+    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor) throws ParserException, TypeNotAllowedAsChildException,
+            MetadataTypeNotAllowedException, DocStructHasNoTypeException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
-        if(originalAnchor != null) {
-//        	if(originalAnchor.getAllMetadata() != null) {        		
-//        		for (Metadata md : originalAnchor.getAllMetadata()) {
-//        			dd.getLogicalDocStruct().addMetadata(md);
-//        		}
-//        	}
-//        	if(originalAnchor.getAllPersons() != null) {        		
-//        		for (Person person : originalAnchor.getAllPersons()) {
-//        			dd.getLogicalDocStruct().addPerson(person);
-//        		}
-//        	}
-        	dd.getLogicalDocStruct().addChild(originalAnchor.getAllChildren().get(0));
-        	this.dsLogical = dd.getLogicalDocStruct().getAllChildren().get(0);
+        if (originalAnchor != null) {
+            //        	if(originalAnchor.getAllMetadata() != null) {        		
+            //        		for (Metadata md : originalAnchor.getAllMetadata()) {
+            //        			dd.getLogicalDocStruct().addMetadata(md);
+            //        		}
+            //        	}
+            //        	if(originalAnchor.getAllPersons() != null) {        		
+            //        		for (Person person : originalAnchor.getAllPersons()) {
+            //        			dd.getLogicalDocStruct().addPerson(person);
+            //        		}
+            //        	}
+            dd.getLogicalDocStruct().addChild(originalAnchor.getAllChildren().get(0));
+            this.dsLogical = dd.getLogicalDocStruct().getAllChildren().get(0);
         }
         for (Element metadataElement : getMetadataList()) {
             writeElementToDD(metadataElement, dd, false);
@@ -236,8 +237,8 @@ public class MarcXmlParser {
     }
 
     private void addMissingMetadata(DigitalDocument dd) {
-        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo")) && !dsLogical.hasMetadataType(prefs
-                .getMetadataTypeByName("CurrentNoSorting"))) {
+        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo")) && !dsLogical.hasMetadataType(
+                prefs.getMetadataTypeByName("CurrentNoSorting"))) {
             try {
                 Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
                 md.setValue(dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo")).get(0).getValue());
@@ -321,15 +322,16 @@ public class MarcXmlParser {
                 Element controlField008 = getControlfield(marcDoc, "008");
                 if (controlField005 != null) {
                     dateString = controlField005.getText().substring(0, 8);
-                } else if(controlField008 != null) {
-                	dateString = controlField008.getText().substring(0, 6);
+                } else if (controlField008 != null) {
+                    dateString = controlField008.getText().substring(0, 6);
                 }
 
                 String docStructTitle = getDocType(mapDoc);
-                if (StringUtils.isBlank(docStructTitle)) {
-                    docStructTitle = getDocTypeFromLeader(leaderStr, mapDoc);
-                }
                 Element docStructEle = getDocStructEle(docStructTitle);
+                if (docStructEle == null) {
+                        docStructTitle = getDocTypeFromLeader(leaderStr, mapDoc);
+                        docStructEle = getDocStructEle(docStructTitle);
+                }
                 if (docStructEle == null) {
                     throw new ParserException("Cannot find configuration for " + docStructTitle);
                 }
@@ -343,58 +345,58 @@ public class MarcXmlParser {
         }
         throw new ParserException("Cannot parse marc record");
     }
-    
+
     private String getDocTypeFromLeader(String leaderStr, Document mapDoc) throws ParserException {
-    	char typeOfRecord = leaderStr.charAt(6);
+        char typeOfRecord = leaderStr.charAt(6);
         char bibliographicLevel = leaderStr.charAt(7);
         char archival = leaderStr.charAt(8);
         char multipart = leaderStr.charAt(19);
-        
+
         String baseQuery = "map/docstruct";
-//        String leader06Query = "[@leader06='" + typeOfRecord + "']";
-//        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
-//        String leader08Query = "[@leader08='" + archival + "']";
-//        String leader19Query = "[@leader19='" + multipart + "']";
-        
+        //        String leader06Query = "[@leader06='" + typeOfRecord + "']";
+        //        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
+        //        String leader08Query = "[@leader08='" + archival + "']";
+        //        String leader19Query = "[@leader19='" + multipart + "']";
+
         try {
-			List<Element> docstructElements = getXpathNodes(baseQuery, mapDoc, null);
-			Iterator<Element> iterator = docstructElements.iterator();
-			while(iterator.hasNext()) {
-			    Element ele = iterator.next();
-			    if(!attributeMatches(ele, "leader06", typeOfRecord)) {
-			        iterator.remove();
-			        continue;
-			    }
-			    if(!attributeMatches(ele, "leader07", bibliographicLevel)) {
+            List<Element> docstructElements = getXpathNodes(baseQuery, mapDoc, null);
+            Iterator<Element> iterator = docstructElements.iterator();
+            while (iterator.hasNext()) {
+                Element ele = iterator.next();
+                if (!attributeMatches(ele, "leader06", typeOfRecord)) {
                     iterator.remove();
                     continue;
                 }
-			    if(!attributeMatches(ele, "leader08", archival)) {
+                if (!attributeMatches(ele, "leader07", bibliographicLevel)) {
                     iterator.remove();
                     continue;
                 }
-			    if(!attributeMatches(ele, "leader19", multipart)) {
+                if (!attributeMatches(ele, "leader08", archival)) {
                     iterator.remove();
                     continue;
                 }
-			    
-			}
-			if(docstructElements.isEmpty()) {
-				throw new ParserException("Found no docstruct elements in mapping document");
-			} else {
-			    Collections.sort(docstructElements, new Comparator<Element>() {
-			        //sort the elements by number of attributes, descending
+                if (!attributeMatches(ele, "leader19", multipart)) {
+                    iterator.remove();
+                    continue;
+                }
+
+            }
+            if (docstructElements.isEmpty()) {
+                throw new ParserException("Found no docstruct elements in mapping document");
+            } else {
+                Collections.sort(docstructElements, new Comparator<Element>() {
+                    //sort the elements by number of attributes, descending
                     @Override
                     public int compare(Element o1, Element o2) {
                         return Integer.compare(o2.getAttributes().size(), o1.getAttributes().size());
                     }
-			    });
-				return docstructElements.get(0).getTextTrim();
-			}
-		} catch (JDOMException e) {
-			throw new ParserException("Unable to parse mapping document for doctypes");
-		}
-        
+                });
+                return docstructElements.get(0).getTextTrim();
+            }
+        } catch (JDOMException e) {
+            throw new ParserException("Unable to parse mapping document for doctypes");
+        }
+
     }
 
     /**
@@ -428,9 +430,9 @@ public class MarcXmlParser {
                 case 't':
                     return "Manuscript";
                 default:
-                	return "Monograph";
-//                    throw new IllegalArgumentException("Cannot associate marc leader character 06 '" + typeOfRecord
-//                            + "\' with any known type of record");
+                    return "Monograph";
+                //                    throw new IllegalArgumentException("Cannot associate marc leader character 06 '" + typeOfRecord
+                //                            + "\' with any known type of record");
 
             }
         } else if (bibliographicLevel == 'a') {
@@ -453,11 +455,13 @@ public class MarcXmlParser {
     }
 
     private Element getDocStructEle(String docStructTitle) {
-        String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
-        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element());
-        List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(mapDoc));
-        if (nodeList != null && !nodeList.isEmpty()) {
-            return nodeList.get(0);
+        if (StringUtils.isNotBlank(docStructTitle)) {
+            String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
+            XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element());
+            List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(mapDoc));
+            if (nodeList != null && !nodeList.isEmpty()) {
+                return nodeList.get(0);
+            }
         }
         return null;
     }
@@ -471,11 +475,15 @@ public class MarcXmlParser {
         String query1 = null;
         String query2 = null;
         if (this.info.anchorDs.equals("MultiVolumeWork")) {
-            query1 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"958\"][@ind2=\"2\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
-            query2 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"010\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
+            query1 = "/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + "datafield[@tag=\"958\"][@ind2=\"2\"]/" + getNamespacePrefix()
+                    + "subfield[@code=\"a\"]";
+            query2 = "/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + "datafield[@tag=\"010\"]/" + getNamespacePrefix()
+                    + "subfield[@code=\"a\"]";
         } else {
-            query2 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"958\"][@ind2=\"1\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
-            query1 = "/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield[@tag=\"453\"]/"+getNamespacePrefix()+"subfield[@code=\"a\"]";
+            query2 = "/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + "datafield[@tag=\"958\"][@ind2=\"1\"]/" + getNamespacePrefix()
+                    + "subfield[@code=\"a\"]";
+            query1 = "/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + "datafield[@tag=\"453\"]/" + getNamespacePrefix()
+                    + "subfield[@code=\"a\"]";
         }
         try {
             xpath = XPathFactory.instance().compile(query1, Filters.element(), null, namespace);
@@ -520,16 +528,38 @@ public class MarcXmlParser {
         writeToAnchor = writeToAnchor(metadataElement);
         writeToChild = writeToChild(metadataElement);
         String mdTypeName = getMetadataName(metadataElement);
-    	logger.debug("Writing metadata " + mdTypeName);
+        logger.debug("Writing metadata " + mdTypeName);
 
         if (person) {
             @SuppressWarnings("unchecked")
             List<Element> roleList = metadataElement.getChildren("Role");
-            List<Element> allPersons = new ArrayList<Element>();
-            for (Element roleElement : roleList) {
-                allPersons.addAll(writePersonXPaths(getXPaths(metadataElement), roleElement));
+
+            List<Element> xPathElements = getXPaths(metadataElement);
+            //for all person marcfields
+            for (Element eleXpath : xPathElements) {
+                try {
+                    //get nodes for this marcfield
+                    String query = generateQuery(eleXpath);
+                    List<Element> nodeList = getXpathNodes(query);
+                    //for all defined roles
+                    for (Element roleElement : roleList) {
+                        //get nodes that match the role, remove them from the total node list and write person metadata if possible
+                        List<Element> roleNodeList = filterByRole(nodeList, roleElement);
+                        nodeList.removeAll(roleNodeList);
+                        MetadataType mdType = getMetadataType(roleElement);
+                        if (mdType != null) {
+                            writePersonNodeValues(roleNodeList, mdType);
+                        }
+                    }
+                    //write person metadata for remaining nodes
+                    MetadataType mdType = getMetadataType(mdTypeName);
+                    if (mdType != null) {
+                        writePersonNodeValues(nodeList, mdType);
+                    }
+                } catch (JDOMException e) {
+                    logger.error("Error getting nodes for person " + mdTypeName, e);
+                }
             }
-            writePersonXPaths(getXPaths(metadataElement), getMetadataName(metadataElement), allPersons);
         } else {
             MetadataType mdType = prefs.getMetadataTypeByName(mdTypeName);
             if (mdType == null) {
@@ -618,7 +648,6 @@ public class MarcXmlParser {
                     ignoreRegex.replace("\\", "\\\\");
                 }
 
-
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
                     List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex);
@@ -704,7 +733,7 @@ public class MarcXmlParser {
     }
 
     protected String createCurrentNoSort(String value) {
-        if(value != null) {
+        if (value != null) {
             value = value.replaceAll("\\D", "");
         }
         return value;
@@ -846,7 +875,7 @@ public class MarcXmlParser {
                 String query = generateQuery(eleXpath);
                 List<Element> nodeList = getXpathNodes(query);
                 nodeList = filterByRole(nodeList, roleElement);
-                MetadataType mdType = getPersonType(roleElement);
+                MetadataType mdType = getMetadataType(roleElement);
                 if (nodeList != null && mdType != null) {
                     writePersonNodeValues(nodeList, mdType);
                 }
@@ -860,9 +889,29 @@ public class MarcXmlParser {
         return usedNodes;
     }
 
-    private MetadataType getPersonType(Element roleElement) {
+    /**
+     * Retrieves a metadata type from either the text of the given element or the text of the first child named 'name'
+     * 
+     * @param roleElement
+     * @return
+     */
+    private MetadataType getMetadataType(Element roleElement) {
         String typeName = roleElement.getValue().trim();
+        if (StringUtils.isBlank(typeName)) {
+            typeName = roleElement.getChildText("name", null);
+        }
         MetadataType type = prefs.getMetadataTypeByName(typeName);
+        return type;
+    }
+
+    /**
+     * Retrieves a metadaty type from the given string
+     * 
+     * @param mdTypeName
+     * @return
+     */
+    private MetadataType getMetadataType(String mdTypeName) {
+        MetadataType type = prefs.getMetadataTypeByName(mdTypeName);
         return type;
     }
 
@@ -877,7 +926,7 @@ public class MarcXmlParser {
                 write = true;
             } else {
                 for (Element element : subfieldList) {
-                    if (element.getValue().trim().equals(subfieldValue.trim())) {
+                    if (element.getValue().trim().matches(subfieldValue.trim())) {
                         write = true;
                         break;
                     }
@@ -896,10 +945,10 @@ public class MarcXmlParser {
         String ind2 = eleXpath.getAttributeValue("ind2");
         //		String subfields = eleXpath.getAttributeValue("subfields");
         String fieldType = "datafield";
-        if(tag.startsWith("00")) {
-        	fieldType="controlfield";
+        if (tag.startsWith("00")) {
+            fieldType = "controlfield";
         }
-        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+fieldType);
+        StringBuilder query = new StringBuilder("/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + fieldType);
         if (tag != null) {
             query.append("[@tag=\"" + tag + "\"]");
         }
@@ -914,10 +963,10 @@ public class MarcXmlParser {
 
         return query.toString();
     }
-    
+
     protected String generateQuery(String tag, String ind1, String ind2, String subfield) {
         //		String subfields = eleXpath.getAttributeValue("subfields");
-        StringBuilder query = new StringBuilder("/"+getNamespacePrefix()+"record/"+getNamespacePrefix()+"datafield");
+        StringBuilder query = new StringBuilder("/" + getNamespacePrefix() + "record/" + getNamespacePrefix() + "datafield");
         if (tag != null) {
             query.append("[@tag=\"" + tag + "\"]");
         }
@@ -927,34 +976,33 @@ public class MarcXmlParser {
         if (ind2 != null) {
             query.append("[@ind2=\"" + ind2 + "\"]");
         }
-        if(subfield != null) {
-        	query.append("/").append(getNamespacePrefix()).append("subfield[@code='").append(subfield).append("']");
+        if (subfield != null) {
+            query.append("/").append(getNamespacePrefix()).append("subfield[@code='").append(subfield).append("']");
         }
 
         return query.toString();
     }
 
     private String getNamespacePrefix() {
-    	if(StringUtils.isNotBlank(getNamespace().getPrefix())) {
-    				return getNamespace().getPrefix() + ":";
-    	} else {
-    		return "";
-    	}
-	}
-
-	protected List<Element> getXpathNodes(String query) throws JDOMException {
-
-		return getXpathNodes(query, marcDoc, namespace);
-    }
-	
-	protected List<Element> getXpathNodes(String query, Document doc, Namespace namespace) throws JDOMException {
-
-		
-        XPathExpression<Element> xpath;
-        if(namespace != null) {
-        	 xpath = XPathFactory.instance().compile(query, Filters.element(), null, namespace);
+        if (StringUtils.isNotBlank(getNamespace().getPrefix())) {
+            return getNamespace().getPrefix() + ":";
         } else {
-        	 xpath = XPathFactory.instance().compile(query, Filters.element());
+            return "";
+        }
+    }
+
+    protected List<Element> getXpathNodes(String query) throws JDOMException {
+
+        return getXpathNodes(query, marcDoc, namespace);
+    }
+
+    protected List<Element> getXpathNodes(String query, Document doc, Namespace namespace) throws JDOMException {
+
+        XPathExpression<Element> xpath;
+        if (namespace != null) {
+            xpath = XPathFactory.instance().compile(query, Filters.element(), null, namespace);
+        } else {
+            xpath = XPathFactory.instance().compile(query, Filters.element());
         }
         List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(doc));
         return nodeList;
@@ -1000,18 +1048,20 @@ public class MarcXmlParser {
                         institution = eleSubField.getValue();
                     } else if ("q".equals(eleSubField.getAttributeValue("code"))) {
                         // name
-                        if(StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)) {                            
+                        if (StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)) {
                             String[] name = getNameParts(eleSubField.getValue());
                             firstName = name[0];
                             lastName = name[1];
                         }
-//                    } else if ("p".equals(eleSubField.getAttributeValue("code"))) {
-//                        // name
-//                        String[] name = getNameParts(eleSubField.getValue());
-//                        firstName = name[0];
-//                        lastName = name[1];
+                    } else if ("p".equals(eleSubField.getAttributeValue("code"))) {
+                        // name
+                        if (StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)) {
+                            String[] name = getNameParts(eleSubField.getValue());
+                            firstName = name[0];
+                            lastName = name[1];
+                        }
                     } else if ("9".equals(eleSubField.getAttributeValue("code"))) {
-                    	authorityIDs.add(eleSubField.getValue());
+                        authorityIDs.add(eleSubField.getValue());
                         identifier = eleSubField.getValue();
                     }
 
@@ -1030,22 +1080,22 @@ public class MarcXmlParser {
                 try {
                     person = new Person(mdType);
                     person.setFirstname(firstName);
-                    if(StringUtils.isBlank(lastName) && StringUtils.isNotBlank(termsOfAddress)) {
-                    	person.setLastname(termsOfAddress); 
-                    } else if(StringUtils.isBlank(firstName) && StringUtils.isNotBlank(termsOfAddress)) {
-                        	person.setLastname(termsOfAddress);
-                        	person.setFirstname(lastName);
-                    } else {        	
-                    	person.setLastname(lastName);
+                    if (StringUtils.isBlank(lastName) && StringUtils.isNotBlank(termsOfAddress)) {
+                        person.setLastname(termsOfAddress);
+                    } else if (StringUtils.isBlank(firstName) && StringUtils.isNotBlank(termsOfAddress)) {
+                        person.setLastname(termsOfAddress);
+                        person.setFirstname(lastName);
+                    } else {
+                        person.setLastname(lastName);
                     }
                     person.setDisplayname(displayName);
                     person.setAffiliation(affiliation);
-                    if(authorityIDs.isEmpty()) {                    	
+                    if (authorityIDs.isEmpty()) {
                     } else {
-                    		setAuthority(person, identifier, true);
-                    	for (String id : authorityIDs) {
-                    		setAuthority(person, id, false);
-						}
+                        setAuthority(person, identifier, true);
+                        for (String id : authorityIDs) {
+                            setAuthority(person, id, false);
+                        }
                     }
                     person.setInstitution(institution);
                     person.setRole(roleTerm);
@@ -1070,11 +1120,11 @@ public class MarcXmlParser {
             }
         } else if (content.matches("gnd.+")) {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replace("gnd", ""));
-        } else if(content.matches("^\\(DE-588\\).*")) {
-        	per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(DE-\\d{3}\\)", ""));
+        } else if (content.matches("^\\(DE-588\\).*")) {
+            per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(DE-\\d{3}\\)", ""));
         } else if (forceSet && content.matches("\\(.*\\).+")) {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content.replaceAll("\\(.*\\)", ""));
-        } else if(forceSet){
+        } else if (forceSet) {
             per.setAutorityFile("gnd", "http://d-nb.info/gnd/", content);
         }
 
@@ -1191,17 +1241,21 @@ public class MarcXmlParser {
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-                if(StringUtils.isNotBlank(eleValue.getTextTrim())) {
+                if (StringUtils.isNotBlank(eleValue.getTextTrim())) {
                     String string = eleValue.getTextTrim();
                     if (ignoreRegex != null) {
                         string = string.replaceAll(ignoreRegex, "");
                     }
-                	if (mergeOccurances) {
+                    if (mergeOccurances) {
                         value += string + separator;
                     } else {
                         valueList.add(string);
                     }
                 }
+                if (mdType.getName().equals("CurrentNo")) {
+                    System.out.println("HALT");
+                }
+
                 for (Element subfield : getChildElements(eleValue, "subfield")) {
                     String code = subfield.getAttributeValue("code");
                     if (subfields != null && subfields.contains(code)) {
@@ -1214,6 +1268,7 @@ public class MarcXmlParser {
                         } else {
                             valueList.add(string);
                         }
+                        subfields = subfields.replaceFirst(code, "");
                     }
                 }
             } else if (objValue instanceof Attribute) {
@@ -1305,26 +1360,30 @@ public class MarcXmlParser {
     public void setIndividualIdentifier(String individualIdentifier) {
         this.individualIdentifier = individualIdentifier;
     }
-    
+
     public Namespace getNamespace() {
-		return namespace;
-	}
-    
+        return namespace;
+    }
+
     public void setNamespace(Namespace namespace) {
-		this.namespace = namespace;
-	}
-    
+        this.namespace = namespace;
+    }
+
     public void setNamespace(String prefix, String url) {
-    	if(StringUtils.isBlank(prefix) && StringUtils.isBlank(url)) {
-    		this.namespace = Namespace.NO_NAMESPACE;
-    	} else {    		
-    		try {    		
-    			this.namespace = Namespace.getNamespace(prefix, url);
-    		}catch(IllegalArgumentException e) {
-    			e.printStackTrace();
-    			this.namespace = Namespace.NO_NAMESPACE;
-    		}
-    	}
-	}
+        if (StringUtils.isBlank(prefix) && StringUtils.isBlank(url)) {
+            this.namespace = Namespace.NO_NAMESPACE;
+        } else {
+            try {
+                this.namespace = Namespace.getNamespace(prefix, url);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                this.namespace = Namespace.NO_NAMESPACE;
+            }
+        }
+    }
+    
+    public boolean isTreatAsPeriodical() {
+        return treatAsPeriodical;
+    }
 
 }
