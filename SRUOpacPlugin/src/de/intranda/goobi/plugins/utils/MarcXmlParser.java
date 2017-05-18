@@ -327,10 +327,12 @@ public class MarcXmlParser {
                 }
 
                 String docStructTitle = getDocType(mapDoc);
-                Element docStructEle = getDocStructEle(docStructTitle);
-                if (docStructEle == null) {
-                        docStructTitle = getDocTypeFromLeader(leaderStr, mapDoc);
-                        docStructEle = getDocStructEle(docStructTitle);
+                Element docStructEle = null;
+                List<Element> docStructEles = getDocStructEle(docStructTitle);
+                if (docStructEles == null || docStructEles.isEmpty()) {
+                    throw new ParserException("No docstrct types configured");
+                } else {
+                    docStructEle = getDocStructEleFromLeader(leaderStr, docStructEles);
                 }
                 if (docStructEle == null) {
                     throw new ParserException("Cannot find configuration for " + docStructTitle);
@@ -346,55 +348,57 @@ public class MarcXmlParser {
         throw new ParserException("Cannot parse marc record");
     }
 
-    private String getDocTypeFromLeader(String leaderStr, Document mapDoc) throws ParserException {
+    private Element getDocStructEleFromLeader(String leaderStr, List<Element> docStructElements) throws ParserException {
         char typeOfRecord = leaderStr.charAt(6);
         char bibliographicLevel = leaderStr.charAt(7);
         char archival = leaderStr.charAt(8);
         char multipart = leaderStr.charAt(19);
 
-        String baseQuery = "map/docstruct";
-        //        String leader06Query = "[@leader06='" + typeOfRecord + "']";
-        //        String leader07Query = "[@leader07='" + bibliographicLevel + "']";
-        //        String leader08Query = "[@leader08='" + archival + "']";
-        //        String leader19Query = "[@leader19='" + multipart + "']";
-
-        try {
-            List<Element> docstructElements = getXpathNodes(baseQuery, mapDoc, null);
-            Iterator<Element> iterator = docstructElements.iterator();
-            while (iterator.hasNext()) {
-                Element ele = iterator.next();
-                if (!attributeMatches(ele, "leader06", typeOfRecord)) {
-                    iterator.remove();
-                    continue;
-                }
-                if (!attributeMatches(ele, "leader07", bibliographicLevel)) {
-                    iterator.remove();
-                    continue;
-                }
-                if (!attributeMatches(ele, "leader08", archival)) {
-                    iterator.remove();
-                    continue;
-                }
-                if (!attributeMatches(ele, "leader19", multipart)) {
-                    iterator.remove();
-                    continue;
-                }
-
+        Iterator<Element> iterator = docStructElements.iterator();
+        while (iterator.hasNext()) {
+            Element ele = iterator.next();
+            if (!attributeMatches(ele, "leader06", typeOfRecord)) {
+                iterator.remove();
+                continue;
             }
-            if (docstructElements.isEmpty()) {
-                throw new ParserException("Found no docstruct elements in mapping document");
-            } else {
-                Collections.sort(docstructElements, new Comparator<Element>() {
-                    //sort the elements by number of attributes, descending
-                    @Override
-                    public int compare(Element o1, Element o2) {
-                        return Integer.compare(o2.getAttributes().size(), o1.getAttributes().size());
+            if (!attributeMatches(ele, "leader07", bibliographicLevel)) {
+                iterator.remove();
+                continue;
+            }
+            if (!attributeMatches(ele, "leader08", archival)) {
+                iterator.remove();
+                continue;
+            }
+            if (!attributeMatches(ele, "leader19", multipart)) {
+                iterator.remove();
+                continue;
+            }
+
+        }
+        if (docStructElements.isEmpty()) {
+            throw new ParserException("Found no docstruct elements in mapping document");
+        } else {
+            Collections.sort(docStructElements, new Comparator<Element>() {
+                String[] sortingAttributes = new String[] { "leader06", "leader07", "leader08", "leader19" };
+
+                //sort the elements by number of attributes, descending
+                @Override
+                public int compare(Element o1, Element o2) {
+
+                    return Integer.compare(getSortingAttributes(o2), getSortingAttributes(o1));
+                }
+
+                private int getSortingAttributes(Element e) {
+                    int num = 0;
+                    for (String attrName : sortingAttributes) {
+                        if (e.getAttribute(attrName) != null) {
+                            num++;
+                        }
                     }
-                });
-                return docstructElements.get(0).getTextTrim();
-            }
-        } catch (JDOMException e) {
-            throw new ParserException("Unable to parse mapping document for doctypes");
+                    return num;
+                }
+            });
+            return docStructElements.get(0);
         }
 
     }
@@ -454,16 +458,21 @@ public class MarcXmlParser {
         return null;
     }
 
-    private Element getDocStructEle(String docStructTitle) {
+    private List<Element> getDocStructEle(String docStructTitle) {
         if (StringUtils.isNotBlank(docStructTitle)) {
             String query = "/map/docstruct[text()=\"" + docStructTitle + "\"]";
             XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element());
             List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(mapDoc));
             if (nodeList != null && !nodeList.isEmpty()) {
-                return nodeList.get(0);
+                return nodeList;
             }
         }
-        return null;
+
+        //if no element with docStruct title has been found, return all <docstrct> elements
+        String query = "/map/docstruct";
+        XPathExpression<Element> xpath = XPathFactory.instance().compile(query, Filters.element());
+        List<Element> nodeList = new ArrayList<Element>(xpath.evaluate(mapDoc));
+        return nodeList;
     }
 
     @SuppressWarnings("unchecked")
@@ -699,10 +708,10 @@ public class MarcXmlParser {
 
         // create and write medadata
         for (String value : valueList) {
-            String cleanedValue = cleanValue(mdType, value);
+            value = cleanValue(mdType, value);
             try {
                 Metadata md = new Metadata(mdType);
-                md.setValue(cleanedValue);
+                md.setValue(value);
                 writeMetadata(md);
 
             } catch (MetadataTypeNotAllowedException e) {
@@ -739,16 +748,8 @@ public class MarcXmlParser {
         return value;
     }
 
-    private String cleanValue(MetadataType mdType, String value) {
-        String returnValue = value;
-        if (mdType.getName().equals("shelfmarksource") || mdType.getName().equals("TitleDocMainShort")) {
-            returnValue = value.replaceAll("<<.+?>>", "").trim();
-        } else if (mdType.getName().equals("TitleDocMain")) {
-            returnValue = value.replaceAll("<<|>>", "").trim();
-        } else if (mdType.getName().equals("CurrentNoSorting")) {
-            returnValue = createCurrentNoSort(value);
-        }
-        return returnValue;
+    protected String cleanValue(MetadataType mdType, String value) {
+        return value;
     }
 
     private void writeSortingTitle(String value) {
@@ -1381,7 +1382,7 @@ public class MarcXmlParser {
             }
         }
     }
-    
+
     public boolean isTreatAsPeriodical() {
         return treatAsPeriodical;
     }

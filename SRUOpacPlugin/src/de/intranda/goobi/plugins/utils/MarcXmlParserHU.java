@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +17,7 @@ import org.jdom2.filter.Filters;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 
+import ugh.dl.MetadataType;
 import ugh.dl.Prefs;
 
 public class MarcXmlParserHU extends MarcXmlParser {
@@ -56,6 +58,24 @@ public class MarcXmlParserHU extends MarcXmlParser {
                 return typeName;
             }
         return "";
+    }
+    
+    @Override
+    protected String cleanValue(MetadataType mdType, String value) {
+        String separator = "\\|";
+        String separatorReplacement = ", ";
+        
+        if(mdType.getName().equals("CurrentNo")) {
+           String[] tokens = value.split(separator);
+           if(tokens.length > 1 && !tokens[tokens.length-1].trim().matches("\\d+") && tokens[tokens.length-2].trim().matches("\\d+")) {
+               tokens = Arrays.copyOfRange(tokens, 0, tokens.length-1);
+           }
+           String ret = StringUtils.join(tokens, separator);
+           ret = ret.replace(separator, separatorReplacement);
+           return ret;
+        } else {            
+            return super.cleanValue(mdType, value);
+        }
     }
 
     @Override
