@@ -546,6 +546,12 @@ public class MarcXmlParser {
             List<Element> xPathElements = getXPaths(metadataElement);
             //for all person marcfields
             for (Element eleXpath : xPathElements) {
+                String ignoreRegex = eleXpath.getAttributeValue("ignore");
+                if (ignoreRegex != null) {
+                    ignoreRegex.replace("\\", "\\\\");
+                } else {
+                    ignoreRegex = "";
+                }
                 try {
                     //get nodes for this marcfield
                     String query = generateQuery(eleXpath);
@@ -557,13 +563,13 @@ public class MarcXmlParser {
                         nodeList.removeAll(roleNodeList);
                         MetadataType mdType = getMetadataType(roleElement);
                         if (mdType != null) {
-                            writePersonNodeValues(roleNodeList, mdType);
+                            writePersonNodeValues(roleNodeList, mdType, ignoreRegex);
                         }
                     }
                     //write person metadata for remaining nodes
                     MetadataType mdType = getMetadataType(mdTypeName);
                     if (mdType != null) {
-                        writePersonNodeValues(nodeList, mdType);
+                        writePersonNodeValues(nodeList, mdType, ignoreRegex);
                     }
                 } catch (JDOMException e) {
                     logger.error("Error getting nodes for person " + mdTypeName, e);
@@ -835,11 +841,17 @@ public class MarcXmlParser {
     private void writePersonXPaths(List<Element> eleXpathList, MetadataType mdType) {
 
         for (Element eleXpath : eleXpathList) {
+            String ignoreRegex = eleXpath.getAttributeValue("ignore");
+            if (ignoreRegex != null) {
+                ignoreRegex.replace("\\", "\\\\");
+            } else {
+                ignoreRegex = "";
+            }
             try {
                 String query = generateQuery(eleXpath);
                 List<Element> nodeList = getXpathNodes(query);
                 if (nodeList != null) {
-                    writePersonNodeValues(nodeList, mdType);
+                    writePersonNodeValues(nodeList, mdType, ignoreRegex);
                 }
 
             } catch (JDOMException e) {
@@ -847,47 +859,6 @@ public class MarcXmlParser {
                 continue;
             }
         }
-    }
-
-    private void writePersonXPaths(List<Element> eleXpathList, String metadataName, List<Element> usedNodes) {
-        for (Element eleXpath : eleXpathList) {
-            try {
-                String query = generateQuery(eleXpath);
-                List<Element> nodeList = getXpathNodes(query);
-                nodeList = ListUtils.subtract(nodeList, usedNodes);
-                MetadataType mdType = prefs.getMetadataTypeByName(metadataName);
-                if (nodeList != null && mdType != null) {
-                    writePersonNodeValues(nodeList, mdType);
-                }
-                //                usedNodes.addAll(nodeList);
-
-            } catch (JDOMException e) {
-                LOGGER.error("Error parsing mods section for node " + eleXpath.getTextTrim(), e);
-                continue;
-            }
-        }
-
-    }
-
-    private List<Element> writePersonXPaths(List<Element> eleXpathList, Element roleElement) {
-        List<Element> usedNodes = new ArrayList<Element>();
-        for (Element eleXpath : eleXpathList) {
-            try {
-                String query = generateQuery(eleXpath);
-                List<Element> nodeList = getXpathNodes(query);
-                nodeList = filterByRole(nodeList, roleElement);
-                MetadataType mdType = getMetadataType(roleElement);
-                if (nodeList != null && mdType != null) {
-                    writePersonNodeValues(nodeList, mdType);
-                }
-                usedNodes.addAll(nodeList);
-
-            } catch (JDOMException e) {
-                LOGGER.error("Error parsing mods section for node " + eleXpath.getTextTrim(), e);
-                continue;
-            }
-        }
-        return usedNodes;
     }
 
     /**
@@ -1009,7 +980,7 @@ public class MarcXmlParser {
         return nodeList;
     }
 
-    private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType) {
+    private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex) {
         for (Element node : xPathNodeList) {
             String displayName = "";
             String nameNumeration = "";
@@ -1078,6 +1049,12 @@ public class MarcXmlParser {
             // create and write metadata
             if (StringUtils.isNotEmpty(lastName)) {
                 Person person = null;
+                firstName = firstName.replaceAll(ignoreRegex, "");
+                lastName = lastName.replaceAll(ignoreRegex, "");
+                termsOfAddress = termsOfAddress.replaceAll(ignoreRegex, "");
+                displayName = displayName.replaceAll(ignoreRegex, "");
+                affiliation = affiliation.replaceAll(ignoreRegex, "");
+                institution = institution.replaceAll(ignoreRegex, "");
                 try {
                     person = new Person(mdType);
                     person.setFirstname(firstName);
@@ -1237,6 +1214,10 @@ public class MarcXmlParser {
         List<String> valueList = new ArrayList<String>();
         Set<String> codes = new HashSet<String>();
 
+//        if(mdType.getName().equals("CreatorsAllOrigin")) {
+//            System.out.println("Stop");
+//        }
+        
         for (Object objValue : nodeList) {
             String value = "";
             if (objValue instanceof Element) {
@@ -1253,13 +1234,10 @@ public class MarcXmlParser {
                         valueList.add(string);
                     }
                 }
-                if (mdType.getName().equals("CurrentNo")) {
-                    System.out.println("HALT");
-                }
-
+                String localSubfields = subfields;
                 for (Element subfield : getChildElements(eleValue, "subfield")) {
                     String code = subfield.getAttributeValue("code");
-                    if (subfields != null && subfields.contains(code)) {
+                    if (localSubfields != null && localSubfields.contains(code)) {
                         String string = subfield.getValue();
                         if (ignoreRegex != null) {
                             string = string.replaceAll(ignoreRegex, "");
@@ -1269,7 +1247,7 @@ public class MarcXmlParser {
                         } else {
                             valueList.add(string);
                         }
-                        subfields = subfields.replaceFirst(code, "");
+                        localSubfields = localSubfields.replaceFirst(code, "");
                     }
                 }
             } else if (objValue instanceof Attribute) {

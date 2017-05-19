@@ -41,8 +41,8 @@
       <Role subfield="4" value="ill">IllustratorArtist</Role>
       <Role subfield="4" value="trl">Translator</Role>
       <Role subfield="4" value="oth">Bearbeiter</Role>
-      <marcfield tag="100"></marcfield>
-      <marcfield tag="700"></marcfield>
+      <marcfield tag="100" ignore="[.,;:/]$"></marcfield>
+      <marcfield tag="700" ignore="[.,;:/]$"></marcfield>
     </person>
     <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true" separator="|">
         <name>CurrentNo</name>
@@ -80,7 +80,7 @@
      <metadata logical="true" separateXPaths="false" separateOccurances="false" separator="; ">
         <name>CreatorsAllOrigin</name>
         <marcfield tag="100" subfields="a"></marcfield>
-        <marcfield tag="700" subfields="a"></marcfield>
+        <marcfield tag="700" subfields="a"></marcfield>        
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="true">
         <name>PublicationYear</name>
