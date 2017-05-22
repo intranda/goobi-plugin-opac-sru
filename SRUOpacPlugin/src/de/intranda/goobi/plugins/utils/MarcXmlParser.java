@@ -717,7 +717,7 @@ public class MarcXmlParser {
             value = cleanValue(mdType, value);
             try {
                 Metadata md = new Metadata(mdType);
-                md.setValue(value);
+                md.setValue(value.trim());
                 writeMetadata(md);
 
             } catch (MetadataTypeNotAllowedException e) {
@@ -1049,12 +1049,12 @@ public class MarcXmlParser {
             // create and write metadata
             if (StringUtils.isNotEmpty(lastName)) {
                 Person person = null;
-                firstName = firstName.replaceAll(ignoreRegex, "");
-                lastName = lastName.replaceAll(ignoreRegex, "");
-                termsOfAddress = termsOfAddress.replaceAll(ignoreRegex, "");
-                displayName = displayName.replaceAll(ignoreRegex, "");
-                affiliation = affiliation.replaceAll(ignoreRegex, "");
-                institution = institution.replaceAll(ignoreRegex, "");
+                firstName = firstName.replaceAll(ignoreRegex, "").trim();
+                lastName = lastName.replaceAll(ignoreRegex, "").trim();
+                termsOfAddress = termsOfAddress.replaceAll(ignoreRegex, "").trim();
+                displayName = displayName.replaceAll(ignoreRegex, "").trim();
+                affiliation = affiliation.replaceAll(ignoreRegex, "").trim();
+                institution = institution.replaceAll(ignoreRegex, "").trim();
                 try {
                     person = new Person(mdType);
                     person.setFirstname(firstName);
