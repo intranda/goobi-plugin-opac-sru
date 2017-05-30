@@ -648,6 +648,10 @@ public class MarcXmlParser {
 
     private void writeMetadataXPaths(List<Element> eleXpathList, MetadataType mdType, boolean mergeXPaths) {
 
+        if(mdType.getName().equals("CatalogIDPeriodicalDB")) {
+            System.out.println("halt");
+        }
+        
         List<String> valueList = new ArrayList<String>();
         for (Element eleXpath : eleXpathList) {
             try {
@@ -659,13 +663,14 @@ public class MarcXmlParser {
                 String prefix = eleXpath.getAttributeValue("prefix");
                 String suffix = eleXpath.getAttributeValue("suffix");
                 String ignoreRegex = eleXpath.getAttributeValue("ignore");
+                List<Condition> conditions = getConditions(eleXpath.getChildren("condition"));
                 if (ignoreRegex != null) {
                     ignoreRegex.replace("\\", "\\\\");
                 }
 
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
-                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex);
+                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex, conditions);
 
                     List<String> tempList = new ArrayList<String>();
                     StringBuilder sb = new StringBuilder();
@@ -731,6 +736,14 @@ public class MarcXmlParser {
             }
         }
 
+    }
+
+    private List<Condition> getConditions(List<Element> conditionElements) {
+        List<Condition> conditions = new ArrayList<>();
+        for (Element element : conditionElements) {
+            conditions.add(new Condition(element));
+        }
+        return conditions;
     }
 
     private void writeCurrentNoSort(String value) {
@@ -1209,19 +1222,24 @@ public class MarcXmlParser {
     }
 
     private List<String> getMetadataNodeValues(@SuppressWarnings("rawtypes") List nodeList, String subfields, MetadataType mdType,
-            boolean mergeOccurances, String ignoreRegex) {
+            boolean mergeOccurances, String ignoreRegex, List<Condition> conditions) {
 
         List<String> valueList = new ArrayList<String>();
         Set<String> codes = new HashSet<String>();
 
-//        if(mdType.getName().equals("CreatorsAllOrigin")) {
-//            System.out.println("Stop");
-//        }
-        
         for (Object objValue : nodeList) {
             String value = "";
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
+                boolean write = conditions.isEmpty();
+                for (Condition condition : conditions) {
+                    if(condition.matches(eleValue)) {
+                        write = true;
+                    }
+                }
+                if(!write) {
+                    continue;
+                }
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
                 if (StringUtils.isNotBlank(eleValue.getTextTrim())) {
                     String string = eleValue.getTextTrim();
