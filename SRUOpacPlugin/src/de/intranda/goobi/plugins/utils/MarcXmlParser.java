@@ -413,7 +413,7 @@ public class MarcXmlParser {
      */
     private boolean attributeMatches(Element ele, String attributeName, char value) {
         String attributeValue = ele.getAttributeValue(attributeName);
-        return StringUtils.isBlank(attributeValue) || attributeValue.equalsIgnoreCase(Character.toString(value));
+        return StringUtils.isEmpty(attributeValue) || attributeValue.equalsIgnoreCase(Character.toString(value));
     }
 
     @Deprecated
