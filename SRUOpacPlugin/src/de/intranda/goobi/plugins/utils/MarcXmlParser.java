@@ -256,19 +256,19 @@ public class MarcXmlParser {
                 LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsAnchor.getType().getName());
             }
         }
-        if (dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
-            if (StringUtils.isNotBlank(info.getRecordIdentifier())) {
-                try {
-                    Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
-                    md.setValue(info.getRecordIdentifier());
-                    dsLogical.addMetadata(md);
-                } catch (MetadataTypeNotAllowedException e) {
-                    LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
-                }
-            } else {
-                LOGGER.error("No value found for CatalogIDDigital for record ");
-            }
-        }
+//        if (dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
+//            if (StringUtils.isNotBlank(info.getRecordIdentifier())) {
+//                try {
+//                    Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
+//                    md.setValue(info.getRecordIdentifier());
+//                    dsLogical.addMetadata(md);
+//                } catch (MetadataTypeNotAllowedException e) {
+//                    LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
+//                }
+//            } else {
+//                LOGGER.error("No value found for CatalogIDDigital for record ");
+//            }
+//        }
     }
 
     private DigitalDocument generateDD() throws ParserException {

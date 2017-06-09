@@ -18,20 +18,23 @@
     <metadata logical="true" anchor="true" child="false">
         <name>CatalogIDPeriodicalDB</name>
         <marcfield tag="016" subfields="a">
-        	<condition subfield="2" matches="DE-600"></condition>
-        </marcfield>
+		<condition subfield="2" matches="DE-600"></condition>	
+	</marcfield>
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="true">
         <name>DocLanguage</name>
         <marcfield tag="041" subfields="a" />
     </metadata>
-        <metadata logical="true" separateOccurances="true" separateXPaths="false">
-        <name>ISBN</name>
-        <marcfield tag="020" subfields="a" />
-    </metadata>
     <metadata logical="true">
         <name>ISSN</name>
         <marcfield tag="776" subfields="x" separateOccurances="true"></marcfield>
+    </metadata>
+    <metadata logical="true" child="true" separateXPaths="true">
+        <name>ISSN</name>
+        <marcfield tag="800" subfields="x" separateOccurances="true"></marcfield>
+        <marcfield tag="810" subfields="x" separateOccurances="true"></marcfield>
+        <marcfield tag="811" subfields="x" separateOccurances="true"></marcfield>
+        <marcfield tag="830" subfields="x" separateOccurances="true"></marcfield>
     </metadata>
     <person logical="true">
       <name>Bearbeiter</name>
@@ -56,16 +59,15 @@
     </metadata>
     <metadata logical="true" child="true" anchor="false" separateOccurances="true" separateXPaths="true">
         <name>CurrentNoSorting</name>
-        <marcfield tag="245" subfields="npnpnp" ignore="\D"/>
+        <marcfield tag="773" subfields="q" ignore="\D"></marcfield>
+    </metadata>
+    <metadata logical="true"  anchor="true" separateOccurances="true" separateXPaths="true">
+        <name>Sponsorship</name>
+        <marcfield tag="264" subfields="b" ignore="[.,;:]$"/>
     </metadata>
     <metadata logical="true"  anchor="true" separateOccurances="true" separateXPaths="true">
         <name>PublisherName</name>
         <marcfield tag="776" subfields="e" ignore="[.,;:]$"/>
-        <marcfield tag="110" subfields="ag" />
-    </metadata>
-    <metadata logical="true"  separateOccurances="true" separateXPaths="true">
-        <name>OriginatorCorporate</name>
-        <marcfield tag="110" subfields="ag" />
     </metadata>
     <metadata logical="true" anchor="true" separateOccurances="true" separateXPaths="false">
         <name>PlaceOfPublication</name>
@@ -96,12 +98,12 @@
     <metadata logical="true" separateXPaths="true">
         <name>PublicationStart</name>
         <marcfield tag="534" subfields="c"  ignore="(,.*)|(\D+)|(.*?\..+?)" />
-        <marcfield tag="008" ignore="^.{7}|.{29}$" />
+        <marcfield tag="008" ignore="^.{7}|\D|.{29}$" />
     </metadata>
     <metadata logical="true" separateXPaths="true">
         <name>PublicationEnd</name>
         <marcfield tag="776" subfields="f" ignore="^\[?\d+\]?$|\[|\]|\d+-"></marcfield>
-        <marcfield tag="008" ignore="^.{11}|.{25}$" />
+        <marcfield tag="008" ignore="^.{11}|\D|.{25}$" />
     </metadata>
     <metadata logical="true" anchor="false" separateOccurances="true" separateXPaths="false" separator=", ">
         <name>TitleDocMainShort</name>
@@ -131,9 +133,9 @@
     </metadata>
     <metadata logical="true" separateXPaths="true">
         <name>TitleDocParallel</name>
-        <marcfield tag="776" subfields="t" separateOccurances="true"></marcfield>
+        <marcfield tag="240" subfields="t" separateOccurances="true"></marcfield>
     </metadata>
-        <metadata logical="true" separateXPaths="false" separator=" : ">
+    <metadata logical="true" separateXPaths="false" separator=" : ">
         <name>FormatSourcePrint</name>
         <marcfield tag="776" subfields="h" />
         <marcfield tag="300" subfields="b" ignore="[.,;:]$"/>
@@ -145,9 +147,9 @@
     <metadata logical="true" physical="true" child="true" separateOccurances="true" separateXPaths="true">
         <name>shelfmarksource</name>
         <marcfield tag="776" subfields="n" ignore="&lt;&lt;.*?&gt;&gt;"/>
-        <marcfield tag="AVA" subfields="d" />
+        <marcfield tag="AVE" subfields="n" ignore="^.*mit der Signatur:\s*"/>
     </metadata>
-    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="false">
+<!--    <metadata logical="true" anchor="true" child="false" separateOccurances="true" separateXPaths="false">
         <name>datedigit</name>
         <marcfield tag="362" subfields="a" />
     </metadata>
@@ -174,7 +176,7 @@
         <name>CatalogIDSuccessor</name>
         <marcfield tag="785" subfields="w" prefix="ZDB" ignore="(\(DE-600\)[\w-]+)|\(DE-\d{3}\)" />
         <marcfield tag="785" subfields="t" ignore="\s.*" />
-    </metadata>
+    </metadata> -->
     <metadata logical="true" separateOccurances="true" separateXPaths="false">
         <name>CatalogIDSource</name>
         <marcfield tag="776" subfields="w"/>
