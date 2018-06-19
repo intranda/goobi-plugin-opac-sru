@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
@@ -24,7 +25,7 @@ import ugh.fileformats.mets.MetsMods;
 
 public class MarcXmlParserTest {
 	
-	File sampleFile = new File("samples/AC00677689_record.xml");
+	File sampleFile = new File("samples/AC14446261.xml");
 	File rulesetFile = new File("resources/HU-monographie.xml");
 	File mappingFile = new File("resources/marc_map.xml");
 	File outputFolder = new File("output");
@@ -46,6 +47,11 @@ public class MarcXmlParserTest {
 		
 		SAXBuilder builder = new SAXBuilder();
 		Document marcDoc = builder.build(sampleFile);
+		if(!marcDoc.getRootElement().getName().equalsIgnoreCase("record")) {
+		    Element record = marcDoc.getRootElement().getChild("records", null).getChild("record", null).getChild("recordData", null).getChild(
+                    "record", null);
+		    marcDoc = new Document((Element) record.detach());
+		}
 		
 		parser.setNamespace(Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
 		parser.setNamespace(Namespace.NO_NAMESPACE);

@@ -332,7 +332,10 @@ public class MarcXmlParser {
                 if (docStructEles == null || docStructEles.isEmpty()) {
                     throw new ParserException("No docstrct types configured");
                 } else {
-                    docStructEle = getDocStructEleFromLeader(leaderStr, docStructEles);
+                    docStructEle = getDocStructEleFromField(docStructEles);
+                    if(docStructEle == null) {                        
+                        docStructEle = getDocStructEleFromLeader(leaderStr, docStructEles);
+                    }
                 }
                 if (docStructEle == null) {
                     throw new ParserException("Cannot find configuration for " + docStructTitle);
@@ -347,6 +350,37 @@ public class MarcXmlParser {
         }
         throw new ParserException("Cannot parse marc record");
     }
+    
+    private Element getDocStructEleFromField(List<Element> docStructElements) {
+        Iterator<Element> iterator = docStructElements.iterator();
+        while (iterator.hasNext()) {
+            Element ele = iterator.next();
+            
+            //see if the docType is to bederived from a field rather than the leader
+            String field = ele.getAttributeValue("field");
+            String value = ele.getAttributeValue("value");
+            if(StringUtils.isNotBlank(field) && StringUtils.isNotBlank(value)) {
+                String subField = null;
+                if(field.contains("$")) {
+                    String fieldTemp = field.substring(0, field.indexOf("$"));
+                    subField = field.substring(field.indexOf("$")+1);
+                    field = fieldTemp;
+                }
+                String query = generateQuery(field, null, null, subField);
+                try {
+                    List<Element> nodes = getXpathNodes(query);
+                    for (Element element : nodes) {
+                        if(element.getText().trim().equals(value)) {
+                            return ele;
+                        }
+                    }
+                } catch (JDOMException e) {
+                    logger.error(e.toString(), e);
+                }
+            }
+        }
+        return null;
+    }
 
     private Element getDocStructEleFromLeader(String leaderStr, List<Element> docStructElements) throws ParserException {
         char typeOfRecord = leaderStr.charAt(6);
@@ -357,6 +391,7 @@ public class MarcXmlParser {
         Iterator<Element> iterator = docStructElements.iterator();
         while (iterator.hasNext()) {
             Element ele = iterator.next();
+            
             if (!attributeMatches(ele, "leader06", typeOfRecord)) {
                 iterator.remove();
                 continue;
