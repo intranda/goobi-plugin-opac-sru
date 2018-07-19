@@ -183,8 +183,8 @@ public class MarcXmlParser {
         } catch (IOException e) {
             throw new ParserException("Failed to open file " + mapFile.getAbsolutePath());
         }
-        if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map") || mapDoc.getRootElement().getChildren(
-                "metadata").isEmpty()) {
+        if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map")
+                || mapDoc.getRootElement().getChildren("metadata").isEmpty()) {
             mapDoc = null;
             throw new ParserException("Map document is either invalid or empty");
         }
@@ -208,8 +208,17 @@ public class MarcXmlParser {
         }
     }
 
-    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor) throws ParserException, TypeNotAllowedAsChildException,
-            MetadataTypeNotAllowedException, DocStructHasNoTypeException {
+    @SuppressWarnings("unchecked")
+    private List<Element> getCorporateList() {
+        if (mapDoc != null) {
+            return mapDoc.getRootElement().getChildren("corporate");
+        } else {
+            return new ArrayList<Element>();
+        }
+    }
+
+    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor)
+            throws ParserException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
         if (originalAnchor != null) {
@@ -227,18 +236,21 @@ public class MarcXmlParser {
             this.dsLogical = dd.getLogicalDocStruct().getAllChildren().get(0);
         }
         for (Element metadataElement : getMetadataList()) {
-            writeElementToDD(metadataElement, dd, false);
+            writeElementToDD(metadataElement, dd, MetadataKind.METADATA);
         }
         for (Element metadataElement : getPersonList()) {
-            writeElementToDD(metadataElement, dd, true);
+            writeElementToDD(metadataElement, dd, MetadataKind.PERSON);
+        }
+        for (Element metadataElement : getCorporateList()) {
+            writeElementToDD(metadataElement, dd, MetadataKind.CORPORATE);
         }
         addMissingMetadata(dd);
         return dd;
     }
 
     private void addMissingMetadata(DigitalDocument dd) {
-        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo")) && !dsLogical.hasMetadataType(
-                prefs.getMetadataTypeByName("CurrentNoSorting"))) {
+        if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo"))
+                && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
             try {
                 Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
                 md.setValue(dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo")).get(0).getValue());
@@ -256,19 +268,19 @@ public class MarcXmlParser {
                 LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsAnchor.getType().getName());
             }
         }
-//        if (dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
-//            if (StringUtils.isNotBlank(info.getRecordIdentifier())) {
-//                try {
-//                    Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
-//                    md.setValue(info.getRecordIdentifier());
-//                    dsLogical.addMetadata(md);
-//                } catch (MetadataTypeNotAllowedException e) {
-//                    LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
-//                }
-//            } else {
-//                LOGGER.error("No value found for CatalogIDDigital for record ");
-//            }
-//        }
+        //        if (dsLogical != null && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CatalogIDDigital"))) {
+        //            if (StringUtils.isNotBlank(info.getRecordIdentifier())) {
+        //                try {
+        //                    Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
+        //                    md.setValue(info.getRecordIdentifier());
+        //                    dsLogical.addMetadata(md);
+        //                } catch (MetadataTypeNotAllowedException e) {
+        //                    LOGGER.error("Cannot add CatalogIDDigital: Not allowed for ds " + dsLogical.getType().getName());
+        //                }
+        //            } else {
+        //                LOGGER.error("No value found for CatalogIDDigital for record ");
+        //            }
+        //        }
     }
 
     private DigitalDocument generateDD() throws ParserException {
@@ -333,7 +345,7 @@ public class MarcXmlParser {
                     throw new ParserException("No docstrct types configured");
                 } else {
                     docStructEle = getDocStructEleFromField(docStructEles);
-                    if(docStructEle == null) {                        
+                    if (docStructEle == null) {
                         docStructEle = getDocStructEleFromLeader(leaderStr, docStructEles);
                     }
                 }
@@ -350,27 +362,27 @@ public class MarcXmlParser {
         }
         throw new ParserException("Cannot parse marc record");
     }
-    
+
     private Element getDocStructEleFromField(List<Element> docStructElements) {
         Iterator<Element> iterator = docStructElements.iterator();
         while (iterator.hasNext()) {
             Element ele = iterator.next();
-            
+
             //see if the docType is to bederived from a field rather than the leader
             String field = ele.getAttributeValue("field");
             String value = ele.getAttributeValue("value");
-            if(StringUtils.isNotBlank(field) && StringUtils.isNotBlank(value)) {
+            if (StringUtils.isNotBlank(field) && StringUtils.isNotBlank(value)) {
                 String subField = null;
-                if(field.contains("$")) {
+                if (field.contains("$")) {
                     String fieldTemp = field.substring(0, field.indexOf("$"));
-                    subField = field.substring(field.indexOf("$")+1);
+                    subField = field.substring(field.indexOf("$") + 1);
                     field = fieldTemp;
                 }
                 String query = generateQuery(field, null, null, subField);
                 try {
                     List<Element> nodes = getXpathNodes(query);
                     for (Element element : nodes) {
-                        if(element.getText().trim().equals(value)) {
+                        if (element.getText().trim().equals(value)) {
                             return ele;
                         }
                     }
@@ -391,7 +403,7 @@ public class MarcXmlParser {
         Iterator<Element> iterator = docStructElements.iterator();
         while (iterator.hasNext()) {
             Element ele = iterator.next();
-            
+
             if (!attributeMatches(ele, "leader06", typeOfRecord)) {
                 iterator.remove();
                 continue;
@@ -484,8 +496,8 @@ public class MarcXmlParser {
             //Serial component
             return "ContainedWork";
         } else {
-            throw new IllegalArgumentException("Cannot associate marc leader character 07 '" + bibliographicLevel
-                    + "\' with any known bibliographic level");
+            throw new IllegalArgumentException(
+                    "Cannot associate marc leader character 07 '" + bibliographicLevel + "\' with any known bibliographic level");
         }
     }
 
@@ -565,7 +577,7 @@ public class MarcXmlParser {
         return null;
     }
 
-    private void writeElementToDD(Element metadataElement, DigitalDocument dd, boolean person) {
+    private void writeElementToDD(Element metadataElement, DigitalDocument dd, MetadataKind type) {
         writeLogical = writeLogical(metadataElement);
         writePhysical = writePhysical(metadataElement);
         separator = getSeparator(metadataElement);
@@ -574,7 +586,7 @@ public class MarcXmlParser {
         String mdTypeName = getMetadataName(metadataElement);
         logger.debug("Writing metadata " + mdTypeName);
 
-        if (person) {
+        if (MetadataKind.METADATA != type) {
             @SuppressWarnings("unchecked")
             List<Element> roleList = metadataElement.getChildren("Role");
 
@@ -598,13 +610,21 @@ public class MarcXmlParser {
                         nodeList.removeAll(roleNodeList);
                         MetadataType mdType = getMetadataType(roleElement);
                         if (mdType != null) {
-                            writePersonNodeValues(roleNodeList, mdType, ignoreRegex);
+                            if (MetadataKind.PERSON == type) {
+                                writePersonNodeValues(roleNodeList, mdType, ignoreRegex);
+                            } else if (MetadataKind.CORPORATE == type) {
+                                writeCorporateNodeValues(roleNodeList, mdType, ignoreRegex);
+                            }
                         }
                     }
                     //write person metadata for remaining nodes
                     MetadataType mdType = getMetadataType(mdTypeName);
                     if (mdType != null) {
-                        writePersonNodeValues(nodeList, mdType, ignoreRegex);
+                        if (MetadataKind.PERSON == type) {
+                            writePersonNodeValues(nodeList, mdType, ignoreRegex);
+                        } else if (MetadataKind.CORPORATE == type) {
+                            writeCorporateNodeValues(nodeList, mdType, ignoreRegex);
+                        }
                     }
                 } catch (JDOMException e) {
                     logger.error("Error getting nodes for person " + mdTypeName, e);
@@ -683,11 +703,11 @@ public class MarcXmlParser {
 
     private void writeMetadataXPaths(List<Element> eleXpathList, MetadataType mdType, boolean mergeXPaths) {
 
-        if(mdType.getName().equals("CatalogIDPeriodicalDB")) {
+        if (mdType.getName().equals("CatalogIDPeriodicalDB")) {
             System.out.println("halt");
         }
-        
-        List<String> valueList = new ArrayList<String>();
+
+        List<GoobiMetadataValue> valueList = new ArrayList<>();
         for (Element eleXpath : eleXpathList) {
             try {
                 boolean mergeOccurances = !separateOccurances(eleXpath);
@@ -705,38 +725,43 @@ public class MarcXmlParser {
 
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
-                    List<String> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex, conditions);
+                    List<GoobiMetadataValue> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex, conditions);
 
-                    List<String> tempList = new ArrayList<String>();
+                    List<GoobiMetadataValue> tempList = new ArrayList<>();
                     StringBuilder sb = new StringBuilder();
-                    for (String string : nodeValueList) {
+                    for (GoobiMetadataValue value : nodeValueList) {
                         sb.append((prefix != null) ? prefix : "");
-                        sb.append(string);
+                        sb.append(value.getValue());
                         sb.append((suffix != null) ? suffix : "");
                         if (mergeOccurances) {
                             sb.append(separator);
                         } else {
-                            tempList.add(sb.toString());
+                            value.setValue(sb.toString());
+                            tempList.add(value);
                             sb = new StringBuilder();
                         }
                     }
                     if (mergeOccurances) {
+                        GoobiMetadataValue newValue = new GoobiMetadataValue();
                         if (sb.length() > separator.length()) {
-                            tempList.add(sb.substring(0, sb.length() - separator.length()));
+                            newValue.setValue(sb.substring(0, sb.length() - separator.length()));
                         } else {
-                            tempList.add(sb.toString());
+                            newValue.setValue(sb.toString());
                         }
+                        tempList.add(newValue);
                     }
                     nodeValueList = tempList;
 
                     if (mergeXPaths) {
                         int count = 0;
-                        for (String value : nodeValueList) {
+                        for (GoobiMetadataValue value : nodeValueList) {
                             if (value != null && valueList.size() <= count) {
                                 valueList.add(value);
-                            } else if (value != null && !value.trim().isEmpty()) {
-                                value = valueList.get(count) + separator + value;
-                                valueList.set(count, value);
+                            } else if (value != null && !value.getValue().trim().isEmpty()) {
+//                                value = valueList.get(count) + separator + value;
+//                                GoobiMetadataValue v = new GoobiMetadataValue(valueList.get(count).getValue() + separator + value.getValue());
+//                                valueList.set(count, v);
+                                valueList.get(count).setValue(valueList.get(count).getValue() + separator + value.getValue());
                             }
                             count++;
                         }
@@ -753,21 +778,27 @@ public class MarcXmlParser {
         }
 
         // create and write medadata
-        for (String value : valueList) {
-            value = cleanValue(mdType, value);
+        for (GoobiMetadataValue value : valueList) {
+            cleanValue(mdType, value);
             try {
                 Metadata md = new Metadata(mdType);
-                md.setValue(value.trim());
+                md.setValue(value.getValue().trim());
+                if(StringUtils.isNotBlank(value.getIdentifier())) {                    
+                    setAuthority(md, value.getIdentifier(), true);
+                }
+                for (String id : value.getAuthorityIds()) {
+                    setAuthority(md, id, false);
+                }
                 writeMetadata(md);
 
             } catch (MetadataTypeNotAllowedException e) {
                 LOGGER.error("Failed to create metadata " + mdType.getName());
             }
             if (mdType.getName().equals("TitleDocMain")) {
-                writeSortingTitle(value);
+                writeSortingTitle(value.getValue());
             }
             if (mdType.getName().equals("CurrentNo")) {
-                writeCurrentNoSort(value);
+                writeCurrentNoSort(value.getValue());
             }
         }
 
@@ -802,8 +833,7 @@ public class MarcXmlParser {
         return value;
     }
 
-    protected String cleanValue(MetadataType mdType, String value) {
-        return value;
+    protected void cleanValue(MetadataType mdType, GoobiMetadataValue value) {
     }
 
     private void writeSortingTitle(String value) {
@@ -1137,7 +1167,56 @@ public class MarcXmlParser {
 
     }
 
-    private void setAuthority(Person per, String content, boolean forceSet) {
+    private void writeCorporateNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex) {
+        for (Element node : xPathNodeList) {
+            String displayName = "";
+            List<String> authorityIDs = new ArrayList<>();
+            String identifier = "";
+            String roleTerm = mdType.getName();
+
+            // get subelements of person
+            for (Object o : node.getChildren()) {
+                if (o instanceof Element) {
+                    Element eleSubField = (Element) o;
+                    if ("a".equals(eleSubField.getAttributeValue("code"))) {
+                        // name
+                        displayName = eleSubField.getValue();
+                    } else if ("0".equals(eleSubField.getAttributeValue("code"))) {
+                        authorityIDs.add(eleSubField.getValue());
+                    } else if ("9".equals(eleSubField.getAttributeValue("code"))) {
+                        authorityIDs.add(eleSubField.getValue());
+                        identifier = eleSubField.getValue();
+                    }
+
+                }
+            }
+
+            // create and write metadata
+            if (StringUtils.isNotEmpty(displayName)) {
+                Metadata corporate = null;
+                displayName = displayName.replaceAll(ignoreRegex, "").trim();
+                try {
+                    corporate = new Metadata(mdType);
+                    corporate.setValue(displayName);
+                    if (!authorityIDs.isEmpty()) {
+                        setAuthority(corporate, identifier, true);
+                        for (String id : authorityIDs) {
+                            setAuthority(corporate, id, false);
+                        }
+                    }
+                } catch (MetadataTypeNotAllowedException e) {
+                    LOGGER.error("Failed to create person metadata " + mdType.getName());
+                }
+
+                if (corporate != null) {
+                    writeMetadata(corporate);
+                }
+            }
+        }
+
+    }
+
+    private void setAuthority(Metadata per, String content, boolean forceSet) {
         if (content.contains("/")) {
             String catalogue = content.substring(0, content.indexOf("/"));
             String identifier = content.substring(content.indexOf("/") + 1);
@@ -1256,23 +1335,23 @@ public class MarcXmlParser {
 
     }
 
-    private List<String> getMetadataNodeValues(@SuppressWarnings("rawtypes") List nodeList, String subfields, MetadataType mdType,
+    private List<GoobiMetadataValue> getMetadataNodeValues(@SuppressWarnings("rawtypes") List nodeList, String subfields, MetadataType mdType,
             boolean mergeOccurances, String ignoreRegex, List<Condition> conditions) {
 
-        List<String> valueList = new ArrayList<String>();
+        List<GoobiMetadataValue> valueList = new ArrayList<>();
         Set<String> codes = new HashSet<String>();
 
         for (Object objValue : nodeList) {
-            String value = "";
+            GoobiMetadataValue value = new GoobiMetadataValue();
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
                 boolean write = conditions.isEmpty();
                 for (Condition condition : conditions) {
-                    if(condition.matches(eleValue)) {
+                    if (condition.matches(eleValue)) {
                         write = true;
                     }
                 }
-                if(!write) {
+                if (!write) {
                     continue;
                 }
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
@@ -1282,11 +1361,15 @@ public class MarcXmlParser {
                         string = string.replaceAll(ignoreRegex, "");
                     }
                     if (mergeOccurances) {
-                        value += string + separator;
+                        value.setValue(value.getValue() + string + separator);
+//                        value += string + separator;
                     } else {
-                        valueList.add(string);
+                        valueList.add(new GoobiMetadataValue(string));
                     }
                 }
+
+                List<String> authorityIDs = new ArrayList<>();
+                String identifier = "";
                 String localSubfields = subfields;
                 for (Element subfield : getChildElements(eleValue, "subfield")) {
                     String code = subfield.getAttributeValue("code");
@@ -1296,25 +1379,41 @@ public class MarcXmlParser {
                             string = string.replaceAll(ignoreRegex, "");
                         }
                         if (codes.add(code) || mergeOccurances) {
-                            value += string + separator;
+                            value.setValue(value.getValue() + string + separator);
                         } else {
-                            valueList.add(string);
+                            valueList.add(new GoobiMetadataValue(string));
                         }
                         localSubfields = localSubfields.replaceFirst(code, "");
                     }
+                    if ("0".equals(code)) {
+                        authorityIDs.add(subfield.getValue());
+                    } else if ("9".equals(code)) {
+                        authorityIDs.add(subfield.getValue());
+                        identifier = subfield.getValue();
+                    }
                 }
+                
+                if(!authorityIDs.isEmpty() || StringUtils.isNotBlank(identifier)) {  
+                    value.setIdentifier(identifier);
+                    value.setAuthorityIds(authorityIDs);
+                    for (GoobiMetadataValue v : valueList) {
+                        v.setIdentifier(identifier);
+                        v.setAuthorityIds(authorityIDs);
+                    }
+                }
+                
             } else if (objValue instanceof Attribute) {
                 Attribute atrValue = (Attribute) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + atrValue.getValue());
-                value = atrValue.getValue();
+                value.setValue(atrValue.getValue());
                 if (ignoreRegex != null) {
-                    value = value.replaceAll(ignoreRegex, "");
+                    value.setValue(value.getValue().replaceAll(ignoreRegex, ""));
                 }
             }
-            if (value.length() > separator.length()) {
-                value = value.substring(0, value.length() - separator.length());
+            if (value.getValue().length() > separator.length()) {
+                value.setValue(value.getValue().substring(0, value.getValue().length() - separator.length()));
             }
-            if (!value.isEmpty()) {
+            if (!value.getValue().isEmpty()) {
                 valueList.add(value);
             }
         }

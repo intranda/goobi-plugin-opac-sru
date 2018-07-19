@@ -83,7 +83,6 @@ public class SRUClient {
             url += "&recordSchema=" + recordSchema;
 
             logger.debug("SRU URL: " + url);
-            System.out.println(url);
 
             HttpGet httpGet = new HttpGet(url);
 //            ResponseHandler<String> handler = new BasicResponseHandler();

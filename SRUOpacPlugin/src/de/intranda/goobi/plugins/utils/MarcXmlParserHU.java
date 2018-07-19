@@ -61,10 +61,10 @@ public class MarcXmlParserHU extends MarcXmlParser {
     }
     
     @Override
-    protected String cleanValue(MetadataType mdType, String value) {
+    protected void cleanValue(MetadataType mdType, GoobiMetadataValue mdValue) {
         String separator = "\\|";
         String separatorReplacement = ", ";
-        
+        String value = mdValue.getValue();
         if(mdType.getName().equals("CurrentNo")) {
            String[] tokens = value.split(separator);
            if(tokens.length > 1 && !tokens[tokens.length-1].trim().matches("\\d+") && tokens[tokens.length-2].trim().matches("\\d+")) {
@@ -72,9 +72,9 @@ public class MarcXmlParserHU extends MarcXmlParser {
            }
            String ret = StringUtils.join(tokens, separator);
            ret = ret.replace(separator, separatorReplacement);
-           return ret;
+           mdValue.setValue(value);
         } else {            
-            return super.cleanValue(mdType, value);
+            super.cleanValue(mdType, mdValue);
         }
     }
 
