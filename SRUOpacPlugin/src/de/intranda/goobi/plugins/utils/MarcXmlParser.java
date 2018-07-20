@@ -784,7 +784,7 @@ public class MarcXmlParser {
                 Metadata md = new Metadata(mdType);
                 md.setValue(value.getValue().trim());
                 if(StringUtils.isNotBlank(value.getIdentifier())) {                    
-                    setAuthority(md, value.getIdentifier(), true);
+                    setAuthority(md, value.getIdentifier(), false);
                 }
                 for (String id : value.getAuthorityIds()) {
                     setAuthority(md, id, false);
@@ -1199,9 +1199,9 @@ public class MarcXmlParser {
                     corporate = new Metadata(mdType);
                     corporate.setValue(displayName);
                     if (!authorityIDs.isEmpty()) {
-                        setAuthority(corporate, identifier, true);
+                        setAuthority(corporate, identifier, false);
                         for (String id : authorityIDs) {
-                            setAuthority(corporate, id, false);
+                            setAuthority(corporate, id, true);
                         }
                     }
                 } catch (MetadataTypeNotAllowedException e) {
@@ -1393,7 +1393,7 @@ public class MarcXmlParser {
                     }
                 }
                 
-                if(!authorityIDs.isEmpty() || StringUtils.isNotBlank(identifier)) {  
+                if(!authorityIDs.isEmpty()) {  
                     value.setIdentifier(identifier);
                     value.setAuthorityIds(authorityIDs);
                     for (GoobiMetadataValue v : valueList) {
