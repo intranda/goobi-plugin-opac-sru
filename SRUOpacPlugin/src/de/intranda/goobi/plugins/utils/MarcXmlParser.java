@@ -1368,6 +1368,8 @@ public class MarcXmlParser {
                 for (Condition condition : conditions) {
                     if (condition.matches(eleValue)) {
                         write = true;
+                    } else {
+                        write = false;
                     }
                 }
                 if (!write) {
