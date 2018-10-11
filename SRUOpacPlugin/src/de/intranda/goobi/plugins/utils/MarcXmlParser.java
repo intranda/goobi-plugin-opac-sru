@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.plaf.synth.SynthScrollBarUI;
+
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -1256,7 +1258,7 @@ public class MarcXmlParser {
         if (writeLogical) {
             if ((writeToChild || dsAnchor == null) && dsLogical != null) {
                 try {
-                    dsLogical.addMetadata(metadata);
+                    addMetadata(metadata, dsLogical);
                 } catch (MetadataTypeNotAllowedException e) {
                     LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to logical topStruct: " + e.getMessage());
                 } catch (IncompletePersonObjectException e) {
@@ -1267,7 +1269,7 @@ public class MarcXmlParser {
                 // if (dsAnchor != null && (anchorMetadataList == null ||
                 // anchorMetadataList.contains(metadata.getType().getName()))) {
                 try {
-                    dsAnchor.addMetadata(metadata);
+                    addMetadata(metadata, dsAnchor);
                 } catch (MetadataTypeNotAllowedException e) {
                     LOGGER.warn("Failed to write metadata " + metadata.getType().getName() + " to logical anchor: " + e.getMessage());
 
@@ -1281,7 +1283,7 @@ public class MarcXmlParser {
 
         if (writePhysical) {
             try {
-                dsPhysical.addMetadata(metadata);
+                addMetadata(metadata, dsPhysical);
             } catch (MetadataTypeNotAllowedException e) {
                 LOGGER.error("Failed to write metadata " + metadata.getType().getName() + " to physical topStruct: " + e.getMessage());
 
@@ -1291,6 +1293,23 @@ public class MarcXmlParser {
             }
         }
 
+    }
+
+    /**
+     * Write the given metadata to the ds. But only if no other metadata of the same type and value already exists in the ds
+     * 
+     * @param metadata
+     * @param ds
+     * @throws MetadataTypeNotAllowedException
+     */
+    public void addMetadata(Metadata metadata, DocStruct ds) throws MetadataTypeNotAllowedException {
+        List<? extends Metadata> metadataOfType = ds.getAllMetadataByType(metadata.getType());
+        for (Metadata existingMetadata : metadataOfType) {
+            if(existingMetadata.getValue().equals(metadata.getValue())) {
+                return;
+            }
+        }
+        ds.addMetadata(metadata);
     }
 
     private void writePerson(Person person) {
@@ -1396,10 +1415,10 @@ public class MarcXmlParser {
                 if(!authorityIDs.isEmpty()) {  
                     value.setIdentifier(identifier);
                     value.setAuthorityIds(authorityIDs);
-                    for (GoobiMetadataValue v : valueList) {
-                        v.setIdentifier(identifier);
-                        v.setAuthorityIds(authorityIDs);
-                    }
+//                    for (GoobiMetadataValue v : valueList) {
+//                        v.setIdentifier(identifier);
+//                        v.setAuthorityIds(authorityIDs);
+//                    }
                 }
                 
             } else if (objValue instanceof Attribute) {

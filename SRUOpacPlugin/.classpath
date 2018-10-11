@@ -17,7 +17,7 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-logger-1.0.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/chronicle-logger-log4j-1-1.0.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/lang-6.4.6.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-4.5.2.jar"/>
-	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpcore-4.4.4.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpclient-4.5.5.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/httpcore-4.4.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

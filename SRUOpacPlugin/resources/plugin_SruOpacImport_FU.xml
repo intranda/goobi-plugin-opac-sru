@@ -19,7 +19,7 @@
     </searchFields>
     <namespace catalogue="FU-BERLIN (ALMA)">
     	<prefix></prefix>
-    	<uri></uri>
+    	<uri>http://www.loc.gov/MARC21/slim</uri>
     </namespace>
     <namespace catalogue="BVB">
     	<prefix>slim</prefix>
