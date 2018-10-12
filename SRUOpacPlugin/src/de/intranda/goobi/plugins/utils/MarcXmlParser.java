@@ -1370,6 +1370,7 @@ public class MarcXmlParser {
                         write = true;
                     } else {
                         write = false;
+                        break;
                     }
                 }
                 if (!write) {
