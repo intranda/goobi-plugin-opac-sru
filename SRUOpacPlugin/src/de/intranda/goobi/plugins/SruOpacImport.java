@@ -362,6 +362,7 @@ public class SruOpacImport implements IOpacPlugin {
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
         File marcMappingFile = initMappingFile(catalogue, marcXmlDoc, parser.getNamespace());
+        myLogger.debug("Using mapping file " + marcMappingFile);
         parser.setMapFile(marcMappingFile);
         
         //parse the marcXml record
