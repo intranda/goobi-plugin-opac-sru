@@ -43,7 +43,8 @@ public class MarcXmlParserTest {
 
 	@Test
 	public void testParse() throws ParserException, JDOMException, IOException, PreferencesException, WriteException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
-		MarcXmlParser parser = new MarcXmlParser(prefs, mappingFile);
+		MarcXmlParser parser = new MarcXmlParser(prefs);
+		parser.setMapFile(mappingFile);
 		
 		SAXBuilder builder = new SAXBuilder();
 		Document marcDoc = builder.build(sampleFile);

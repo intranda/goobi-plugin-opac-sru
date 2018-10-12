@@ -28,8 +28,8 @@ public class MarcXmlParserHU extends MarcXmlParser {
     private static final NumberFormat[] currentNoSortingFormats = {new DecimalFormat("0000"), new DecimalFormat("000"), new DecimalFormat("00")};
 
 
-    public MarcXmlParserHU(Prefs prefs, File mapFile) throws ParserException {
-        super(prefs, mapFile);
+    public MarcXmlParserHU(Prefs prefs) throws ParserException {
+        super(prefs);
     }
 
     @Override

@@ -172,8 +172,11 @@ public class MarcXmlParser {
     private boolean treatAsPeriodical = false;
     private Namespace namespace = NS_DEFAULT;
 
-    public MarcXmlParser(Prefs prefs, File mapFile) throws ParserException {
+    public MarcXmlParser(Prefs prefs) throws ParserException {
         this.prefs = prefs;
+    }
+    
+    public void setMapFile(File mapFile) throws ParserException {
         loadMap(mapFile);
     }
 

@@ -33,11 +33,13 @@ public class SRUClientTest {
     public void testQuerySru() {
         try {
             ConfigOpacCatalogue cat =
-                    new ConfigOpacCatalogue("test", "none", "aleph20.ub.hu-berlin.de", "hub01", null, 5661, "utf-8", null, null, "SRU", "http://", null);
+                    new ConfigOpacCatalogue("test", "none", "hu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_HUB", null, 80, "utf-8", null, null, "SRU", "http://", null);
             String query = "BV040552415";
 //            String query = "BV041701500";
             String recordSchema = "marcxml";
-            String ret = new SRUClient().querySRU(cat, query, recordSchema);
+            SRUClient client = new SRUClient();
+            client.setSruVersion("1.2");
+            String ret = client.querySRU(cat, query, recordSchema);
             System.out.println(ret);
         } catch (Throwable e) {
             e.printStackTrace();

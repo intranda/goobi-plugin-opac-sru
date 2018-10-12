@@ -29,17 +29,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -85,6 +82,14 @@ public class SRUClient {
             logger.debug("SRU URL: " + url);
 
             HttpGet httpGet = new HttpGet(url);
+            
+            //set 30 sec timeout
+            RequestConfig.Builder requestConfig = RequestConfig.custom();
+            requestConfig.setConnectTimeout(30 * 1000);
+            requestConfig.setConnectionRequestTimeout(30 * 1000);
+            requestConfig.setSocketTimeout(30 * 1000);
+            httpGet.setConfig(requestConfig.build());
+            
 //            ResponseHandler<String> handler = new BasicResponseHandler();
             try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
                 CloseableHttpResponse response = httpclient.execute(httpGet);

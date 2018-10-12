@@ -22,8 +22,8 @@ public class MarcXmlParserFU extends MarcXmlParser {
     private static final Logger logger = Logger.getLogger(MarcXmlParserFU.class);
 
 
-    public MarcXmlParserFU(Prefs prefs, File mapFile) throws ParserException {
-        super(prefs, mapFile);
+    public MarcXmlParserFU(Prefs prefs) throws ParserException {
+        super(prefs);
     }
 
     @Override

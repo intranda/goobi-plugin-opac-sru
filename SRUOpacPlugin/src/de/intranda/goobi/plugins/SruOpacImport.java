@@ -24,6 +24,8 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,6 +41,12 @@ import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.filter.Filters;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 
 import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
@@ -115,6 +123,7 @@ public class SruOpacImport implements IOpacPlugin {
 //        this.inputEncoding = config.getString("charset", "utf-8");
 //        this.marcXmlParserType = config.getString("marcXmlParserType", "");
         this.config.setExpressionEngine(new XPathExpressionEngine());
+        initSearchFieldMap();
         
     }
 
@@ -185,19 +194,17 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
-        File marcMappingFile = initMappingFile(catalogue);
-        initSearchFieldMap();
+//        initSearchFieldMap();
     	inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
     	
     	String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
-    	
         MarcXmlParser parser;
         if("HU".equalsIgnoreCase(marcParserType)) {            
-            parser = new MarcXmlParserHU(inPrefs, marcMappingFile);
+            parser = new MarcXmlParserHU(inPrefs);
         } else if("FU".equalsIgnoreCase(marcParserType)) {
-        	parser = new MarcXmlParserFU(inPrefs, marcMappingFile);
+        	parser = new MarcXmlParserFU(inPrefs);
         } else {
-            parser = new MarcXmlParser(inPrefs, marcMappingFile) {
+            parser = new MarcXmlParser(inPrefs) {
                 
                 @Override
                 protected String getDocType(Document doc) {
@@ -212,11 +219,32 @@ public class SruOpacImport implements IOpacPlugin {
             };
         }
         
-        return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, parser, marcMappingFile, null);
+        return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, parser, null);
     }
 
-    private File initMappingFile(ConfigOpacCatalogue catalogue) throws ImportPluginException {
-    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
+    private File initMappingFile(ConfigOpacCatalogue catalogue, Document marcDoc, Namespace namespace) throws ImportPluginException {
+//    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
+        
+        List<SubnodeConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
+        String mappingPath = null;
+        for (SubnodeConfiguration mappingConfig : configs) {
+            mappingConfig.setExpressionEngine(new XPathExpressionEngine());
+            String catalogType = mappingConfig.getString("@type", "");
+            if(StringUtils.isNotBlank(catalogType)) {
+                String query = mappingConfig.getString("@typeXPath", "");
+                if(StringUtils.isBlank(query)) {
+                    throw new ImportPluginException("All mapping configs with a type must also have a 'typeXPath' attribute");
+                }
+                String foundType = getCatalogType(marcDoc, query, namespace);
+                if(catalogType.equalsIgnoreCase(foundType)) {
+                    mappingPath = mappingConfig.getString(".");
+                    break;
+                }
+            } else {
+                mappingPath =  mappingConfig.getString("");
+            }
+        }
+        
     	File marcMappingFile;
         if (mappingPath == null) {
             throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
@@ -228,9 +256,35 @@ public class SruOpacImport implements IOpacPlugin {
         if (!marcMappingFile.isFile()) {
             throw new ImportPluginException("Cannot locate mods mapping file " + marcMappingFile.getAbsolutePath());
         }
-        initSearchFieldMap();
+//        initSearchFieldMap();
 		return marcMappingFile;
 	}
+    
+    private List<SubnodeConfiguration> getConfigs(String query, String catalogue, String subQuery) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append(query)
+        .append("[@catalogue='")
+        .append(catalogue)
+        .append("']");
+        if(StringUtils.isNotBlank(subQuery)) {
+            queryBuilder.append("/")
+            .append(subQuery);
+        }
+        
+        StringBuilder defaultQueryBuilder = new StringBuilder();
+        defaultQueryBuilder.append(query)
+        .append("[not(@catalogue)]");
+        if(StringUtils.isNotBlank(subQuery)) {
+            defaultQueryBuilder.append("/")
+            .append(subQuery);
+        }
+        
+        List<SubnodeConfiguration> configs = config.configurationsAt(queryBuilder.toString());
+        if(configs == null || configs.isEmpty()) {
+            configs = config.configurationsAt(defaultQueryBuilder.toString());
+        }
+        return configs == null ? Collections.EMPTY_LIST : configs;
+    }
 
 	private String getConfigString(String query, String catalogue, String subQuery, String defaultValue) {
 		
@@ -267,7 +321,7 @@ public class SruOpacImport implements IOpacPlugin {
      * @return The query result as Goobi fileformat
      * @throws Exception If no unique query result could be found and parsed successfully
      */
-    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, MarcXmlParser parser, File marcMappingFile, RecordInformation info)
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, MarcXmlParser parser, RecordInformation info)
             throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
@@ -307,6 +361,9 @@ public class SruOpacImport implements IOpacPlugin {
         parser.setNamespace(prefix, uri);
         parser.setInfo(info);   //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
+        File marcMappingFile = initMappingFile(catalogue, marcXmlDoc, parser.getNamespace());
+        parser.setMapFile(marcMappingFile);
+        
         //parse the marcXml record
         DigitalDocument dd = parser.parseMarcXml(marcXmlDoc, this.originalAnchor);
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
@@ -331,7 +388,7 @@ public class SruOpacImport implements IOpacPlugin {
             this.marcXmlDocVolume = this.marcXmlDoc;
             this.originalAnchor  = dd.getLogicalDocStruct();
             try {            	
-            	ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, marcMappingFile, anchorInfo);
+            	ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, anchorInfo);
             	dd = ff.getDigitalDocument();
 //            attachToAnchor(dd, af);
             } catch(SRUException e) {
@@ -343,6 +400,46 @@ public class SruOpacImport implements IOpacPlugin {
         ff.setDigitalDocument(dd);
         
         return ff;
+    }
+
+    /**
+     * @return the catalog type found under the given query. Or null if the query yields no results
+     */
+    public String getCatalogType(Document doc, String query, Namespace namespace) {
+        query = getStringQuery(query, namespace);
+        XPathExpression<String> xpath = createXPath(query, namespace);
+        String catalogType = xpath.evaluateFirst(marcXmlDoc);
+        return catalogType;
+    }
+
+    /**
+     * @param query
+     * @param namespace
+     * @return
+     */
+    public XPathExpression<String> createXPath(String query, Namespace namespace) {
+        XPathExpression<String> xpath;
+        if(namespace != null) {            
+            xpath = XPathFactory.instance().compile(query, Filters.fstring(), null, namespace);
+        } else {
+            xpath = XPathFactory.instance().compile(query, Filters.fstring(), null);
+        }
+        return xpath;
+    }
+
+    /**
+     * @param query
+     * @param namespace
+     */
+    public String getStringQuery(String query, Namespace namespace) {
+        if(namespace != null && StringUtils.isNotBlank(namespace.getPrefix())) {
+            query = query.replaceAll("\\/(\\w)", "/" + namespace.getPrefix() + ":" + "$1");
+        }
+        if(query.endsWith("/")) {
+            query = query.substring(0, query.length()-1);
+        }
+        query = "string(" + query + ")";
+        return query;
     }
 
     /**
