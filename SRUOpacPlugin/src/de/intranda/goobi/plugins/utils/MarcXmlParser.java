@@ -1364,6 +1364,8 @@ public class MarcXmlParser {
             GoobiMetadataValue value = new GoobiMetadataValue();
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
+                
+                //check write conditions for element
                 boolean write = conditions.isEmpty();
                 for (Condition condition : conditions) {
                     if (condition.matches(eleValue)) {
