@@ -1,8 +1,8 @@
 /**
  * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
  * 
- * Visit the websites for more information. 
- *          - http://digiverso.com 
+ * Visit the websites for more information.
+ *          - http://digiverso.com
  *          - http://www.intranda.com
  * 
  * Copyright 2013, intranda GmbH, Göttingen
@@ -21,10 +21,11 @@
 package de.intranda.goobi.plugins;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.io.FileWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -39,12 +40,12 @@ import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
-import org.goobi.production.plugin.interfaces.IOpacPlugin;
+import org.goobi.production.plugin.interfaces.IOpacPluginVersion2;
 import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.filter.Filters;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 
@@ -73,7 +74,7 @@ import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
-public class SruOpacImport implements IOpacPlugin {
+public class SruOpacImport implements IOpacPluginVersion2  {
     private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
     private XMLConfiguration config;
@@ -83,15 +84,21 @@ public class SruOpacImport implements IOpacPlugin {
     private String atstsl;
     private ConfigOpacCatalogue coc;
     private Prefs prefs;
-//    private String inputEncoding;
+    //    private String inputEncoding;
     protected Document marcXmlDoc;
     protected Document marcXmlDocVolume;
-//    private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
-//    private String marcXmlParserType = null;
+    //    private File marcMappingFile = new File(ConfigurationHelper.getInstance().getXsltFolder() + "marc_map.xml");
+    //    private String marcXmlParserType = null;
 
     private Map<String, Map<String, String>> searchFieldMap;
 
-	private DocStruct originalAnchor = null;
+    private DocStruct originalAnchor = null;
+
+    private boolean saveOriginalMetadata = false;
+    private String originalMetadataFolder;
+
+    private Path pathToMarcRecord;
+
 
     /**
      * Constructor using the default plugin configuration profived by Goobi
@@ -99,7 +106,7 @@ public class SruOpacImport implements IOpacPlugin {
      * @throws ImportPluginException if any configuration files could not be found or read
      */
     public SruOpacImport() throws ImportPluginException {
-        this.config = ConfigPlugins.getPluginConfig(this);
+        this.config = ConfigPlugins.getPluginConfig("SruOpacImport");
         init();
     }
 
@@ -120,11 +127,16 @@ public class SruOpacImport implements IOpacPlugin {
      * @throws ImportPluginException no metadata mapping file could be found
      */
     private void init() throws ImportPluginException {
-//        this.inputEncoding = config.getString("charset", "utf-8");
-//        this.marcXmlParserType = config.getString("marcXmlParserType", "");
+        //        this.inputEncoding = config.getString("charset", "utf-8");
+        //        this.marcXmlParserType = config.getString("marcXmlParserType", "");
         this.config.setExpressionEngine(new XPathExpressionEngine());
         initSearchFieldMap();
-        
+
+        saveOriginalMetadata = config.getBoolean("storeMetadata", false);
+        if (saveOriginalMetadata) {
+            originalMetadataFolder = config.getString("metadataFolder");
+        }
+
     }
 
     /**
@@ -133,7 +145,7 @@ public class SruOpacImport implements IOpacPlugin {
      * 
      */
     private void initSearchFieldMap() {
-        searchFieldMap = new HashMap<String, Map<String, String>>();
+        searchFieldMap = new HashMap<>();
         SubnodeConfiguration mappings = null;
         try {
             mappings = config.configurationAt("searchFields");
@@ -142,20 +154,20 @@ public class SruOpacImport implements IOpacPlugin {
         }
 
         if (mappings == null || mappings.isEmpty()) {
-            HashMap<String, String> catalogMap = new HashMap<String, String>();
+            HashMap<String, String> catalogMap = new HashMap<>();
             catalogMap.put(null, "rec.id");
             searchFieldMap.put("12", catalogMap);
         } else {
             List<SubnodeConfiguration> fieldConfigs = mappings.configurationsAt("field");
             for (SubnodeConfiguration fieldConfig : fieldConfigs) {
                 String key = fieldConfig.getString("id");
-                Map<String, String> catalogFieldMap = new LinkedHashMap<String, String>();
+                Map<String, String> catalogFieldMap = new LinkedHashMap<>();
                 List<Configuration> searchFields = fieldConfig.configurationsAt("searchField");
                 for (Configuration searchFieldConfig : searchFields) {
-					String value = searchFieldConfig.getString("");
-					String catalogue = searchFieldConfig.getString("@catalogue");
-					catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
-				}
+                    String value = searchFieldConfig.getString("");
+                    String catalogue = searchFieldConfig.getString("@catalogue");
+                    catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
+                }
                 searchFieldMap.put(key, catalogFieldMap);
             }
         }
@@ -194,23 +206,23 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
-//        initSearchFieldMap();
-    	inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
-    	
-    	String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
+        //        initSearchFieldMap();
+        inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
+        pathToMarcRecord = null;
+        String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
         MarcXmlParser parser;
-        if("HU".equalsIgnoreCase(marcParserType)) {            
+        if ("HU".equalsIgnoreCase(marcParserType)) {
             parser = new MarcXmlParserHU(inPrefs);
-        } else if("FU".equalsIgnoreCase(marcParserType)) {
-        	parser = new MarcXmlParserFU(inPrefs);
+        } else if ("FU".equalsIgnoreCase(marcParserType)) {
+            parser = new MarcXmlParserFU(inPrefs);
         } else {
             parser = new MarcXmlParser(inPrefs) {
-                
+
                 @Override
                 protected String getDocType(Document doc) {
                     return null;
                 }
-                
+
                 @Override
                 protected String createCurrentNoSort(String value) {
                     value = value.replaceAll("\\D", "");
@@ -218,34 +230,34 @@ public class SruOpacImport implements IOpacPlugin {
                 }
             };
         }
-        
+
         return search(inSuchfeld, inSuchbegriff, catalogue, inPrefs, parser, null);
     }
 
     private File initMappingFile(ConfigOpacCatalogue catalogue, Document marcDoc, Namespace namespace) throws ImportPluginException {
-//    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
-        
+        //    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
+
         List<SubnodeConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
         String mappingPath = null;
         for (SubnodeConfiguration mappingConfig : configs) {
             mappingConfig.setExpressionEngine(new XPathExpressionEngine());
             String catalogType = mappingConfig.getString("@type", "");
-            if(StringUtils.isNotBlank(catalogType)) {
+            if (StringUtils.isNotBlank(catalogType)) {
                 String query = mappingConfig.getString("@typeXPath", "");
-                if(StringUtils.isBlank(query)) {
+                if (StringUtils.isBlank(query)) {
                     throw new ImportPluginException("All mapping configs with a type must also have a 'typeXPath' attribute");
                 }
                 String foundType = getCatalogType(marcDoc, query, namespace);
-                if(catalogType.equalsIgnoreCase(foundType)) {
+                if (catalogType.equalsIgnoreCase(foundType)) {
                     mappingPath = mappingConfig.getString(".");
                     break;
                 }
             } else {
-                mappingPath =  mappingConfig.getString("");
+                mappingPath = mappingConfig.getString("");
             }
         }
-        
-    	File marcMappingFile;
+
+        File marcMappingFile;
         if (mappingPath == null) {
             throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
         } else if (mappingPath.startsWith("/")) {
@@ -256,60 +268,48 @@ public class SruOpacImport implements IOpacPlugin {
         if (!marcMappingFile.isFile()) {
             throw new ImportPluginException("Cannot locate mods mapping file " + marcMappingFile.getAbsolutePath());
         }
-//        initSearchFieldMap();
-		return marcMappingFile;
-	}
-    
+        //        initSearchFieldMap();
+        return marcMappingFile;
+    }
+
     private List<SubnodeConfiguration> getConfigs(String query, String catalogue, String subQuery) {
         StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append(query)
-        .append("[@catalogue='")
-        .append(catalogue)
-        .append("']");
-        if(StringUtils.isNotBlank(subQuery)) {
-            queryBuilder.append("/")
-            .append(subQuery);
+        queryBuilder.append(query).append("[@catalogue='").append(catalogue).append("']");
+        if (StringUtils.isNotBlank(subQuery)) {
+            queryBuilder.append("/").append(subQuery);
         }
-        
+
         StringBuilder defaultQueryBuilder = new StringBuilder();
-        defaultQueryBuilder.append(query)
-        .append("[not(@catalogue)]");
-        if(StringUtils.isNotBlank(subQuery)) {
-            defaultQueryBuilder.append("/")
-            .append(subQuery);
+        defaultQueryBuilder.append(query).append("[not(@catalogue)]");
+        if (StringUtils.isNotBlank(subQuery)) {
+            defaultQueryBuilder.append("/").append(subQuery);
         }
-        
+
         List<SubnodeConfiguration> configs = config.configurationsAt(queryBuilder.toString());
-        if(configs == null || configs.isEmpty()) {
+        if (configs == null || configs.isEmpty()) {
             configs = config.configurationsAt(defaultQueryBuilder.toString());
         }
         return configs == null ? Collections.EMPTY_LIST : configs;
     }
 
-	private String getConfigString(String query, String catalogue, String subQuery, String defaultValue) {
-		
-		StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append(query)
-		.append("[@catalogue='")
-		.append(catalogue)
-		.append("']");
-		if(StringUtils.isNotBlank(subQuery)) {
-			queryBuilder.append("/")
-			.append(subQuery);
-		}
-		
-		StringBuilder defaultQueryBuilder = new StringBuilder();
-		defaultQueryBuilder.append(query)
-		.append("[not(@catalogue)]");
-		if(StringUtils.isNotBlank(subQuery)) {
-			defaultQueryBuilder.append("/")
-			.append(subQuery);
-		}
-		
-		return config.getString(queryBuilder.toString(), config.getString(defaultQueryBuilder.toString(), defaultValue));
-	}
+    private String getConfigString(String query, String catalogue, String subQuery, String defaultValue) {
 
-	/**
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append(query).append("[@catalogue='").append(catalogue).append("']");
+        if (StringUtils.isNotBlank(subQuery)) {
+            queryBuilder.append("/").append(subQuery);
+        }
+
+        StringBuilder defaultQueryBuilder = new StringBuilder();
+        defaultQueryBuilder.append(query).append("[not(@catalogue)]");
+        if (StringUtils.isNotBlank(subQuery)) {
+            defaultQueryBuilder.append("/").append(subQuery);
+        }
+
+        return config.getString(queryBuilder.toString(), config.getString(defaultQueryBuilder.toString(), defaultValue));
+    }
+
+    /**
      * Performs the sru search and creates a Goobi fileformat representing the result Also used internally to create an anchor fileformat for a part
      * of a work
      * 
@@ -321,50 +321,59 @@ public class SruOpacImport implements IOpacPlugin {
      * @return The query result as Goobi fileformat
      * @throws Exception If no unique query result could be found and parsed successfully
      */
-    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, MarcXmlParser parser, RecordInformation info)
-            throws Exception {
+    public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs, MarcXmlParser parser,
+            RecordInformation info) throws Exception {
         this.coc = catalogue;
         this.prefs = inPrefs;
-        
+
         SRUClient client = new SRUClient();
-        String version =this.config.getString("sru[@catalogue='" + catalogue.getTitle() + "']/version",
-				this.config.getString("sru[not(@catalogue)]/version", client.getSruVersion()));
+        String version = this.config.getString("sru[@catalogue='" + catalogue.getTitle() + "']/version", this.config.getString(
+                "sru[not(@catalogue)]/version", client.getSruVersion()));
         client.setSruVersion(version);
-      
+
         //create a new empty fileformat
         Fileformat ff = new MetsMods(inPrefs);
-        
+
         //query the catalogue, first without using a search field. recordSchema is always marcxml
         String recordSchema = "marcxml";
         String answer = client.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
         //retrieve the marcXml document from the answer
-        try {        	
-        	marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-        } catch(SRUException e ) {
-        	//If no record was found, search again using the search field     		
-        	answer = client.querySRU(catalogue, inSuchbegriff, recordSchema);
-        	marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-        	
+        try {
+            marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+        } catch (SRUException e) {
+            //If no record was found, search again using the search field
+            answer = client.querySRU(catalogue, inSuchbegriff, recordSchema);
+            marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
+
         }
-        
+
         //throw exception if not exactly one record was found
         if (marcXmlDoc != null) {
             hitcount = 1;
         } else {
             throw new Exception("Unable to find record");
         }
-        
-        String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix",
-				this.config.getString("namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
-        String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri",
-				this.config.getString("namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
+        if (saveOriginalMetadata) {
+            // save marcXmlDoc into file, overwrite existing
+            XMLOutputter xmlOutput = new XMLOutputter();
+            xmlOutput.setFormat(Format.getPrettyFormat());
+
+            Path destination = Paths.get(originalMetadataFolder, inSuchbegriff.replaceAll("\\W", "") + "_marc.xml");
+            xmlOutput.output(marcXmlDoc, new FileWriter(destination.toString()));
+            pathToMarcRecord = destination;
+        }
+
+        String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix", this.config.getString(
+                "namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
+        String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri", this.config.getString(
+                "namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
         parser.setNamespace(prefix, uri);
-        parser.setInfo(info);   //Pass record type if this is an anchor
-        parser.setIndividualIdentifier(inSuchbegriff.trim());   //not used
+        parser.setInfo(info); //Pass record type if this is an anchor
+        parser.setIndividualIdentifier(inSuchbegriff.trim()); //not used
         File marcMappingFile = initMappingFile(catalogue, marcXmlDoc, parser.getNamespace());
         myLogger.debug("Using mapping file " + marcMappingFile);
         parser.setMapFile(marcMappingFile);
-        
+
         //parse the marcXml record
         DigitalDocument dd = parser.parseMarcXml(marcXmlDoc, this.originalAnchor);
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
@@ -373,33 +382,33 @@ public class SruOpacImport implements IOpacPlugin {
 
         //If the record contains a reference to an anchor, retrieve the anchor record
         String anchorId = parser.getAchorID();
-        if(!parser.isTreatAsPeriodical() &&  anchorId == null && info == null) {
-        	if(dd.getLogicalDocStruct().getType().isAnchor()) {
-        		MetadataType catalogId = prefs.getMetadataTypeByName("CatalogIDDigital");
-        		if(catalogId != null) {        			
-        			List<? extends Metadata> mds = dd.getLogicalDocStruct().getAllMetadataByType(catalogId);
-        			if(!mds.isEmpty()) {
-        				anchorId = mds.get(0).getValue();
-        			}
-        		}
-        	}
+        if (!parser.isTreatAsPeriodical() && anchorId == null && info == null) {
+            if (dd.getLogicalDocStruct().getType().isAnchor()) {
+                MetadataType catalogId = prefs.getMetadataTypeByName("CatalogIDDigital");
+                if (catalogId != null) {
+                    List<? extends Metadata> mds = dd.getLogicalDocStruct().getAllMetadataByType(catalogId);
+                    if (!mds.isEmpty()) {
+                        anchorId = mds.get(0).getValue();
+                    }
+                }
+            }
         }
         if (anchorId != null) {
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
             this.marcXmlDocVolume = this.marcXmlDoc;
-            this.originalAnchor  = dd.getLogicalDocStruct();
-            try {            	
-            	ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, anchorInfo);
-            	dd = ff.getDigitalDocument();
-//            attachToAnchor(dd, af);
-            } catch(SRUException e) {
-            	myLogger.warn("No anchor entry found for identifier " + anchorId);
+            this.originalAnchor = dd.getLogicalDocStruct();
+            try {
+                ff = search(inSuchfeld, anchorId, catalogue, inPrefs, parser, anchorInfo);
+                dd = ff.getDigitalDocument();
+                //            attachToAnchor(dd, af);
+            } catch (SRUException e) {
+                myLogger.warn("No anchor entry found for identifier " + anchorId);
             }
         }
 
         createAtstsl(dd);
         ff.setDigitalDocument(dd);
-        
+
         return ff;
     }
 
@@ -420,7 +429,7 @@ public class SruOpacImport implements IOpacPlugin {
      */
     public XPathExpression<String> createXPath(String query, Namespace namespace) {
         XPathExpression<String> xpath;
-        if(namespace != null) {            
+        if (namespace != null) {
             xpath = XPathFactory.instance().compile(query, Filters.fstring(), null, namespace);
         } else {
             xpath = XPathFactory.instance().compile(query, Filters.fstring(), null);
@@ -433,11 +442,11 @@ public class SruOpacImport implements IOpacPlugin {
      * @param namespace
      */
     public String getStringQuery(String query, Namespace namespace) {
-        if(namespace != null && StringUtils.isNotBlank(namespace.getPrefix())) {
+        if (namespace != null && StringUtils.isNotBlank(namespace.getPrefix())) {
             query = query.replaceAll("\\/(\\w)", "/" + namespace.getPrefix() + ":" + "$1");
         }
-        if(query.endsWith("/")) {
-            query = query.substring(0, query.length()-1);
+        if (query.endsWith("/")) {
+            query = query.substring(0, query.length() - 1);
         }
         query = "string(" + query + ")";
         return query;
@@ -446,10 +455,10 @@ public class SruOpacImport implements IOpacPlugin {
     /**
      * Attaches the digital document to the fileformat containing the anchor record
      * 
-     * @param dd    The digital document containing the volume record
-     * @param anchorFormat  the fileformat containing the anchor record
-     * @throws PreferencesException     If the anchor digital document could not be retireved from the fileformat
-     * @throws TypeNotAllowedAsChildException   If the record doctype is not allowed as child of the anchor doctype
+     * @param dd The digital document containing the volume record
+     * @param anchorFormat the fileformat containing the anchor record
+     * @throws PreferencesException If the anchor digital document could not be retireved from the fileformat
+     * @throws TypeNotAllowedAsChildException If the record doctype is not allowed as child of the anchor doctype
      */
     private void attachToAnchor(DigitalDocument dd, Fileformat anchorFormat) throws PreferencesException, TypeNotAllowedAsChildException {
         if (anchorFormat != null && anchorFormat.getDigitalDocument().getLogicalDocStruct().getType().isAnchor()) {
@@ -495,7 +504,7 @@ public class SruOpacImport implements IOpacPlugin {
         }
         this.atstsl = createAtstsl(title, author).toLowerCase();
     }
-    
+
     /**
      * Create a shorthand string from the provided title and author to create an identifier string
      * 
@@ -597,36 +606,49 @@ public class SruOpacImport implements IOpacPlugin {
      */
     @Override
     public ConfigOpacDoctype getOpacDocType() {
-            ConfigOpac co;
-			try {
-				co = ConfigOpac.getInstance();
-			} catch (Throwable e) {
-				myLogger.error(e.getMessage(), e);
-				return null;
-			}
-			ConfigOpacDoctype cod = null;
-			if(this.gattung != null) {				
-				cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
-			} else {
-				cod = co.getDoctypeByName(this.docType);
-				if(cod == null) {
-					cod = co.getDoctypeByName(this.docType.toLowerCase());
-				}
-			}
+        ConfigOpac co;
+        try {
+            co = ConfigOpac.getInstance();
+        } catch (Throwable e) {
+            myLogger.error(e.getMessage(), e);
+            return null;
+        }
+        ConfigOpacDoctype cod = null;
+        if (this.gattung != null) {
+            cod = co.getDoctypeByMapping(this.gattung.substring(0, 2), this.coc.getTitle());
+        } else {
+            cod = co.getDoctypeByName(this.docType);
             if (cod == null) {
-                cod = co.getAllDoctypes().get(0);
-                this.gattung = cod.getMappings().get(0);
-
+                cod = co.getDoctypeByName(this.docType.toLowerCase());
             }
-            return cod;
+        }
+        if (cod == null) {
+            cod = co.getAllDoctypes().get(0);
+            this.gattung = cod.getMappings().get(0);
+
+        }
+        return cod;
     }
 
+    @Override
     public void setAtstsl(String createAtstsl) {
         atstsl = createAtstsl;
     }
 
+    @Override
     public String getGattung() {
         return gattung;
+    }
+
+    @Override
+    public String getRawDataAsString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Path getRecordPath() {
+        return pathToMarcRecord;
     }
 
 }
