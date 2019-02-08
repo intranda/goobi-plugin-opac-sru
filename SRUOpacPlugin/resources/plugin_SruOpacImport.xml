@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config_plugin>
     <storeMetadata>true</storeMetadata>
-    <metadataFolder>/opt/digiverso/goobi/marc/</metadataFolder>
+    <metadataFolder>/opt/digiverso/goobi/tmp/</metadataFolder>
     <charset>utf-8</charset>
     <mapping catalogue="HU-BERLIN Alma (SRU)" type="rda" typeXPath="//datafield[@tag='040']/subfield[@code='e']">/opt/digiverso/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map_alma.xml</mapping>
     <mapping catalogue="HU-BERLIN Alma (SRU)">/opt/digiverso/git/goobi-plugin-opac-sru/SRUOpacPlugin/resources/marc_map.xml</mapping>
