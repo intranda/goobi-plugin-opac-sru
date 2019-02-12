@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -97,7 +98,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     private boolean saveOriginalMetadata = false;
     private String originalMetadataFolder;
 
-    private Path pathToMarcRecord;
+    private List<Path> pathToMarcRecord = new ArrayList<>();
 
 
     /**
@@ -208,7 +209,6 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
         //        initSearchFieldMap();
         inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
-        pathToMarcRecord = null;
         String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
         MarcXmlParser parser;
         if ("HU".equalsIgnoreCase(marcParserType)) {
@@ -360,7 +360,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
             Path destination = Paths.get(originalMetadataFolder, inSuchbegriff.replaceAll("\\W", "") + "_marc.xml");
             xmlOutput.output(marcXmlDoc, new FileWriter(destination.toString()));
-            pathToMarcRecord = destination;
+            pathToMarcRecord .add(destination);
         }
 
         String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix", this.config.getString(
@@ -641,13 +641,12 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     }
 
     @Override
-    public String getRawDataAsString() {
-        // TODO Auto-generated method stub
+    public Map<String, String> getRawDataAsString() {
         return null;
     }
 
     @Override
-    public Path getRecordPath() {
+    public List<Path> getRecordPathList() {
         return pathToMarcRecord;
     }
 
