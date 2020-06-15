@@ -1,12 +1,12 @@
 /**
  * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
- * 
+ *
  * Visit the websites for more information.
  *          - http://digiverso.com
  *          - http://www.intranda.com
- * 
+ *
  * Copyright 2013, intranda GmbH, Göttingen
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * 
+ *
  */
 
 package de.intranda.goobi.plugins;
@@ -103,7 +103,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Constructor using the default plugin configuration profived by Goobi
-     * 
+     *
      * @throws ImportPluginException if any configuration files could not be found or read
      */
     public SruOpacImport() throws ImportPluginException {
@@ -113,7 +113,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Constructor for using a custom plugin configuration
-     * 
+     *
      * @param config the config to use
      * @throws ImportPluginException if any configuration files could not be found or read
      */
@@ -124,7 +124,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Reads the plugin configuration
-     * 
+     *
      * @throws ImportPluginException no metadata mapping file could be found
      */
     private void init() throws ImportPluginException {
@@ -143,7 +143,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     /**
      * Reads the search fields to use from the plugin configuration. If no fields are configured, a default configuration is used: 12 (identifier) >>
      * rec.id The search field is used in the sru query like so: query=<search field>=123345
-     * 
+     *
      */
     private void initSearchFieldMap() {
         searchFieldMap = new HashMap<>();
@@ -176,9 +176,9 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     }
 
     /**
-     * 
+     *
      * get the search field to use for this query
-     * 
+     *
      * @param fieldCode the field code seleced in goobi (e.g. 12=identifier, 4=title)
      * @param catalogue the catalog title used. May be null, in which case the first configured search field is used
      * @return the query search field
@@ -203,7 +203,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     /**
      * Called from Goobi. Gets the search field to use from configuration, performs the query and if possible creates a new Goobi fileformat
      * representing the result
-     * 
+     *
      */
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
@@ -312,7 +312,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     /**
      * Performs the sru search and creates a Goobi fileformat representing the result Also used internally to create an anchor fileformat for a part
      * of a work
-     * 
+     *
      * @param inSuchfeld The field to search
      * @param inSuchbegriff The search term
      * @param catalogue The catalogue to use
@@ -454,7 +454,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Attaches the digital document to the fileformat containing the anchor record
-     * 
+     *
      * @param dd The digital document containing the volume record
      * @param anchorFormat the fileformat containing the anchor record
      * @throws PreferencesException If the anchor digital document could not be retireved from the fileformat
@@ -477,7 +477,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Create a shorthand string from title and author of the record to create an identifier string
-     * 
+     *
      * @param dd
      */
     private void createAtstsl(DigitalDocument dd) {
@@ -507,7 +507,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     /**
      * Create a shorthand string from the provided title and author to create an identifier string
-     * 
+     *
      */
     @Override
     public String createAtstsl(String myTitle, String autor) {
@@ -593,16 +593,16 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     @Override
     public String getTitle() {
-        return "SRU";
+        return "intranda_opac_sru";
     }
 
     public String getDescription() {
-        return "SRU";
+        return "intranda_opac_sru";
     }
 
     /**
      * Gets the DocType for the record from the gattung-term
-     * 
+     *
      */
     @Override
     public ConfigOpacDoctype getOpacDocType() {
