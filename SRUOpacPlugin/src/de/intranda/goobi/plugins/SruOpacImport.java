@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
@@ -159,12 +159,12 @@ public class SruOpacImport implements IOpacPluginVersion2  {
             catalogMap.put(null, "rec.id");
             searchFieldMap.put("12", catalogMap);
         } else {
-            List<SubnodeConfiguration> fieldConfigs = mappings.configurationsAt("field");
-            for (SubnodeConfiguration fieldConfig : fieldConfigs) {
+            List<HierarchicalConfiguration> fieldConfigs = mappings.configurationsAt("field");
+            for (HierarchicalConfiguration fieldConfig : fieldConfigs) {
                 String key = fieldConfig.getString("id");
                 Map<String, String> catalogFieldMap = new LinkedHashMap<>();
-                List<Configuration> searchFields = fieldConfig.configurationsAt("searchField");
-                for (Configuration searchFieldConfig : searchFields) {
+                List<HierarchicalConfiguration> searchFields = fieldConfig.configurationsAt("searchField");
+                for (HierarchicalConfiguration searchFieldConfig : searchFields) {
                     String value = searchFieldConfig.getString("");
                     String catalogue = searchFieldConfig.getString("@catalogue");
                     catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
@@ -237,9 +237,9 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     private File initMappingFile(ConfigOpacCatalogue catalogue, Document marcDoc, Namespace namespace) throws ImportPluginException {
         //    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
 
-        List<SubnodeConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
+        List<HierarchicalConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
         String mappingPath = null;
-        for (SubnodeConfiguration mappingConfig : configs) {
+        for (HierarchicalConfiguration mappingConfig : configs) {
             mappingConfig.setExpressionEngine(new XPathExpressionEngine());
             String catalogType = mappingConfig.getString("@type", "");
             if (StringUtils.isNotBlank(catalogType)) {
@@ -272,7 +272,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
         return marcMappingFile;
     }
 
-    private List<SubnodeConfiguration> getConfigs(String query, String catalogue, String subQuery) {
+    private List<HierarchicalConfiguration> getConfigs(String query, String catalogue, String subQuery) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(query).append("[@catalogue='").append(catalogue).append("']");
         if (StringUtils.isNotBlank(subQuery)) {
@@ -285,7 +285,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
             defaultQueryBuilder.append("/").append(subQuery);
         }
 
-        List<SubnodeConfiguration> configs = config.configurationsAt(queryBuilder.toString());
+        List<HierarchicalConfiguration> configs = config.configurationsAt(queryBuilder.toString());
         if (configs == null || configs.isEmpty()) {
             configs = config.configurationsAt(defaultQueryBuilder.toString());
         }
