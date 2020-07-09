@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
@@ -159,12 +159,12 @@ public class SruOpacImport implements IOpacPluginVersion2  {
             catalogMap.put(null, "rec.id");
             searchFieldMap.put("12", catalogMap);
         } else {
-            List<SubnodeConfiguration> fieldConfigs = mappings.configurationsAt("field");
-            for (SubnodeConfiguration fieldConfig : fieldConfigs) {
+            List<HierarchicalConfiguration> fieldConfigs = mappings.configurationsAt("field");
+            for (HierarchicalConfiguration fieldConfig : fieldConfigs) {
                 String key = fieldConfig.getString("id");
                 Map<String, String> catalogFieldMap = new LinkedHashMap<>();
-                List<Configuration> searchFields = fieldConfig.configurationsAt("searchField");
-                for (Configuration searchFieldConfig : searchFields) {
+                List<HierarchicalConfiguration> searchFields = fieldConfig.configurationsAt("searchField");
+                for (HierarchicalConfiguration searchFieldConfig : searchFields) {
                     String value = searchFieldConfig.getString("");
                     String catalogue = searchFieldConfig.getString("@catalogue");
                     catalogFieldMap.put(catalogue.replaceAll("\\s", "").toLowerCase(), value);
@@ -285,7 +285,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
             defaultQueryBuilder.append("/").append(subQuery);
         }
 
-        List<SubnodeConfiguration> configs = config.configurationsAt(queryBuilder.toString());
+        List<HierarchicalConfiguration> configs = config.configurationsAt(queryBuilder.toString());
         if (configs == null || configs.isEmpty()) {
             configs = config.configurationsAt(defaultQueryBuilder.toString());
         }
