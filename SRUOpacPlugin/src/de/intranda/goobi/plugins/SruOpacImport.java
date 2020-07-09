@@ -237,9 +237,9 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     private File initMappingFile(ConfigOpacCatalogue catalogue, Document marcDoc, Namespace namespace) throws ImportPluginException {
         //    	String mappingPath = getConfigString("mapping", catalogue.getTitle(), null, "marc_map");
 
-        List<SubnodeConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
+        List<HierarchicalConfiguration> configs = getConfigs("mapping", catalogue.getTitle(), null);
         String mappingPath = null;
-        for (SubnodeConfiguration mappingConfig : configs) {
+        for (HierarchicalConfiguration mappingConfig : configs) {
             mappingConfig.setExpressionEngine(new XPathExpressionEngine());
             String catalogType = mappingConfig.getString("@type", "");
             if (StringUtils.isNotBlank(catalogType)) {
@@ -272,7 +272,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
         return marcMappingFile;
     }
 
-    private List<SubnodeConfiguration> getConfigs(String query, String catalogue, String subQuery) {
+    private List<HierarchicalConfiguration> getConfigs(String query, String catalogue, String subQuery) {
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append(query).append("[@catalogue='").append(catalogue).append("']");
         if (StringUtils.isNotBlank(subQuery)) {
