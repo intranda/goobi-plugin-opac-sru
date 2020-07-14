@@ -60,15 +60,16 @@ public class SRUClient {
      * @param query The query.
      * @param recordSchema The expected record schema.
      * @return Query result XML string.
+     * @throws IOException If connecting to the catalog failed
      */
-    public String querySRU(ConfigOpacCatalogue cat, String query, String recordSchema) {
+    public String querySRU(ConfigOpacCatalogue cat, String query, String recordSchema) throws IOException {
         String ret = null;
         if (query != null && !query.isEmpty()) {
             query = query.trim();
         }
 
         if (cat != null) {
-            String url = "http://";
+            String url = cat.getProtocol();
 
             url += cat.getAddress();
             url += ":" + cat.getPort();
@@ -102,8 +103,6 @@ public class SRUClient {
                 }
                 ret = encodeAsString(bytes, charset);
 //                ret = StringEscapeUtils.unescapeHtml(ret);
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
             }
         }
 

@@ -593,7 +593,7 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
     @Override
     public String getTitle() {
-        return "intranda_opac_sru";
+        return "SRU";
     }
 
     public String getDescription() {
