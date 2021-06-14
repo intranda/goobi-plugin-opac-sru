@@ -75,7 +75,7 @@ import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
-public class SruOpacImport implements IOpacPluginVersion2  {
+public class SruOpacImport implements IOpacPluginVersion2 {
     private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
     private XMLConfiguration config;
@@ -99,7 +99,6 @@ public class SruOpacImport implements IOpacPluginVersion2  {
     private String originalMetadataFolder;
 
     private List<Path> pathToMarcRecord = new ArrayList<>();
-
 
     /**
      * Constructor using the default plugin configuration profived by Goobi
@@ -327,8 +326,8 @@ public class SruOpacImport implements IOpacPluginVersion2  {
         this.prefs = inPrefs;
 
         SRUClient client = new SRUClient();
-        String version = this.config.getString("sru[@catalogue='" + catalogue.getTitle() + "']/version", this.config.getString(
-                "sru[not(@catalogue)]/version", client.getSruVersion()));
+        String version = this.config.getString("sru[@catalogue='" + catalogue.getTitle() + "']/version",
+                this.config.getString("sru[not(@catalogue)]/version", client.getSruVersion()));
         client.setSruVersion(version);
 
         //create a new empty fileformat
@@ -360,13 +359,15 @@ public class SruOpacImport implements IOpacPluginVersion2  {
 
             Path destination = Paths.get(originalMetadataFolder, inSuchbegriff.replaceAll("\\W", "") + "_marc.xml");
             xmlOutput.output(marcXmlDoc, new FileWriter(destination.toString()));
-            pathToMarcRecord .add(destination);
+            if (!pathToMarcRecord.contains(destination)) {
+                pathToMarcRecord.add(destination);
+            }
         }
 
-        String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix", this.config.getString(
-                "namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
-        String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri", this.config.getString(
-                "namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
+        String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix",
+                this.config.getString("namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
+        String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri",
+                this.config.getString("namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
         parser.setNamespace(prefix, uri);
         parser.setInfo(info); //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim()); //not used
