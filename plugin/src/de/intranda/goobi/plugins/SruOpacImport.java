@@ -207,6 +207,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
         //        initSearchFieldMap();
+        pathToMarcRecord.clear();
         inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
         String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
         MarcXmlParser parser;
