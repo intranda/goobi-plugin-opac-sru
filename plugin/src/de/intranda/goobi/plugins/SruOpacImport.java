@@ -54,6 +54,7 @@ import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.MarcXmlParserFU;
 import de.intranda.goobi.plugins.utils.MarcXmlParserHU;
+import de.intranda.goobi.plugins.utils.MarcXmlParserUGH;
 import de.intranda.goobi.plugins.utils.SRUClient;
 import de.intranda.goobi.plugins.utils.SRUClient.SRUException;
 import de.sub.goobi.config.ConfigPlugins;
@@ -215,6 +216,8 @@ public class SruOpacImport implements IOpacPluginVersion2 {
             parser = new MarcXmlParserHU(inPrefs);
         } else if ("FU".equalsIgnoreCase(marcParserType)) {
             parser = new MarcXmlParserFU(inPrefs);
+        } else if("UGH".equalsIgnoreCase(marcParserType)) {
+            parser = new MarcXmlParserUGH(inPrefs);
         } else {
             parser = new MarcXmlParser(inPrefs) {
 

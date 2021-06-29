@@ -15,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.intranda.goobi.plugins.utils.SRUClient.SRUException;
+import de.intranda.ugh.extension.MarcFileformat;
 import de.intranda.utils.DocumentUtils;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import ugh.dl.Fileformat;
@@ -24,6 +25,7 @@ public class SruOpacImportTest {
 
 	private static final String ruleset = "resources/ruleset-ubwien.xml";
 	private static final String rulesetHU = "resources/HU-monographie.xml";
+	private static final String rulesetHUMarc = "resources/HU-monographie-marc.xml";
 	private static final String configPath = "resources/plugin_SruOpacImport.xml";
 	private static final File output = new File("output");
 
@@ -48,8 +50,8 @@ public class SruOpacImportTest {
 		catalogueFU = new ConfigOpacCatalogue("FU-BERLIN (ALMA)", "SRU-Schnittstelle der FU-Berlin",
 				"fu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_FUB", null, 80, null, "SRU", null);
 		catalogueBVB = new ConfigOpacCatalogue("BVB", "BVB", "bvbr.bib-bvb.de", "bvb01sru", null, 5661, null, "SRU", null);
-		catalogueHU = new ConfigOpacCatalogue("HU-BERLIN Alma (SRU)", "HU-Berlin", "hu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_HUB", null, 80,
-				null, "SRU", null);
+		catalogueHU = new ConfigOpacCatalogue("HU-BERLIN Alma (SRU)", "HU-Berlin", "hu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_HUB", null, 443, "utf-8",
+				null, null, "SRU", "https://", null);
 		config = new XMLConfiguration(new File(configPath));
 		FileUtils.deleteDirectory(output);
 		output.mkdir();
@@ -92,19 +94,18 @@ public class SruOpacImportTest {
 	@Test
 	public void testSearchHU() throws Exception {
 		try {
-			prefs.loadPrefs(rulesetHU);
+			prefs.loadPrefs(rulesetHUMarc);
 			SruOpacImport importer = new SruOpacImport(config);
-			// Fileformat ff = importer.search("12", "BV042478174", catalogueHU,
-			// prefs);
-			// Fileformat ff = importer.search("12", "DE-11-001852167",
-			// catalogueHU, prefs);
-			Fileformat ff = importer.search("12", "BV044675998", catalogueHU, prefs);
+
+			Fileformat ff = importer.search("12", "BV045903998", catalogueHU, prefs);
 			DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
 			if (importer.marcXmlDocVolume != null) {
 				DocumentUtils.getFileFromDocument(new File("output", "marc-volume.xml"), importer.marcXmlDocVolume);
 			}
 			File outputFile = new File(output, "meta.xml");
 			ff.write(outputFile.getAbsolutePath());
+			assertTrue(outputFile.exists());
+			
 		} catch (SRUException e) {
 			Assume.assumeFalse("Cannot perform test: " + e.getMessage(),
 					"System temporarily unavailable".equals(e.getMessage()));

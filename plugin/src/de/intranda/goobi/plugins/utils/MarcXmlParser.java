@@ -163,8 +163,8 @@ public class MarcXmlParser {
     private boolean writeToAnchor;
     private boolean writeToChild;
     protected DocStruct dsLogical;
-    private DocStruct dsAnchor;
-    private DocStruct dsPhysical;
+    protected DocStruct dsAnchor;
+    protected DocStruct dsPhysical;
     // private List<String> anchorMetadataList = new ArrayList<String>();
     protected String separator;
     private RecordInformation info;
@@ -253,7 +253,7 @@ public class MarcXmlParser {
         return dd;
     }
 
-    private void addMissingMetadata(DigitalDocument dd) {
+    protected void addMissingMetadata(DigitalDocument dd) {
         if (dsLogical != null && dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNo"))
                 && !dsLogical.hasMetadataType(prefs.getMetadataTypeByName("CurrentNoSorting"))) {
             try {
@@ -288,7 +288,7 @@ public class MarcXmlParser {
         //        }
     }
 
-    private DigitalDocument generateDD() throws ParserException {
+    public DigitalDocument generateDD() throws ParserException {
         boolean anchorMode = true;
         DigitalDocument dd = new DigitalDocument();
         if (info == null) {
@@ -1499,6 +1499,10 @@ public class MarcXmlParser {
 
         public ParserException(String string) {
             super(string);
+        }
+        
+        public ParserException(Exception e) {
+            super(e);
         }
 
     }
