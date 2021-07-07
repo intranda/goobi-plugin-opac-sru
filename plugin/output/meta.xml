@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mets:mets OBJID="" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd" xmlns:mets="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   <mets:metsHdr CREATEDATE="2017-02-03T11:54:20Z">
+<mets:mets OBJID="" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd" xmlns:mets="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:goobi="http://meta.goobi.org/v1.5.1/">
+   <mets:metsHdr CREATEDATE="2021-06-29T13:36:25Z">
       <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
-         <mets:name>Goobi - ugh-3.0-ugh-2.0.0-29-g3b6efe1 - 21−December−2016</mets:name>
+         <mets:name>Goobi -  - 2021-06-29T08:47:12Z</mets:name>
          <mets:note>Goobi</mets:note>
       </mets:agent>
    </mets:metsHdr>
    <mets:dmdSec ID="DMDLOG_0000">
       <mets:mdWrap MDTYPE="MODS">
          <mets:xmlData>
-            <mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+            <mods:mods>
                <mods:extension>
-                  <goobi:goobi xmlns:goobi="http://meta.goobi.org/v1.5.1/">
-                     <goobi:metadata name="PublisherName">Oldenbourg</goobi:metadata>
-                     <goobi:metadata name="PlaceOfPublication">München</goobi:metadata>
-                     <goobi:metadata name="PublicationYear">1984</goobi:metadata>
-                     <goobi:metadata name="TitleDocMain">Literaturverfilmungen</goobi:metadata>
-                     <goobi:metadata name="TitleDocMainShort">Literaturverfilmungen</goobi:metadata>
-                     <goobi:metadata name="SizeSourcePrint">91 S.</goobi:metadata>
-                     <goobi:metadata name="CatalogIDDigital">BV006015701</goobi:metadata>
-                     <goobi:metadata name="Author" type="person">
-                        <goobi:lastName>Adam</goobi:lastName>
-                        <goobi:firstName>Gerhard</goobi:firstName>
+                  <goobi:goobi>
+                     <goobi:metadata name="TitleDocMain">Verzeichnis der Vorlesungen und Übungen /</goobi:metadata>
+                     <goobi:metadata name="PlaceOfPublication">Berlin,</goobi:metadata>
+                     <goobi:metadata name="PublicationYear">2019.</goobi:metadata>
+                     <goobi:metadata name="CatalogIDDigital">BV045903998</goobi:metadata>
+                     <goobi:metadata name="DocLanguage">ger</goobi:metadata>
+                     <goobi:metadata name="CorporateAuthor" type="corporate">
+                        <goobi:mainName>Seminar für Orientalische Sprachen zu Berlin</goobi:mainName>
                         <goobi:authorityID>gnd</goobi:authorityID>
                         <goobi:authorityURI>http://d-nb.info/gnd/</goobi:authorityURI>
-                        <goobi:displayName>Adam, Gerhard</goobi:displayName>
+                        <goobi:authorityValue>35468-5</goobi:authorityValue>
                      </goobi:metadata>
                   </goobi:goobi>
                </mods:extension>
@@ -33,7 +30,7 @@
       </mets:mdWrap>
    </mets:dmdSec>
    <mets:structMap TYPE="LOGICAL">
-      <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Monograph"/>
+      <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="SingleSheetMaterial"/>
    </mets:structMap>
    <mets:structMap TYPE="PHYSICAL">
       <mets:div ID="PHYS_0000" TYPE="BoundBook"/>

@@ -4169,7 +4169,7 @@
         <MetsType>SingleSheetMultiPart</MetsType>
       </DocStruct>
     </METS>
-    <Marc>
+<Marc>
       <Metadata>
         <!-- internal metadata name -->
         <Name>TitleDocMain</Name>
@@ -4180,6 +4180,18 @@
           <fieldMainTag>245</fieldMainTag>
           <fieldSubTag>a</fieldSubTag>
           <!-- number, blank or any -->
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>245</fieldMainTag>
+          <fieldSubTag>n</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>245</fieldMainTag>
+          <fieldSubTag>p</fieldSubTag>
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
@@ -4194,7 +4206,7 @@
         <conditionField/>
         <conditionValue/>
         <!-- run the regex and keep the value of $1 -->
-        <fieldReplacement/>
+        <fieldReplacement>s/[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)//g</fieldReplacement>
         <separateEntries>true</separateEntries>
         <separator>; </separator>
       </Metadata>
@@ -4206,6 +4218,7 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <fieldReplacement>s/[\u0098\u009c]|[&lt;+\>+]|(\s*[\/.,;:]$)//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4216,7 +4229,26 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
-        <separateEntries>true</separateEntries>
+        <field>
+          <fieldMainTag>245</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>245</fieldMainTag>
+          <fieldSubTag>n</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>245</fieldMainTag>
+          <fieldSubTag>p</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/(\u0098.*\u009c)|(&lt;+.*\>+)|(\s*[\/.,;:]$)//g</fieldReplacement>
+        <separateEntries>false</separateEntries>
       </Metadata>
       <Metadata>
         <Name>TitleDocParallel</Name>
@@ -4263,6 +4295,36 @@
         <field>
           <fieldMainTag>022</fieldMainTag>
           <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>x</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>800</fieldMainTag>
+          <fieldSubTag>x</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>810</fieldMainTag>
+          <fieldSubTag>x</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>811</fieldMainTag>
+          <fieldSubTag>x</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>830</fieldMainTag>
+          <fieldSubTag>x</fieldSubTag>
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
@@ -4330,6 +4392,13 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>e</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/[:.,;]$//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4346,6 +4415,70 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <field>
+          <fieldMainTag>534</fieldMainTag>
+          <fieldSubTag>c</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/(,.*)|(\D+)|(.*?\..+?)//g</fieldReplacement>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>PublicationYearDisplay</Name>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>f</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>264</fieldMainTag>
+          <fieldSubTag>c</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>533</fieldMainTag>
+          <fieldSubTag>d</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/[.,;:/]$//g</fieldReplacement>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>PublicationStart</Name>
+        <field>
+          <fieldMainTag>363</fieldMainTag>
+          <fieldSubTag>i</fieldSubTag>
+          <fieldInd1>0</fieldInd1>
+          <fieldInd2>0</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>534</fieldMainTag>
+          <fieldSubTag>c</fieldSubTag>
+          <fieldInd1>0</fieldInd1>
+          <fieldInd2>0</fieldInd2>
+        </field>
+        <fieldReplacement>s/(,.*)|(\D+)|(.*?\..+?)//g</fieldReplacement>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>PublicationEnd</Name>
+        <field>
+          <fieldMainTag>363</fieldMainTag>
+          <fieldSubTag>i</fieldSubTag>
+          <fieldInd1>1</fieldInd1>
+          <fieldInd2>0</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>264</fieldMainTag>
+          <fieldSubTag>c</fieldSubTag>
+          <fieldInd1>0</fieldInd1>
+          <fieldInd2>0</fieldInd2>
+        </field>
+        <fieldReplacement>s/(,.*)|(\D+)|(.*?\..+?)//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4392,13 +4525,64 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <field>
+          <fieldMainTag>773</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
         <fieldReplacement>s/\(DE-\d{3}\)\s?[\w-]+//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
+        <Name>CatalogIDAnchor</Name>
+        <field>
+          <fieldMainTag>773</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>035</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/\(DE-\d{3}\)\s?[\w-]+//g</fieldReplacement>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>CatalogIDSource</Name>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>CatalogIDPeriodicalDB</Name>
+        <field>
+          <fieldMainTag>016</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>true</separateEntries>
+        <conditionField>2</conditionField>
+        <conditionValue>/^DE-600/</conditionValue>
+        </Metadata>
+      <Metadata>
         <Name>DocLanguage</Name>
         <field>
           <fieldMainTag>008</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>041</fieldMainTag>
           <fieldSubTag>a</fieldSubTag>
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
@@ -4440,6 +4624,33 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+         <field>
+          <fieldMainTag>773</fieldMainTag>
+          <fieldSubTag>q</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>CurrentNoSortAlphabetical</Name>
+        <field>
+          <fieldMainTag>773</fieldMainTag>
+          <fieldSubTag>q</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+            <Metadata>
+        <Name>CurrentNoSorting</Name>
+        <field>
+          <fieldMainTag>773</fieldMainTag>
+          <fieldSubTag>q</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/\D+//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4480,7 +4691,36 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <field>
+          <fieldMainTag>300</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>300</fieldMainTag>
+          <fieldSubTag>b</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>h</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/[.,;:]$//g</fieldReplacement>
         <separateEntries>true</separateEntries>
+      </Metadata>
+       <Metadata>
+        <Name>AdditionalInformation</Name>
+        <field>
+          <fieldMainTag>500</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/[.,;:]$//g</fieldReplacement>
       </Metadata>
       <Metadata>
         <Name>PhysicalDescriptionAccompanyingMaterial</Name>
@@ -4580,6 +4820,19 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
+        <field>
+          <fieldMainTag>776</fieldMainTag>
+          <fieldSubTag>n</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>AVE</fieldMainTag>
+          <fieldSubTag>n</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/^.*mit der Signatur: >>\s*|^.*mit der Signatur:\s*//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4600,6 +4853,18 @@
           <fieldSubTag>a</fieldSubTag>
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>995</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>g</fieldInd1>
+          <fieldInd2> </fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>995</fieldMainTag>
+          <fieldSubTag>b</fieldSubTag>
+          <fieldInd1>g</fieldInd1>
+          <fieldInd2> </fieldInd2>
         </field>
         <identifierField>0</identifierField>
         <identifierConditionField>/DE-588/</identifierConditionField>
@@ -6134,6 +6399,51 @@
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
+        <Name>IdentifierSeries</Name>
+        <field>
+          <fieldMainTag>830</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>800</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>810</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>811</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>true</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>CreatorsAllOrigin</Name>
+        <field>
+          <fieldMainTag>100</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>700</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <separateEntries>false</separateEntries>
+        <separator>; </separator>
+      </Metadata>
+      <Metadata>
         <Name>TitleDocMainSeries</Name>
         <field>
           <fieldMainTag>830</fieldMainTag>
@@ -6144,6 +6454,54 @@
         <separateEntries>false</separateEntries>
         <separator>; </separator>
       </Metadata>
+      
+      <Metadata>
+        <Name>PrecedingWork</Name>
+        <field>
+          <fieldMainTag>780</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>780</fieldMainTag>
+          <fieldSubTag>t</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>780</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/\s.*//g</fieldReplacement>
+        <separateEntries>false</separateEntries>
+      </Metadata>
+      <Metadata>
+        <Name>SucceedingWork</Name>
+        <field>
+          <fieldMainTag>785</fieldMainTag>
+          <fieldSubTag>a</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>785</fieldMainTag>
+          <fieldSubTag>t</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <field>
+          <fieldMainTag>785</fieldMainTag>
+          <fieldSubTag>w</fieldSubTag>
+          <fieldInd1>any</fieldInd1>
+          <fieldInd2>any</fieldInd2>
+        </field>
+        <fieldReplacement>s/\s.*//g</fieldReplacement>
+        <separateEntries>false</separateEntries>
+      </Metadata>
+      
       <!-- TODO
             <Metadata>
                 <Name>SourceCatalog</Name>

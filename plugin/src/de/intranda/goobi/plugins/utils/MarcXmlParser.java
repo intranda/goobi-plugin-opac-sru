@@ -708,10 +708,6 @@ public class MarcXmlParser {
 
     private void writeMetadataXPaths(List<Element> eleXpathList, MetadataType mdType, boolean mergeXPaths) {
 
-        if (mdType.getName().equals("CatalogIDPeriodicalDB")) {
-            System.out.println("halt");
-        }
-
         List<GoobiMetadataValue> valueList = new ArrayList<>();
         for (Element eleXpath : eleXpathList) {
             try {
