@@ -3,8 +3,6 @@
     <storeMetadata>true</storeMetadata>
     <metadataFolder>/opt/digiverso/goobi/tmp/</metadataFolder>
     <charset>utf-8</charset>
-    <mapping catalogue="HU-BERLIN Alma (SRU)" type="rda" typeXPath="//datafield[@tag='040']/subfield[@code='e']">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_alma.xml</mapping>
-    <mapping catalogue="HU-BERLIN Alma (SRU)">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map.xml</mapping>
     <mapping catalogue="FU-BERLIN (ALMA)">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_alma_fu.xml</mapping>
 <!--     <mapping catalogue="HU-BERLIN (SRU)">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_hu.xml</mapping> -->
     <mapping catalogue="TEST-ALMA">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_wu.xml</mapping>
@@ -31,7 +29,7 @@
     	<uri>http://www.loc.gov/MARC21/slim</uri>
     </namespace>
     <namespace catalogue="HU-BERLIN Alma (SRU)">
-    	<prefix>slim</prefix>
+    	<prefix>marc</prefix>
     	<uri>http://www.loc.gov/MARC21/slim</uri>
     </namespace>
     <namespace catalogue="BVB">
@@ -45,4 +43,8 @@
     <sru>
     	<version>1.2</version>
     </sru>
+    <mappings>
+    	<docType xpath="//marc:datafield[@tag='655'][@ind2='7']/marc:subfield[@code='a'][text()='Flugblatt']">SingleSheetMaterial</docType>
+    	<docType xpath="//marc:datafield[@tag='655'][@ind2='7']/marc:subfield[@code='a'][text()='Einblattdruck']">SingleSheetMaterial</docType>
+    </mappings>
 </config_plugin>

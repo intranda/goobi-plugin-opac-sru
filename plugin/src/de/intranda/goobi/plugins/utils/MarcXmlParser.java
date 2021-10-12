@@ -59,17 +59,17 @@ public class MarcXmlParser {
         public RecordInformation(DocStruct ds, ConfigOpac configOpac) {
             this.gattung = configOpac.getDoctypeByName(ds.getType().getName()).getMappings().get(0);
             this.ds = ds.getType().getName();
-            if(ds.getType().isAnchor()) {
+            if (ds.getType().isAnchor()) {
                 this.anchorDs = this.ds;
-                if(ds.getAllChildren() != null && !ds.getAllChildren().isEmpty()) { 
+                if (ds.getAllChildren() != null && !ds.getAllChildren().isEmpty()) {
                     this.childDs = ds.getAllChildren().get(0).getType().getName();
                 }
             } else {
                 this.childDs = null;
-                this.anchorDs = null;                
+                this.anchorDs = null;
             }
         }
-        
+
         public RecordInformation(Element element) {
             super();
             String gattung = element.getAttributeValue("gattung");
@@ -191,23 +191,27 @@ public class MarcXmlParser {
     public MarcXmlParser(Prefs prefs) throws ParserException {
         this.prefs = prefs;
     }
-    
+
     public void setMapFile(File mapFile) throws ParserException {
         loadMap(mapFile);
     }
 
     private void loadMap(File mapFile) throws ParserException {
-        try {
-            mapDoc = DocumentUtils.getDocumentFromFile(mapFile);
-        } catch (JDOMException e) {
-            throw new ParserException("Failed to read xml-Document from file " + mapFile.getAbsolutePath() + ":" + e.getMessage());
-        } catch (IOException e) {
-            throw new ParserException("Failed to open file " + mapFile.getAbsolutePath());
-        }
-        if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map")
-                || mapDoc.getRootElement().getChildren("metadata").isEmpty()) {
-            mapDoc = null;
-            throw new ParserException("Map document is either invalid or empty");
+        if (mapFile != null && mapFile.isFile()) {
+            try {
+                mapDoc = DocumentUtils.getDocumentFromFile(mapFile);
+            } catch (JDOMException e) {
+                throw new ParserException("Failed to read xml-Document from file " + mapFile.getAbsolutePath() + ":" + e.getMessage());
+            } catch (IOException e) {
+                throw new ParserException("Failed to open file " + mapFile.getAbsolutePath());
+            }
+            if (mapDoc == null || !mapDoc.hasRootElement() || !mapDoc.getRootElement().getName().equals("map")
+                    || mapDoc.getRootElement().getChildren("metadata").isEmpty()) {
+                mapDoc = null;
+                throw new ParserException("Map document is either invalid or empty");
+            }
+        } else {
+            mapDoc = new Document();
         }
     }
 
@@ -238,7 +242,7 @@ public class MarcXmlParser {
         }
     }
 
-    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor)
+    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor, DocStruct mappedDocStruct)
             throws ParserException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
         this.marcDoc = marcDoc;
         DigitalDocument dd = generateDD();
@@ -742,7 +746,8 @@ public class MarcXmlParser {
 
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
-                    List<GoobiMetadataValue> nodeValueList = getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex, conditions);
+                    List<GoobiMetadataValue> nodeValueList =
+                            getMetadataNodeValues(nodeList, subfields, mdType, mergeSubfields, ignoreRegex, conditions);
 
                     List<GoobiMetadataValue> tempList = new ArrayList<>();
                     StringBuilder sb = new StringBuilder();
@@ -775,9 +780,9 @@ public class MarcXmlParser {
                             if (value != null && valueList.size() <= count) {
                                 valueList.add(value);
                             } else if (value != null && !value.getValue().trim().isEmpty()) {
-//                                value = valueList.get(count) + separator + value;
-//                                GoobiMetadataValue v = new GoobiMetadataValue(valueList.get(count).getValue() + separator + value.getValue());
-//                                valueList.set(count, v);
+                                //                                value = valueList.get(count) + separator + value;
+                                //                                GoobiMetadataValue v = new GoobiMetadataValue(valueList.get(count).getValue() + separator + value.getValue());
+                                //                                valueList.set(count, v);
                                 valueList.get(count).setValue(valueList.get(count).getValue() + separator + value.getValue());
                             }
                             count++;
@@ -800,7 +805,7 @@ public class MarcXmlParser {
             try {
                 Metadata md = new Metadata(mdType);
                 md.setValue(value.getValue().trim());
-                if(StringUtils.isNotBlank(value.getIdentifier())) {                    
+                if (StringUtils.isNotBlank(value.getIdentifier())) {
                     setAuthority(md, value.getIdentifier(), false);
                 }
                 for (String id : value.getAuthorityIds()) {
@@ -1320,7 +1325,7 @@ public class MarcXmlParser {
     public void addMetadata(Metadata metadata, DocStruct ds) throws MetadataTypeNotAllowedException {
         List<? extends Metadata> metadataOfType = ds.getAllMetadataByType(metadata.getType());
         for (Metadata existingMetadata : metadataOfType) {
-            if(existingMetadata.getValue().equals(metadata.getValue())) {
+            if (existingMetadata.getValue().equals(metadata.getValue())) {
                 return;
             }
         }
@@ -1379,7 +1384,7 @@ public class MarcXmlParser {
             GoobiMetadataValue value = new GoobiMetadataValue();
             if (objValue instanceof Element) {
                 Element eleValue = (Element) objValue;
-                
+
                 //check write conditions for element
                 boolean write = conditions.isEmpty();
                 for (Condition condition : conditions) {
@@ -1401,7 +1406,7 @@ public class MarcXmlParser {
                     }
                     if (mergeOccurances) {
                         value.setValue(value.getValue() + string + separator);
-//                        value += string + separator;
+                        //                        value += string + separator;
                     } else {
                         valueList.add(new GoobiMetadataValue(string));
                     }
@@ -1431,16 +1436,16 @@ public class MarcXmlParser {
                         identifier = subfield.getValue();
                     }
                 }
-                
-                if(!authorityIDs.isEmpty()) {  
+
+                if (!authorityIDs.isEmpty()) {
                     value.setIdentifier(identifier);
                     value.setAuthorityIds(authorityIDs);
-//                    for (GoobiMetadataValue v : valueList) {
-//                        v.setIdentifier(identifier);
-//                        v.setAuthorityIds(authorityIDs);
-//                    }
+                    //                    for (GoobiMetadataValue v : valueList) {
+                    //                        v.setIdentifier(identifier);
+                    //                        v.setAuthorityIds(authorityIDs);
+                    //                    }
                 }
-                
+
             } else if (objValue instanceof Attribute) {
                 Attribute atrValue = (Attribute) objValue;
                 LOGGER.debug("mdType: " + mdType.getName() + "; Value: " + atrValue.getValue());
@@ -1512,7 +1517,7 @@ public class MarcXmlParser {
         public ParserException(String string) {
             super(string);
         }
-        
+
         public ParserException(Exception e) {
             super(e);
         }

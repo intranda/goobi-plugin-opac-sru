@@ -1,34 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mets:mets OBJID="" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd" xmlns:mets="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:goobi="http://meta.goobi.org/v1.5.1/" xmlns:xlink="http://www.w3.org/1999/xlink">
-   <mets:metsHdr CREATEDATE="2021-07-16T11:56:57Z">
+<mets:mets OBJID="" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd" xmlns:mets="http://www.loc.gov/METS/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:goobi="http://meta.goobi.org/v1.5.1/">
+   <mets:metsHdr CREATEDATE="2021-10-12T12:38:31Z">
       <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
-         <mets:name>Goobi -  - 2021-07-16T08:18:28Z</mets:name>
+         <mets:name>Goobi - e353d - 2021-04-09T09:13:01Z</mets:name>
          <mets:note>Goobi</mets:note>
       </mets:agent>
    </mets:metsHdr>
-   <mets:dmdSec ID="DMDLOG_0001">
+   <mets:dmdSec ID="DMDLOG_0000">
       <mets:mdWrap MDTYPE="MODS">
          <mets:xmlData>
             <mods:mods>
                <mods:extension>
                   <goobi:goobi>
-                     <goobi:metadata name="TitleDocMain">Verzeihnis der Vorlesngen nd Übngen</goobi:metadata>
-                     <goobi:metadata name="TitleDocMainShort">Verzeichnis der Vorlesungen und Übungen</goobi:metadata>
+                     <goobi:metadata name="TitleDocMain">Caner</goobi:metadata>
+                     <goobi:metadata name="TitleDocSub1">the problem of its genesis and treatment</goobi:metadata>
+                     <goobi:metadata name="TitleDocMainShort">Cancer</goobi:metadata>
+                     <goobi:metadata name="PlaceOfPublication">Berlin :</goobi:metadata>
+                     <goobi:metadata name="PublisherName">Humboldt-Universität zu Berlin, Universitätsbibliothek</goobi:metadata>
                      <goobi:metadata name="PublicationYear">2019</goobi:metadata>
+                     <goobi:metadata name="PublicationYear">1912</goobi:metadata>
                      <goobi:metadata name="PublicationYearDisplay">2019</goobi:metadata>
-                     <goobi:metadata name="CatalogIDDigital">1626436616818</goobi:metadata>
-                     <goobi:metadata anchorId="true" name="CatalogIDDigital">BV045903998</goobi:metadata>
-                     <goobi:metadata name="CatalogIDSource">BV009292510</goobi:metadata>
-                     <goobi:metadata name="DocLanguage">ger</goobi:metadata>
-                     <goobi:metadata name="DocLanguage">ger</goobi:metadata>
-                     <goobi:metadata name="FormatSourcePrint">Online-Ressource</goobi:metadata>
-                     <goobi:metadata name="AdditionalInformation">Reproduktion</goobi:metadata>
-                     <goobi:metadata name="shelfmarksource">PB 8103 und PA 8103</goobi:metadata>
-                     <goobi:metadata name="CorporateAuthor" type="corporate">
-                        <goobi:mainName>Seminar für Orientalische Sprachen zu Berlin</goobi:mainName>
+                     <goobi:metadata name="PublicationYearDisplay">1912</goobi:metadata>
+                     <goobi:metadata name="CatalogIDDigital">BV046323712</goobi:metadata>
+                     <goobi:metadata name="CatalogIDSource">BV037380959</goobi:metadata>
+                     <goobi:metadata name="DocLanguage">eng</goobi:metadata>
+                     <goobi:metadata name="DocLanguage">eng</goobi:metadata>
+                     <goobi:metadata name="FormatSourcePrint">1 Online-Ressource (x, 261 Seiten)</goobi:metadata>
+                     <goobi:metadata name="shelfmarksource">Iy 66257:F8</goobi:metadata>
+                     <goobi:metadata name="Subject">Medizingeschichte</goobi:metadata>
+                     <goobi:metadata name="CreatorsAllOrigin">Forbes-Ross, Frederick William,</goobi:metadata>
+                     <goobi:metadata name="Creator" type="person">
+                        <goobi:lastName>Forbes-Ross</goobi:lastName>
+                        <goobi:firstName>Frederick William,</goobi:firstName>
                         <goobi:authorityID>gnd</goobi:authorityID>
                         <goobi:authorityURI>http://d-nb.info/gnd/</goobi:authorityURI>
-                        <goobi:authorityValue>35468-5</goobi:authorityValue>
+                        <goobi:authorityValue>1201441048</goobi:authorityValue>
+                        <goobi:displayName>Forbes-Ross, Frederick William,</goobi:displayName>
+                     </goobi:metadata>
+                     <goobi:metadata name="Author" type="person">
+                        <goobi:lastName>Forbes-Ross</goobi:lastName>
+                        <goobi:firstName>Frederick William,</goobi:firstName>
+                        <goobi:authorityID>gnd</goobi:authorityID>
+                        <goobi:authorityURI>http://d-nb.info/gnd/</goobi:authorityURI>
+                        <goobi:authorityValue>1201441048</goobi:authorityValue>
+                        <goobi:displayName>Forbes-Ross, Frederick William,</goobi:displayName>
                      </goobi:metadata>
                   </goobi:goobi>
                </mods:extension>
@@ -37,9 +52,6 @@
       </mets:mdWrap>
    </mets:dmdSec>
    <mets:structMap TYPE="LOGICAL">
-      <mets:div ID="LOG_0002" TYPE="Periodical">
-         <mets:mptr LOCTYPE="URL" xlink:href=""/>
-         <mets:div DMDID="DMDLOG_0001" ID="LOG_0003" TYPE="PeriodicalVolume"/>
-      </mets:div>
+      <mets:div DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="Monograph"/>
    </mets:structMap>
 </mets:mets>

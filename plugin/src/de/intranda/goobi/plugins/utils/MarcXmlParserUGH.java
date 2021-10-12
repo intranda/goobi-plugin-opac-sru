@@ -27,6 +27,7 @@ import ugh.exceptions.PreferencesException;
 import ugh.exceptions.ReadException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
+import ugh.fileformats.mets.MetsMods;
 
 public class MarcXmlParserUGH extends MarcXmlParser {
 
@@ -52,13 +53,13 @@ public class MarcXmlParserUGH extends MarcXmlParser {
     }
 
     @Override
-    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor)
+    public DigitalDocument parseMarcXml(Document marcDoc, DocStruct originalAnchor, DocStruct mappedDocStruct)
             throws ParserException, TypeNotAllowedAsChildException, MetadataTypeNotAllowedException, DocStructHasNoTypeException {
         this.marcDoc = marcDoc;
         DigitalDocument dd;
         this.anchorId = null;
         try {
-            dd = readMarc(marcDoc, null).getDigitalDocument();
+            dd = readMarc(marcDoc, mappedDocStruct).getDigitalDocument();
             RecordInformation info = new RecordInformation(dd.getLogicalDocStruct(), this.configOpac);
             setInfo(info);
         } catch (PreferencesException  e) {

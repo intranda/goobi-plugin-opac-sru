@@ -8,9 +8,15 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assume;
@@ -43,12 +49,13 @@ public class SruOpacImportTest {
     private static final String HU_ID_PERIODICAL = "BV041382587";
     private static final String HU_ID_SINGLESHEETMATERIAL = "BV041421924";
 
-
     private Prefs prefs;
     private ConfigOpacCatalogue catalogueFU;
     private ConfigOpacCatalogue catalogueBVB;
     private ConfigOpacCatalogue catalogueHU;
     private XMLConfiguration config;
+
+    SruOpacImport importer;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -70,6 +77,14 @@ public class SruOpacImportTest {
         config = new XMLConfiguration(new File(configPath));
         FileUtils.deleteDirectory(output);
         output.mkdir();
+
+        importer = new SruOpacImport(config);
+
+        ConfigOpac configOpac = Mockito.mock(ConfigOpac.class);
+        ConfigOpacDoctype configOpacDoctype = Mockito.mock(ConfigOpacDoctype.class);
+        Mockito.when(configOpac.getDoctypeByName(Mockito.anyString())).thenReturn(configOpacDoctype);
+        Mockito.when(configOpacDoctype.getMappings()).thenReturn(Collections.singletonList("AA"));
+        importer.setConfigOpac(configOpac);
     }
 
     @After
@@ -96,7 +111,6 @@ public class SruOpacImportTest {
     public void testSearchBVB() throws Exception {
         prefs.loadPrefs(ruleset);
         try {
-            SruOpacImport importer = new SruOpacImport(config);
             Fileformat ff = importer.search("12", "BV006015701", catalogueBVB, prefs);
             File outputFile = new File(output, "meta.xml");
             ff.write(outputFile.getAbsolutePath());
@@ -129,73 +143,65 @@ public class SruOpacImportTest {
             fail(e.getMessage());
         }
     }
-    
+
     @Test
     public void testHU_Monograph() throws Exception {
-        
+
         String id = HU_ID_MONOGRAPH;
-        
-            Fileformat ff = importData(id);
-            assertEquals("Monograph", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
-            File outputFile = new File(output, "meta.xml");
-            ff.write(outputFile.getAbsolutePath());
-            assertTrue(outputFile.exists());
+
+        Fileformat ff = importData(id);
+        assertEquals("Monograph", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
 
     }
-    
+
     @Test
     public void testHU_Volume() throws Exception {
-        
+
         String id = HU_ID_VOLUME;
-        
-            Fileformat ff = importData(id);
-            assertEquals("MultiVolumeWork", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
-            assertEquals("Volume", ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
-            File outputFile = new File(output, "meta.xml");
-            ff.write(outputFile.getAbsolutePath());
-            assertTrue(outputFile.exists());
+
+        Fileformat ff = importData(id);
+        assertEquals("MultiVolumeWork", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+        assertEquals("Volume", ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
 
     }
-    
+
     @Test
     public void testHU_Periodical() throws Exception {
-        
+
         String id = HU_ID_PERIODICAL;
-        
-            Fileformat ff = importData(id);
-            assertEquals("Periodical", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
-            assertEquals("PeriodicalVolume", ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
-            File outputFile = new File(output, "meta.xml");
-            ff.write(outputFile.getAbsolutePath());
-            assertTrue(outputFile.exists());
+
+        Fileformat ff = importData(id);
+        assertEquals("Periodical", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+        assertEquals("PeriodicalVolume", ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
 
     }
-    
+
     @Test
     public void testHU_Corporate() throws Exception {
-        
+
         String id = "BV045903998";
-        
-            Fileformat ff = importData(id);
-            assertNotNull(ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getAllCorporates().get(0).getMainName());
-            
-            File outputFile = new File(output, "meta.xml");
-            ff.write(outputFile.getAbsolutePath());
-            assertTrue(outputFile.exists());
+
+        Fileformat ff = importData(id);
+        assertNotNull(ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getAllCorporates().get(0).getMainName());
+
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
 
     }
-    
-    
+
     private Fileformat importData(String id) throws PreferencesException, ImportPluginException, Exception, IOException {
         prefs.loadPrefs(rulesetHUMarc);
-        SruOpacImport importer = new SruOpacImport(config);
-        
-        ConfigOpac configOpac = Mockito.mock(ConfigOpac.class);
-        ConfigOpacDoctype configOpacDoctype = Mockito.mock(ConfigOpacDoctype.class);
-        Mockito.when(configOpac.getDoctypeByName(Mockito.anyString())).thenReturn(configOpacDoctype);
-        Mockito.when(configOpacDoctype.getMappings()).thenReturn(Collections.singletonList("AA"));
-        importer.setConfigOpac(configOpac);
-        
+
         Fileformat ff = importer.search("12", id, catalogueHU, prefs);
         DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
         if (importer.marcXmlDocVolume != null) {
@@ -203,7 +209,6 @@ public class SruOpacImportTest {
         }
         return ff;
     }
-
 
     @Test
     public void testInit() throws Exception {
@@ -219,4 +224,27 @@ public class SruOpacImportTest {
         assertEquals("marcxml.title", importer.getMappedSearchField("4", "BVB"));
     }
 
+    @Test
+    public void testReadDocTypeMappings() {
+        Map<String, String> mappings = importer.getDocTypeXPaths();
+        assertTrue(mappings.containsValue("SingleSheetMaterial"));
+        assertTrue(mappings.containsKey("/record/datafield[@tag='650']/subfield[@code='a']"));
+    }
+
+    @Test
+    public void findMappedValue() throws PreferencesException, JDOMException, IOException {
+        prefs.loadPrefs(rulesetHUMarc);
+        
+        SAXBuilder builder = new SAXBuilder(); 
+        Document origDoc = builder.build(new File("samples/BV045903998.xml"));
+        Element record = origDoc.getRootElement()
+                .getChild("records", null)
+                .getChild("record", null)
+                .getChild("recordData", null)
+                .getChild("record", null);
+        Document doc = new Document(record.clone());
+        String ds = importer.getMappedDocStructType(Collections.singletonMap("//marc:datafield[@tag='650']/marc:subfield[@code='a'][text()='Vorlesungsverzeichnis.']", "SingleSheetMaterial"),
+                doc, Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
+        assertEquals("SingleSheetMaterial", ds);
+    }
 }

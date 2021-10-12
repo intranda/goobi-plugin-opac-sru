@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<searchRetrieveResponse
+	xmlns="http://www.loc.gov/zing/srw/">
+	<version>1.2</version>
+	<numberOfRecords>1</numberOfRecords>
+	<records>
+		<record>
+			<recordSchema>marcxml</recordSchema>
+			<recordPacking>xml</recordPacking>
+			<recordData>
+				<record xmlns="http://www.loc.gov/MARC21/slim">
+					<leader>01920nas a2200457 i 4500</leader>
+					<controlfield tag="001">9948097857002882</controlfield>
+					<controlfield tag="005">20211001150758</controlfield>
+					<controlfield tag="007">cr#|||||||||||</controlfield>
+					<controlfield tag="008">190529m18871936xx####p#o##|########ger#u
+					</controlfield>
+					<datafield ind1="7" ind2=" " tag="016">
+						<subfield code="a">1187359181</subfield>
+						<subfield code="2">DE-101b</subfield>
+					</datafield>
+					<datafield ind1="7" ind2=" " tag="016">
+						<subfield code="a">2973661-4</subfield>
+						<subfield code="2">DE-600</subfield>
+					</datafield>
+					<datafield ind1="7" ind2=" " tag="016">
+						<subfield code="a">1104931511</subfield>
+						<subfield code="2">OCoLC</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="035">
+						<subfield code="a">BV045903998</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="035">
+						<subfield code="a">(DE-599)ZDB2973661-4</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="035">
+						<subfield code="a">(DE-604)BV045903998</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="040">
+						<subfield code="c">DE-604</subfield>
+						<subfield code="e">rda</subfield>
+						<subfield code="a">0011</subfield>
+						<subfield code="d">9001</subfield>
+					</datafield>
+					<datafield ind1=" " ind2="7" tag="041">
+						<subfield code="a">ger</subfield>
+						<subfield code="2">ISO 639-2</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="044">
+						<subfield code="c">XA-DXDE</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="084">
+						<subfield code="a">370</subfield>
+						<subfield code="q">DE-600</subfield>
+						<subfield code="2">sdnb</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="084">
+						<subfield code="a">890</subfield>
+						<subfield code="q">DE-600</subfield>
+						<subfield code="2">sdnb</subfield>
+					</datafield>
+					<datafield ind1="2" ind2=" " tag="110">
+						<subfield code="a">Seminar für Orientalische Sprachen zu
+							Berlin</subfield>
+						<subfield code="0">(DE-588)35468-5</subfield>
+						<subfield code="4">aut</subfield>
+					</datafield>
+					<datafield ind1="1" ind2="0" tag="245">
+						<subfield code="a">Verzeichnis der Vorlesungen und Übungen /
+						</subfield>
+						<subfield code="c">Seminar für Orientalische Sprachen an der
+							Friedrich-Wilhelms-Universität zu Berlin.</subfield>
+					</datafield>
+					<datafield ind1="3" ind2="1" tag="264">
+						<subfield code="a">Berlin,</subfield>
+						<subfield code="c">1887-1936.</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="336">
+						<subfield code="b">txt</subfield>
+						<subfield code="2">rdacontent</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="337">
+						<subfield code="b">c</subfield>
+						<subfield code="2">rdamedia</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="338">
+						<subfield code="b">cr</subfield>
+						<subfield code="2">rdacarrier</subfield>
+					</datafield>
+					<datafield ind1="1" ind2=" " tag="362">
+						<subfield code="a">Nachgewiesen WS 1887/88 - SS 1936
+						</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="0" tag="363">
+						<subfield code="8">1.1</subfield>
+						<subfield code="i">1887/88</subfield>
+					</datafield>
+					<datafield ind1="1" ind2="0" tag="363">
+						<subfield code="8">1.2</subfield>
+						<subfield code="i">1936</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="533">
+						<subfield code="7">d20192019</subfield>
+						<subfield code="a">Online-Ausgabe</subfield>
+						<subfield code="b">Berlin</subfield>
+						<subfield code="e">Online-Ressource</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="534">
+						<subfield code="c">1887</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="500">
+						<subfield code="a">Reproduktion</subfield>
+					</datafield>
+					<datafield ind1=" " ind2="7" tag="650">
+						<subfield code="a">Vorlesungsverzeichnis.</subfield>
+						<subfield code="0">(DE-588)4188684-7</subfield>
+						<subfield code="2">gnd</subfield>
+						<subfield code="9">rswk-swf</subfield>
+					</datafield>
+					<datafield ind1="1" ind2="7" tag="610">
+						<subfield code="a">Seminar für Orientalische Sprachen zu
+							Berlin.</subfield>
+						<subfield code="0">(DE-588)35468-5</subfield>
+						<subfield code="2">gnd</subfield>
+						<subfield code="9">rswk-swf</subfield>
+					</datafield>
+					<datafield ind1=" " ind2="7" tag="655">
+						<subfield code="a">Zeitschrift</subfield>
+						<subfield code="0">(DE-588)4067488-5</subfield>
+						<subfield code="2">gnd-content</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="0" tag="689">
+						<subfield code="k">Seminar für Orientalische Sprachen zu
+							Berlin</subfield>
+						<subfield code="0">(DE-588)35468-5</subfield>
+						<subfield code="2">gnd</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="1" tag="689">
+						<subfield code="s">Vorlesungsverzeichnis</subfield>
+						<subfield code="0">(DE-588)4188684-7</subfield>
+						<subfield code="2">gnd</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="8" tag="776">
+						<subfield code="i">Elektronische Reproduktion von</subfield>
+						<subfield code="a">Seminar für Orientalische Sprachen zu
+							Berlin</subfield>
+						<subfield code="t">Verzeichnis der Vorlesungen und Übungen /
+							Seminar für Orientalische Sprachen an der
+							Friedrich-Wilhelms-Universität zu Berlin</subfield>
+						<subfield code="d">Berlin</subfield>
+						<subfield code="f">1887-1936</subfield>
+						<subfield code="w">BV009292510</subfield>
+					</datafield>
+					<datafield ind1="4" ind2="0" tag="856">
+						<subfield code="u">https://www.ub.hu-berlin.de/de/bibliothek-benutzen/digitalisierung-eod/digitalisierung-in-bearbeitung
+						</subfield>
+						<subfield code="x">Langzeitarchivierung</subfield>
+						<subfield code="z">kostenfrei</subfield>
+					</datafield>
+					<datafield ind1="c" ind2=" " tag="930">
+						<subfield code="a">dm ld</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="940">
+						<subfield code="a">RDA-Aufnahme</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="0" tag="967">
+						<subfield code="k">Seminar für Orientalische Sprachen zu
+							Berlin</subfield>
+					</datafield>
+					<datafield ind1="0" ind2="1" tag="967">
+						<subfield code="s">Vorlesungsverzeichnis</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="969">
+						<subfield code="a">BV045903998</subfield>
+					</datafield>
+					<datafield ind1="g" ind2=" " tag="995">
+						<subfield code="a">Institutions- und Universitätsgeschichte
+						</subfield>
+						<subfield code="2">OR010</subfield>
+					</datafield>
+					<datafield ind1=" " ind2=" " tag="AVE">
+						<subfield code="8">53668468160002882</subfield>
+						<subfield code="c">61639769230002882</subfield>
+						<subfield code="e">Available</subfield>
+						<subfield code="l">OR010</subfield>
+						<subfield code="m">HU Digitalisate E-Books</subfield>
+						<subfield code="n">WS 1887/88 - WS 1892/93; WS 1903/04; SS
+							1905 - SS 1906; SS 1907 - WS 1908/09; WS 1909/10 - WS 1912/13; WS
+							1913/14 - SS 1923; SS 1925 - SH 1929; WS 1930/31 - WS 1932/33; WS
+							1933/34 - SS 1936 - Im Digitalisierungsprozess - Nach einem
+							Exemplar der Humboldt-Universität zu Berlin,
+							Universitätsbibliothek mit der Signatur: PB 8103 und PA 8103
+						</subfield>
+						<subfield code="s">Available from 1887.</subfield>
+					</datafield>
+				</record>
+			</recordData>
+			<recordIdentifier>9948097857002882</recordIdentifier>
+			<recordPosition>1</recordPosition>
+		</record>
+	</records>
+	<extraResponseData
+		xmlns:xb="http://www.exlibris.com/repository/search/xmlbeans/">
+		<xb:exact>true</xb:exact>
+		<xb:responseDate>2021-10-12T09:25:23+0200</xb:responseDate>
+	</extraResponseData>
+</searchRetrieveResponse>

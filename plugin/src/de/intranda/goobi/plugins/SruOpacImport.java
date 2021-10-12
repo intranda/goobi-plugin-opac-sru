@@ -32,7 +32,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -43,6 +45,7 @@ import org.apache.log4j.Logger;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IOpacPluginVersion2;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.filter.Filters;
 import org.jdom2.output.Format;
@@ -66,6 +69,7 @@ import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
+import ugh.dl.DocStructType;
 import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
@@ -73,6 +77,7 @@ import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.exceptions.PreferencesException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
+import ugh.exceptions.TypeNotAllowedForParentException;
 import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
@@ -100,7 +105,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
     private String originalMetadataFolder;
 
     private List<Path> pathToMarcRecord = new ArrayList<>();
-    
+
     private ConfigOpac configOpac = null;
 
     /**
@@ -218,7 +223,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
             parser = new MarcXmlParserHU(inPrefs);
         } else if ("FU".equalsIgnoreCase(marcParserType)) {
             parser = new MarcXmlParserFU(inPrefs);
-        } else if("UGH".equalsIgnoreCase(marcParserType)) {
+        } else if ("UGH".equalsIgnoreCase(marcParserType)) {
             parser = new MarcXmlParserUGH(inPrefs, this.configOpac);
         } else {
             parser = new MarcXmlParser(inPrefs) {
@@ -264,7 +269,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
 
         File marcMappingFile;
         if (mappingPath == null) {
-            throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
+            return null;// throw new ImportPluginException("No mapping file configured in configuration file " + config.getFileName());
         } else if (mappingPath.startsWith("/")) {
             marcMappingFile = new File(mappingPath);
         } else {
@@ -381,8 +386,10 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         myLogger.debug("Using mapping file " + marcMappingFile);
         parser.setMapFile(marcMappingFile);
 
-        //parse the marcXml record
-        DigitalDocument dd = parser.parseMarcXml(marcXmlDoc, this.originalAnchor);
+        String dsType =  getMappedDocStructType(getDocTypeXPaths(), marcXmlDoc, parser.getNamespace());
+        DocStruct mappedDocStruct = createDocStruct(dsType);
+         //parse the marcXml record
+        DigitalDocument dd = parser.parseMarcXml(marcXmlDoc, this.originalAnchor, mappedDocStruct);
         //Set the gattung from the parsed result. Used to assign a Document type for the new Goobi process
         gattung = parser.getInfo().getGattung();
         docType = parser.getInfo().getDocStructType();
@@ -660,9 +667,43 @@ public class SruOpacImport implements IOpacPluginVersion2 {
     public ConfigOpac getConfigOpac() {
         return configOpac;
     }
-    
+
     public void setConfigOpac(ConfigOpac configOpac) {
         this.configOpac = configOpac;
     }
-    
+
+    protected Map<String, String> getDocTypeXPaths() {
+        List<HierarchicalConfiguration> docTypeMappings = this.config.configurationsAt("mappings/docType");
+        if (docTypeMappings != null) {
+            return docTypeMappings.stream().collect(Collectors.toMap(c -> c.getString("@xpath"), c -> c.getString(".")));
+        } else {
+            return Collections.emptyMap();
+        }
+
+    }
+
+    protected String getMappedDocStructType(Map<String, String> mappings, Document document, Namespace ns) {
+        for (String xpath : mappings.keySet()) {
+
+            XPathExpression<Element> expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns);
+            String found = Optional.ofNullable(expr.evaluateFirst(document)).map(e -> e.getText()).orElse(null);
+            if (StringUtils.isNotBlank(found)) {
+                return mappings.get(xpath);
+            }
+        }
+        return null;
+    }
+
+    private DocStruct createDocStruct(String docTypeName) throws PreferencesException, TypeNotAllowedForParentException {
+        DocStructType dsType = prefs.getDocStrctTypeByName(docTypeName);
+        if(dsType != null) {            
+            MetsMods mm = new MetsMods(prefs);
+            mm.setDigitalDocument(new DigitalDocument());
+            DocStruct ds = mm.getDigitalDocument().createDocStruct(dsType);
+            return ds;
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -56,7 +56,7 @@ public class MarcXmlParserTest {
 		
 		parser.setNamespace(Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
 		parser.setNamespace(Namespace.NO_NAMESPACE);
-		DigitalDocument digDoc = parser.parseMarcXml(marcDoc, null);
+		DigitalDocument digDoc = parser.parseMarcXml(marcDoc, null, null);
 		
 		Fileformat ff = new MetsMods(prefs);
 		ff.setDigitalDocument(digDoc);

@@ -478,6 +478,12 @@
     <language name="en">Legislative body</language>
     <language name="es">Legislative body zzz</language>
   </MetadataType>
+  <MetadataType normdata="true" type="corporate">
+    <Name>SubjectCorporate</Name>
+    <language name="de">Körperschaft</language>
+    <language name="en">Corporate</language>
+    <language name="es">Corporate</language>
+  </MetadataType>
   <!-- Corporations end -->
   <!-- Partner -->
   <MetadataType>
