@@ -705,6 +705,11 @@
     <language name="de">Sortierzählung</language>
     <language name="en">Enumeration</language>
   </MetadataType>
+  <MetadataType>
+    <Name>_anchorIdentifier</Name>
+    <language name="de">Identifier anchor</language>
+    <language name="en">Identifier anchor</language>
+  </MetadataType>
   <DocStrctType>
     <Name>FrontPasteDown</Name>
     <language name="de">Vorderer Buchspiegel</language>
@@ -990,6 +995,7 @@
     <metadata num="*">DocLanguage</metadata>
     <metadata num="1o">CatalogIDSource</metadata>
     <metadata num="1m">CatalogIDDigital</metadata>
+    <metadata num="1o">_anchorIdentifier</metadata>
     <metadata num="1o">TSL_ATS</metadata>
     <metadata num="1o">_purl</metadata>
     <metadata num="1o">AccessLicense</metadata>
@@ -2142,6 +2148,7 @@
     <allowedchildtype>Theses</allowedchildtype>
     <allowedchildtype>TitlePage</allowedchildtype>
     <metadata num="1o">_urn</metadata>
+    <metadata num="1o">_anchorIdentifier</metadata>
     <metadata num="1o">URN</metadata>
     <metadata num="*">_ucc_id</metadata>
     <metadata num="+">singleDigCollection</metadata>
@@ -4444,7 +4451,7 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
-        <fieldReplacement>s/[.,;:/]$//g</fieldReplacement>
+        <fieldReplacement>s/[.,;:\/]$//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
@@ -4525,29 +4532,29 @@
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
-        <field>
-          <fieldMainTag>773</fieldMainTag>
-          <fieldSubTag>w</fieldSubTag>
-          <fieldInd1>any</fieldInd1>
-          <fieldInd2>any</fieldInd2>
-        </field>
+<!--         <field> -->
+<!--           <fieldMainTag>773</fieldMainTag> -->
+<!--           <fieldSubTag>w</fieldSubTag> -->
+<!--           <fieldInd1>any</fieldInd1> -->
+<!--           <fieldInd2>any</fieldInd2> -->
+<!--         </field> -->
         <fieldReplacement>s/\(DE-\d{3}\)\s?[\w-]+//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>
       <Metadata>
-        <Name>CatalogIDAnchor</Name>
+        <Name>_anchorIdentifier</Name>
         <field>
           <fieldMainTag>773</fieldMainTag>
           <fieldSubTag>w</fieldSubTag>
           <fieldInd1>any</fieldInd1>
           <fieldInd2>any</fieldInd2>
         </field>
-        <field>
-          <fieldMainTag>035</fieldMainTag>
-          <fieldSubTag>a</fieldSubTag>
-          <fieldInd1>any</fieldInd1>
-          <fieldInd2>any</fieldInd2>
-        </field>
+<!--         <field> -->
+<!--           <fieldMainTag>035</fieldMainTag> -->
+<!--           <fieldSubTag>a</fieldSubTag> -->
+<!--           <fieldInd1>any</fieldInd1> -->
+<!--           <fieldInd2>any</fieldInd2> -->
+<!--         </field> -->
         <fieldReplacement>s/\(DE-\d{3}\)\s?[\w-]+//g</fieldReplacement>
         <separateEntries>true</separateEntries>
       </Metadata>

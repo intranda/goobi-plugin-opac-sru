@@ -30,6 +30,8 @@ import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 
 import de.intranda.utils.DocumentUtils;
+import de.unigoettingen.sub.search.opac.ConfigOpac;
+import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
@@ -54,6 +56,20 @@ public class MarcXmlParser {
         private String gattung;
         private String recordIdentifier;
 
+        public RecordInformation(DocStruct ds, ConfigOpac configOpac) {
+            this.gattung = configOpac.getDoctypeByName(ds.getType().getName()).getMappings().get(0);
+            this.ds = ds.getType().getName();
+            if(ds.getType().isAnchor()) {
+                this.anchorDs = this.ds;
+                if(ds.getAllChildren() != null && !ds.getAllChildren().isEmpty()) { 
+                    this.childDs = ds.getAllChildren().get(0).getType().getName();
+                }
+            } else {
+                this.childDs = null;
+                this.anchorDs = null;                
+            }
+        }
+        
         public RecordInformation(Element element) {
             super();
             String gattung = element.getAttributeValue("gattung");

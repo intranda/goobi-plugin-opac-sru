@@ -100,6 +100,8 @@ public class SruOpacImport implements IOpacPluginVersion2 {
     private String originalMetadataFolder;
 
     private List<Path> pathToMarcRecord = new ArrayList<>();
+    
+    private ConfigOpac configOpac = null;
 
     /**
      * Constructor using the default plugin configuration profived by Goobi
@@ -217,7 +219,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         } else if ("FU".equalsIgnoreCase(marcParserType)) {
             parser = new MarcXmlParserFU(inPrefs);
         } else if("UGH".equalsIgnoreCase(marcParserType)) {
-            parser = new MarcXmlParserUGH(inPrefs);
+            parser = new MarcXmlParserUGH(inPrefs, this.configOpac);
         } else {
             parser = new MarcXmlParser(inPrefs) {
 
@@ -655,4 +657,12 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         return pathToMarcRecord;
     }
 
+    public ConfigOpac getConfigOpac() {
+        return configOpac;
+    }
+    
+    public void setConfigOpac(ConfigOpac configOpac) {
+        this.configOpac = configOpac;
+    }
+    
 }
