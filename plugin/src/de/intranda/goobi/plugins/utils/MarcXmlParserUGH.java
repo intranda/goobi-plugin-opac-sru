@@ -62,7 +62,11 @@ public class MarcXmlParserUGH extends MarcXmlParser {
             dd = readMarc(marcDoc, mappedDocStruct).getDigitalDocument();
             RecordInformation info = new RecordInformation(dd.getLogicalDocStruct(), this.configOpac);
             setInfo(info);
-        } catch (PreferencesException  e) {
+            
+            String dsTypePhysical = "BoundBook";
+            dsPhysical = dd.createDocStruct(prefs.getDocStrctTypeByName(dsTypePhysical));
+            dd.setPhysicalDocStruct(dsPhysical);
+        } catch (PreferencesException | TypeNotAllowedForParentException  e) {
             throw new ParserException(e);
         }
 
@@ -92,6 +96,7 @@ public class MarcXmlParserUGH extends MarcXmlParser {
             }
         }
         
+
         
         addMissingMetadata(dd);
         return dd;

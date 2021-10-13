@@ -13,11 +13,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.swing.plaf.synth.SynthScrollBarUI;
-
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jdom2.Attribute;
@@ -34,6 +33,7 @@ import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
+import ugh.dl.DocStructType;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Person;
@@ -57,7 +57,17 @@ public class MarcXmlParser {
         private String recordIdentifier;
 
         public RecordInformation(DocStruct ds, ConfigOpac configOpac) {
-            this.gattung = configOpac.getDoctypeByName(ds.getType().getName()).getMappings().get(0);
+            
+            String docStructTypeName = Optional.ofNullable(ds).map(DocStruct::getType).map(DocStructType::getName)
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown docStruct type " + ds));
+            List<String> dsTypeMappings = configOpac.getAllDoctypes().stream()
+                    .filter(dstype -> dstype.getRulesetType().equals(docStructTypeName) || StringUtils.equals(dstype.getRulesetChildType(), docStructTypeName))
+                    .map(ConfigOpacDoctype::getMappings)
+                    .filter(mappings -> !mappings.isEmpty())
+                    .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("No opac mappings found for ds type " + docStructTypeName));
+            
+            this.gattung = dsTypeMappings.get(0);
             this.ds = ds.getType().getName();
             if (ds.getType().isAnchor()) {
                 this.anchorDs = this.ds;

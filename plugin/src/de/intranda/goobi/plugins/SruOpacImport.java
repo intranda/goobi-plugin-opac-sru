@@ -215,6 +215,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
     @Override
     public Fileformat search(String inSuchfeld, String inSuchbegriff, ConfigOpacCatalogue catalogue, Prefs inPrefs) throws Exception {
         //        initSearchFieldMap();
+        this.originalAnchor = null;
         pathToMarcRecord.clear();
         inSuchfeld = getMappedSearchField(inSuchfeld, catalogue.getTitle());
         String marcParserType = getConfigString("marcXmlParserType", catalogue.getTitle(), null, "");
@@ -394,6 +395,9 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         gattung = parser.getInfo().getGattung();
         docType = parser.getInfo().getDocStructType();
 
+        myLogger.debug("Parsed marc-xml to docStructType " + dd.getLogicalDocStruct().getDocstructType());
+        myLogger.debug("");
+        
         //If the record contains a reference to an anchor, retrieve the anchor record
         String anchorId = parser.getAchorID();
         if (!parser.isTreatAsPeriodical() && anchorId == null && info == null) {
@@ -408,6 +412,7 @@ public class SruOpacImport implements IOpacPluginVersion2 {
             }
         }
         if (anchorId != null) {
+            myLogger.debug("Evaluate anchor id " + anchorId);
             RecordInformation anchorInfo = new RecordInformation(parser.getInfo());
             this.marcXmlDocVolume = this.marcXmlDoc;
             this.originalAnchor = dd.getLogicalDocStruct();
@@ -423,6 +428,13 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         createAtstsl(dd);
         ff.setDigitalDocument(dd);
 
+        if(ff.getDigitalDocument() == null) {
+            throw new ImportPluginException("Fileformat has not digital document");
+        } else if(ff.getDigitalDocument().getPhysicalDocStruct() == null) {
+            throw new ImportPluginException("Digital document has not phyiscal DocStruct");
+        }
+        
+        
         return ff;
     }
 

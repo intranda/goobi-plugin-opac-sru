@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -80,11 +81,17 @@ public class SruOpacImportTest {
 
         importer = new SruOpacImport(config);
 
+        ConfigOpacDoctype monograph = new ConfigOpacDoctype("monograph", "Monograph", "", false, false, false, null, Arrays.asList("AA"), null);
+        ConfigOpacDoctype periodical = new ConfigOpacDoctype("periodical", "Periodical", "", true, false, false, null, Arrays.asList("AA"), "PeriodicalVolume");
+        ConfigOpacDoctype multiVolume = new ConfigOpacDoctype("multiVolume", "MultiVolumeWork", "", false, true, false, null, Arrays.asList("AA"), "Volume");
+
         ConfigOpac configOpac = Mockito.mock(ConfigOpac.class);
         ConfigOpacDoctype configOpacDoctype = Mockito.mock(ConfigOpacDoctype.class);
+        Mockito.when(configOpac.getAllDoctypes()).thenReturn(Arrays.asList(monograph, periodical, multiVolume));
         Mockito.when(configOpac.getDoctypeByName(Mockito.anyString())).thenReturn(configOpacDoctype);
         Mockito.when(configOpacDoctype.getMappings()).thenReturn(Collections.singletonList("AA"));
         importer.setConfigOpac(configOpac);
+        
     }
 
     @After
