@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 
 import de.intranda.goobi.plugins.utils.SRUClient.SRUException;
 import de.intranda.utils.DocumentUtils;
+import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
@@ -47,8 +48,10 @@ public class SruOpacImportTest {
     private static final String HU_ID_MUTLIVOLUME = "BV047352849";
     private static final String HU_ID_VOLUME = "BV047352867";
     private static final String HU_ID_MONOGRAPH = "BV046323712";
+    private static final String HU_ID_MONOGRAPH_SERIES = "BV047628653";
     private static final String HU_ID_PERIODICAL = "BV041382587";
     private static final String HU_ID_SINGLESHEETMATERIAL = "BV041421924";
+    private static final String HU_ID_MAPVOLUME = "BV047661105";
 
     private Prefs prefs;
     private ConfigOpacCatalogue catalogueFU;
@@ -68,6 +71,10 @@ public class SruOpacImportTest {
 
     @Before
     public void setUp() throws Exception {
+        
+        ConfigurationHelper.CONFIG_FILE_NAME = "resources/goobi_config.properties";
+        ConfigurationHelper.resetConfigurationFile();
+        
         prefs = new Prefs();
         catalogueFU = new ConfigOpacCatalogue("FU-BERLIN (ALMA)", "SRU-Schnittstelle der FU-Berlin",
                 "fu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_FUB", null, 80, null, "SRU", null);
@@ -84,10 +91,12 @@ public class SruOpacImportTest {
         ConfigOpacDoctype monograph = new ConfigOpacDoctype("monograph", "Monograph", "", false, false, false, null, Arrays.asList("AA"), null);
         ConfigOpacDoctype periodical = new ConfigOpacDoctype("periodical", "Periodical", "", true, false, false, null, Arrays.asList("AA"), "PeriodicalVolume");
         ConfigOpacDoctype multiVolume = new ConfigOpacDoctype("multiVolume", "MultiVolumeWork", "", false, true, false, null, Arrays.asList("AA"), "Volume");
+        ConfigOpacDoctype volumeMap = new ConfigOpacDoctype("multiVolumeMap", "MapVolume", "", false, true, false, null, Arrays.asList("Kf"), null);
+        ConfigOpacDoctype singleMap = new ConfigOpacDoctype("singleMap", "SingleMap", "", false, true, false, null, Arrays.asList("Ka"), null);
 
         ConfigOpac configOpac = Mockito.mock(ConfigOpac.class);
         ConfigOpacDoctype configOpacDoctype = Mockito.mock(ConfigOpacDoctype.class);
-        Mockito.when(configOpac.getAllDoctypes()).thenReturn(Arrays.asList(monograph, periodical, multiVolume));
+        Mockito.when(configOpac.getAllDoctypes()).thenReturn(Arrays.asList(monograph, periodical, multiVolume, singleMap, volumeMap));
         Mockito.when(configOpac.getDoctypeByName(Mockito.anyString())).thenReturn(configOpacDoctype);
         Mockito.when(configOpacDoctype.getMappings()).thenReturn(Collections.singletonList("AA"));
         importer.setConfigOpac(configOpac);
@@ -98,7 +107,7 @@ public class SruOpacImportTest {
     public void tearDown() throws Exception {
     }
 
-    @Test
+//    @Test
     public void testSearchFU() throws Exception {
         prefs.loadPrefs(ruleset);
         try {
@@ -114,7 +123,7 @@ public class SruOpacImportTest {
 
     }
 
-    @Test
+//    @Test
     public void testSearchBVB() throws Exception {
         prefs.loadPrefs(ruleset);
         try {
@@ -129,7 +138,7 @@ public class SruOpacImportTest {
 
     }
 
-    @Test
+//    @Test
     public void testSearchHU() throws Exception {
         try {
             prefs.loadPrefs(rulesetHUMarc);
@@ -163,7 +172,34 @@ public class SruOpacImportTest {
         assertTrue(outputFile.exists());
 
     }
+    
+    @Test
+    public void testHU_Monograph_Series() throws Exception {
 
+        String id = HU_ID_MONOGRAPH_SERIES;
+
+        Fileformat ff = importData(id);
+        assertEquals("Monograph", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
+
+    }
+
+//    @Test
+    public void testHU_Map_Volume() throws Exception {
+
+        String id = HU_ID_MAPVOLUME;
+
+        Fileformat ff = importData(id);
+        assertEquals("MapVolume", ff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+        File outputFile = new File(output, "meta.xml");
+        ff.write(outputFile.getAbsolutePath());
+        assertTrue(outputFile.exists());
+
+    }
+
+    
     @Test
     public void testHU_Volume() throws Exception {
 
@@ -207,7 +243,7 @@ public class SruOpacImportTest {
     }
 
     private Fileformat importData(String id) throws PreferencesException, ImportPluginException, Exception, IOException {
-        prefs.loadPrefs(rulesetHUMarc);
+        prefs.loadPrefs(rulesetHU);
 
         Fileformat ff = importer.search("12", id, catalogueHU, prefs);
         DocumentUtils.getFileFromDocument(new File("output", "marc.xml"), importer.marcXmlDoc);
@@ -231,12 +267,6 @@ public class SruOpacImportTest {
         assertEquals("marcxml.title", importer.getMappedSearchField("4", "BVB"));
     }
 
-    @Test
-    public void testReadDocTypeMappings() {
-        Map<String, String> mappings = importer.getDocTypeXPaths();
-        assertTrue(mappings.containsValue("SingleSheetMaterial"));
-        assertTrue(mappings.containsKey("/record/datafield[@tag='650']/subfield[@code='a']"));
-    }
 
     @Test
     public void findMappedValue() throws PreferencesException, JDOMException, IOException {

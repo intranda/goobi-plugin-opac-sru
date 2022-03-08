@@ -29,14 +29,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -44,6 +41,7 @@ import org.jdom2.JDOMException;
 
 import de.intranda.goobi.plugins.SruOpacImport;
 import de.intranda.utils.DocumentUtils;
+import de.sub.goobi.helper.HttpClientHelper;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 
 public class SRUClient {
@@ -81,29 +79,10 @@ public class SRUClient {
             url += "&recordSchema=" + recordSchema;
 
             logger.debug("SRU URL: " + url);
-
-            HttpGet httpGet = new HttpGet(url);
             
-            //set 30 sec timeout
-            RequestConfig.Builder requestConfig = RequestConfig.custom();
-            requestConfig.setConnectTimeout(30 * 1000);
-            requestConfig.setConnectionRequestTimeout(30 * 1000);
-            requestConfig.setSocketTimeout(30 * 1000);
-            httpGet.setConfig(requestConfig.build());
-            
-//            ResponseHandler<String> handler = new BasicResponseHandler();
-            try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-                CloseableHttpResponse response = httpclient.execute(httpGet);
-//                ret = handler.handleResponse(response);
-                byte[] bytes = getBytes(response);
-                Charset charset = getCharset(response);
-                if (charset == null) {
-                    charset = Charset.forName("ISO-8859-15");
-//                    charset = Charset.forName("UTF-8");
-                }
-                ret = encodeAsString(bytes, charset);
-//                ret = StringEscapeUtils.unescapeHtml(ret);
-            }
+            ret = HttpClientHelper.getStringFromUrl(url);
+//            ret = StringEscapeUtils.unescapeHtml(ret);
+            return ret;
         }
 
         return ret;

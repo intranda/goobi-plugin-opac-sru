@@ -103,6 +103,11 @@
     <language name="en">Identifier Series</language>
   </MetadataType>
   <MetadataType>
+    <Name>TitleDocMainSeries</Name>
+    <language name="de">Titel der Serie</language>
+    <language name="en">Title Series</language>
+  </MetadataType>
+  <MetadataType>
     <Name>CatalogIDPeriodicalDB</Name>
     <language name="de">ZeitschriftenDB-ID</language>
   </MetadataType>
@@ -1635,6 +1640,8 @@
     <metadata num="1m">CatalogIDDigital</metadata>
     <metadata num="1o">TSL_ATS</metadata>
     <metadata num="1o">_purl</metadata>
+    <metadata num="1o">IdentifierSeries</metadata>
+    <metadata num="1o">TitleDocMainSeries</metadata>
     <group num="*">PrecedingWork</group>
     <group num="*">SucceedingWork</group>
     <metadata num="1o">BibliographicCitation</metadata>
@@ -1742,6 +1749,7 @@
     <metadata num="1o">AccessLicense</metadata>
     <metadata num="1o">AdditionalInformation</metadata>
     <metadata num="1o">IdentifierSeries</metadata>
+    <metadata num="1o">TitleDocMainSeries</metadata>
     <!-- Automatisch eingefügt für das Update auf Goobi 2.2 -->
     <metadata num="1o">copyrightimageset</metadata>
     <metadata num="*">PhysicalLocation</metadata>
