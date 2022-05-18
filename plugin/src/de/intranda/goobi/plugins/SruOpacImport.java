@@ -53,6 +53,7 @@ import org.jdom2.output.XMLOutputter;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 
+import de.intranda.goobi.plugins.beautify.BeautifyerExecutor;
 import de.intranda.goobi.plugins.utils.MarcXmlParser;
 import de.intranda.goobi.plugins.utils.MarcXmlParser.RecordInformation;
 import de.intranda.goobi.plugins.utils.MarcXmlParserFU;
@@ -65,6 +66,7 @@ import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
+import de.unigoettingen.sub.search.opac.ConfigOpacCatalogueBeautifier;
 import de.unigoettingen.sub.search.opac.ConfigOpacDoctype;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
@@ -375,11 +377,21 @@ public class SruOpacImport implements IOpacPluginVersion2 {
                 pathToMarcRecord.add(destination);
             }
         }
-
+        
         String prefix = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/prefix",
                 this.config.getString("namespace[not(@catalogue)]/prefix", MarcXmlParser.NS_DEFAULT.getPrefix()));
         String uri = this.config.getString("namespace[@catalogue='" + catalogue.getTitle() + "']/uri",
                 this.config.getString("namespace[not(@catalogue)]/uri", MarcXmlParser.NS_DEFAULT.getURI()));
+        
+        Namespace marcNamespace = Namespace.getNamespace(prefix, uri);
+        
+        //apply beautyfier
+        List<ConfigOpacCatalogueBeautifier> beautifier = catalogue.getBeautifySetList();
+        if(beautifier != null && !beautifier.isEmpty()) {
+            BeautifyerExecutor executor = new BeautifyerExecutor(marcNamespace);
+            executor.executeBeautifier(beautifier, marcXmlDoc.getRootElement());
+        }
+        
         parser.setNamespace(prefix, uri);
         parser.setInfo(info); //Pass record type if this is an anchor
         parser.setIndividualIdentifier(inSuchbegriff.trim()); //not used

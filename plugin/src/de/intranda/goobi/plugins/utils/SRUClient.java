@@ -79,7 +79,6 @@ public class SRUClient {
             url += "&recordSchema=" + recordSchema;
 
             logger.debug("SRU URL: " + url);
-            
             ret = HttpClientHelper.getStringFromUrl(url);
 //            ret = StringEscapeUtils.unescapeHtml(ret);
             return ret;
