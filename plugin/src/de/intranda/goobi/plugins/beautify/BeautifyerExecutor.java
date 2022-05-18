@@ -16,17 +16,16 @@ public class BeautifyerExecutor {
     private static final Namespace MARC = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
 
     private final Namespace marcNamespace;
-    
+
     public BeautifyerExecutor() {
         marcNamespace = MARC;
     }
-    
+
     public BeautifyerExecutor(Namespace marc) {
         marcNamespace = marc;
     }
-    
-    public void executeBeautifier(List<ConfigOpacCatalogueBeautifier> beautifySetList, Element record) {
 
+    public void executeBeautifier(List<ConfigOpacCatalogueBeautifier> beautifySetList, Element record) {
 
         // run through all configured beautifier
         if (beautifySetList != null && !beautifySetList.isEmpty()) {
@@ -137,35 +136,34 @@ public class BeautifyerExecutor {
                     //
                     if (!"*".equals(beautifier.getTagElementToChange().getValue())) {
                         newValue = beautifier.getTagElementToChange().getValue().replace("\\u0020", " ");
-
-                        if (StringUtils.isNotBlank(beautifier.getTagElementToChange().getTag())
-                                && StringUtils.isBlank(beautifier.getTagElementToChange().getSubtag())) {
-                            if (mainField == null) {
-                                mainField = new Element("controlfield", marcNamespace);
-                                mainField.setAttribute("tag", beautifier.getTagElementToChange().getTag());
-                                record.addContent(mainField);
-                            }
-                            mainField.setText(newValue);
-                        } else {
-                            if (mainField == null) {
-                                mainField = new Element("datafield", marcNamespace);
-                                mainField.setAttribute("tag", beautifier.getTagElementToChange().getTag());
-                                mainField.setAttribute("ind1", " ");
-                                mainField.setAttribute("ind2", " ");
-                                record.addContent(mainField);
-                            }
-                            if (subField == null) {
-                                subField = new Element("subfield", marcNamespace);
-                                subField.setAttribute("code", beautifier.getTagElementToChange().getSubtag());
-                                mainField.addContent(subField);
-                            }
-                            subField.setText(newValue);
+                    }
+                    if (StringUtils.isNotBlank(beautifier.getTagElementToChange().getTag())
+                            && StringUtils.isBlank(beautifier.getTagElementToChange().getSubtag())) {
+                        if (mainField == null) {
+                            mainField = new Element("controlfield", marcNamespace);
+                            mainField.setAttribute("tag", beautifier.getTagElementToChange().getTag());
+                            record.addContent(mainField);
                         }
+                        mainField.setText(newValue);
+                    } else {
+                        if (mainField == null) {
+                            mainField = new Element("datafield", marcNamespace);
+                            mainField.setAttribute("tag", beautifier.getTagElementToChange().getTag());
+                            mainField.setAttribute("ind1", " ");
+                            mainField.setAttribute("ind2", " ");
+                            record.addContent(mainField);
+                        }
+                        if (subField == null) {
+                            subField = new Element("subfield", marcNamespace);
+                            subField.setAttribute("code", beautifier.getTagElementToChange().getSubtag());
+                            mainField.addContent(subField);
+                        }
+                        subField.setText(newValue);
                     }
                 }
 
             }
         }
     }
-    
+
 }
