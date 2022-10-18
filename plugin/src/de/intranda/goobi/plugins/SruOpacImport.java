@@ -198,6 +198,9 @@ public class SruOpacImport implements IOpacPluginVersion2 {
             throw new IllegalStateException("Field mappings must be loaded before evaluating request");
         }
         Map<String, String> catalogueFieldMap = searchFieldMap.get(fieldCode);
+        if(catalogueFieldMap == null) {
+            return fieldCode;
+        }
         String fieldName = catalogueFieldMap.values().iterator().next();
         if (catalogue != null) {
             fieldName = catalogueFieldMap.get(catalogue.replaceAll("\\s", "").toLowerCase());
