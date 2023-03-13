@@ -634,6 +634,7 @@ public class MarcXmlParser {
                 } else {
                     ignoreRegex = "";
                 }
+                List<Condition> conditions = getConditions(eleXpath.getChildren("condition"));
                 try {
                     //get nodes for this marcfield
                     String query = generateQuery(eleXpath);
@@ -646,9 +647,9 @@ public class MarcXmlParser {
                         MetadataType mdType = getMetadataType(roleElement);
                         if (mdType != null) {
                             if (MetadataKind.PERSON == type) {
-                                writePersonNodeValues(roleNodeList, mdType, ignoreRegex);
+                                writePersonNodeValues(roleNodeList, mdType, ignoreRegex, conditions);
                             } else if (MetadataKind.CORPORATE == type) {
-                                writeCorporateNodeValues(roleNodeList, mdType, ignoreRegex);
+                                writeCorporateNodeValues(roleNodeList, mdType, ignoreRegex, conditions);
                             }
                         }
                     }
@@ -656,9 +657,9 @@ public class MarcXmlParser {
                     MetadataType mdType = getMetadataType(mdTypeName);
                     if (mdType != null) {
                         if (MetadataKind.PERSON == type) {
-                            writePersonNodeValues(nodeList, mdType, ignoreRegex);
+                            writePersonNodeValues(nodeList, mdType, ignoreRegex, conditions);
                         } else if (MetadataKind.CORPORATE == type) {
-                            writeCorporateNodeValues(nodeList, mdType, ignoreRegex);
+                            writeCorporateNodeValues(nodeList, mdType, ignoreRegex, conditions);
                         }
                     }
                 } catch (JDOMException e) {
@@ -754,6 +755,7 @@ public class MarcXmlParser {
                     ignoreRegex.replace("\\", "\\\\");
                 }
 
+                
                 // read values
                 if (nodeList != null && !nodeList.isEmpty()) {
                     List<GoobiMetadataValue> nodeValueList =
@@ -952,6 +954,7 @@ public class MarcXmlParser {
 
         for (Element eleXpath : eleXpathList) {
             String ignoreRegex = eleXpath.getAttributeValue("ignore");
+            List<Condition> conditions = getConditions(eleXpath.getChildren("condition"));
             if (ignoreRegex != null) {
                 ignoreRegex.replace("\\", "\\\\");
             } else {
@@ -961,7 +964,7 @@ public class MarcXmlParser {
                 String query = generateQuery(eleXpath);
                 List<Element> nodeList = getXpathNodes(query);
                 if (nodeList != null) {
-                    writePersonNodeValues(nodeList, mdType, ignoreRegex);
+                    writePersonNodeValues(nodeList, mdType, ignoreRegex, conditions);
                 }
 
             } catch (JDOMException e) {
@@ -1090,7 +1093,7 @@ public class MarcXmlParser {
         return nodeList;
     }
 
-    private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex) {
+    private void writePersonNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex, List<Condition> conditions) {
         for (Element node : xPathNodeList) {
             String displayName = "";
             String nameNumeration = "";
@@ -1104,6 +1107,19 @@ public class MarcXmlParser {
             String identifier = "";
             String roleTerm = mdType.getName();
 
+          //check write conditions for element
+            boolean write = conditions.isEmpty();
+            for (Condition condition : conditions) {
+                if (condition.matches(node)) {
+                    write = true;
+                } else {
+                    write = false;
+                    break;
+                }
+            }
+            if (!write) {
+                continue;
+            }            
             // get subelements of person
             for (Object o : node.getChildren()) {
                 if (o instanceof Element) {
@@ -1199,13 +1215,27 @@ public class MarcXmlParser {
 
     }
 
-    private void writeCorporateNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex) {
+    private void writeCorporateNodeValues(List<Element> xPathNodeList, MetadataType mdType, String ignoreRegex, List<Condition> conditions) {
         for (Element node : xPathNodeList) {
             String displayName = "";
             List<String> authorityIDs = new ArrayList<>();
             String identifier = "";
             String roleTerm = mdType.getName();
 
+          //check write conditions for element
+            boolean write = conditions.isEmpty();
+            for (Condition condition : conditions) {
+                if (condition.matches(node)) {
+                    write = true;
+                } else {
+                    write = false;
+                    break;
+                }
+            }
+            if (!write) {
+                continue;
+            }   
+            
             // get subelements of person
             for (Object o : node.getChildren()) {
                 if (o instanceof Element) {
