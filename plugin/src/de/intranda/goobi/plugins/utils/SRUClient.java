@@ -1,8 +1,8 @@
 /**
  * This file is part of the SRU opac import plugin for the Goobi Application - a Workflow tool for the support of mass digitization.
  * 
- * Visit the websites for more information. 
- *          - http://digiverso.com 
+ * Visit the websites for more information.
+ *          - http://digiverso.com
  *          - http://www.intranda.com
  * 
  * Copyright 2013, intranda GmbH, Göttingen
@@ -29,7 +29,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,15 +40,15 @@ import org.jdom2.JDOMException;
 
 import de.intranda.goobi.plugins.SruOpacImport;
 import de.intranda.utils.DocumentUtils;
-import de.sub.goobi.helper.HttpClientHelper;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
+import io.goobi.workflow.api.connection.HttpUtils;
 
 public class SRUClient {
 
     private static final Logger logger = Logger.getLogger(SruOpacImport.class);
     private static final String ENCODING = "UTF-8";
-    
-    private String sruVersion  = "1.1";
+
+    private String sruVersion = "1.1";
 
     /**
      * Queries the given catalog via Z.3950 (SRU) and returns its response.
@@ -79,8 +78,8 @@ public class SRUClient {
             url += "&recordSchema=" + recordSchema;
 
             logger.debug("SRU URL: " + url);
-            ret = HttpClientHelper.getStringFromUrl(url);
-//            ret = StringEscapeUtils.unescapeHtml(ret);
+            ret = HttpUtils.getStringFromUrl(url);
+            //            ret = StringEscapeUtils.unescapeHtml(ret);
             return ret;
         }
 
@@ -113,7 +112,7 @@ public class SRUClient {
 
         return new String(bytes);
     }
-    
+
     /**
      * Converts a <code>String</code> from one given encoding to the other.
      * 
@@ -141,49 +140,57 @@ public class SRUClient {
     public static Document retrieveMarcRecord(String input) throws JDOMException, IOException, SRUException {
         Document wholeDoc = DocumentUtils.getDocumentFromString(input, null);
         try {
-            Element record = wholeDoc.getRootElement().getChild("records", null).getChild("record", null).getChild("recordData", null).getChild(
-                    "record", null);
-            Document outDoc = new Document((Element) record.detach());
+            Element record = wholeDoc.getRootElement()
+                    .getChild("records", null)
+                    .getChild("record", null)
+                    .getChild("recordData", null)
+                    .getChild(
+                            "record", null);
+            Document outDoc = new Document(record.detach());
             return outDoc;
         } catch (NullPointerException e) {
-        	Element diagnosticsEle = wholeDoc.getRootElement().getChild("diagnostics", null);
-        	if(diagnosticsEle != null && diagnosticsEle.getChild("diagnostic", null) != null) {
-        		throw new SRUException(diagnosticsEle.getChild("diagnostic", null).getChildText("message", null));
-        	}
-        	Element recordsFoundEle = wholeDoc.getRootElement().getChild("numberOfRecords", null);
-        	if(recordsFoundEle != null) {
-        		String recordsFoundText = recordsFoundEle.getTextTrim();
-        		if(StringUtils.isNotBlank(recordsFoundText) && StringUtils.isNumeric(recordsFoundText) && Integer.parseInt(recordsFoundText) == 0) {
-        			throw new SRUException("No records found");
-        		}
-        	}
+            Element diagnosticsEle = wholeDoc.getRootElement().getChild("diagnostics", null);
+            if (diagnosticsEle != null && diagnosticsEle.getChild("diagnostic", null) != null) {
+                throw new SRUException(diagnosticsEle.getChild("diagnostic", null).getChildText("message", null));
+            }
+            Element recordsFoundEle = wholeDoc.getRootElement().getChild("numberOfRecords", null);
+            if (recordsFoundEle != null) {
+                String recordsFoundText = recordsFoundEle.getTextTrim();
+                if (StringUtils.isNotBlank(recordsFoundText) && StringUtils.isNumeric(recordsFoundText) && Integer.parseInt(recordsFoundText) == 0) {
+                    throw new SRUException("No records found");
+                }
+            }
             throw new SRUException("No parsable response from SRU server");
         }
     }
-    
+
     public String getSruVersion() {
-		return sruVersion;
-	}
-    
+        return sruVersion;
+    }
+
     public void setSruVersion(String sruVersion) {
-		this.sruVersion = sruVersion;
-	}
-    
+        this.sruVersion = sruVersion;
+    }
+
     public static class SRUException extends Exception {
-		public SRUException() {
-			super();
-		}
-		public SRUException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
-			super(arg0, arg1, arg2, arg3);
-		}
-		public SRUException(String arg0, Throwable arg1) {
-			super(arg0, arg1);
-		}
-		public SRUException(String arg0) {
-			super(arg0);
-		}
-		public SRUException(Throwable arg0) {
-			super(arg0);
-		}
+        public SRUException() {
+            super();
+        }
+
+        public SRUException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
+            super(arg0, arg1, arg2, arg3);
+        }
+
+        public SRUException(String arg0, Throwable arg1) {
+            super(arg0, arg1);
+        }
+
+        public SRUException(String arg0) {
+            super(arg0);
+        }
+
+        public SRUException(Throwable arg0) {
+            super(arg0);
+        }
     }
 }
