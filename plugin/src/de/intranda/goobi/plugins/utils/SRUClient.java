@@ -69,7 +69,9 @@ public class SRUClient {
             String url = cat.getProtocol();
 
             url += cat.getAddress();
-            url += ":" + cat.getPort();
+            if(cat.getPort() > 0 && cat.getPort() != 80) {                
+                url += ":" + cat.getPort();
+            }
             url += "/" + cat.getDatabase();
             url += "?version=" + sruVersion;
             url += "&operation=searchRetrieve";

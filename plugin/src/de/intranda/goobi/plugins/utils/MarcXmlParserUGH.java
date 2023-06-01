@@ -27,25 +27,24 @@ import ugh.exceptions.PreferencesException;
 import ugh.exceptions.ReadException;
 import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
-import ugh.fileformats.mets.MetsMods;
 
 public class MarcXmlParserUGH extends MarcXmlParser {
 
     private static final Logger logger = Logger.getLogger(MarcXmlParserUGH.class);
     private static final String ANCHOR_ID_TYPE = "_anchorIdentifier";
-    
+
     private final ConfigOpac configOpac;
-    
+
     private String anchorId = null;
-    
+
     public MarcXmlParserUGH(Prefs prefs) throws ParserException {
         super(prefs);
         this.configOpac = ConfigOpac.getInstance();
     }
-    
+
     public MarcXmlParserUGH(Prefs prefs, ConfigOpac configOpac) throws ParserException {
         super(prefs);
-        if(configOpac != null) {            
+        if (configOpac != null) {
             this.configOpac = configOpac;
         } else {
             this.configOpac = ConfigOpac.getInstance();
@@ -62,16 +61,16 @@ public class MarcXmlParserUGH extends MarcXmlParser {
             dd = readMarc(marcDoc, mappedDocStruct).getDigitalDocument();
             RecordInformation info = new RecordInformation(dd.getLogicalDocStruct(), this.configOpac);
             setInfo(info);
-            
+
             String dsTypePhysical = "BoundBook";
             dsPhysical = dd.createDocStruct(prefs.getDocStrctTypeByName(dsTypePhysical));
             dd.setPhysicalDocStruct(dsPhysical);
-        } catch (PreferencesException | TypeNotAllowedForParentException  e) {
+        } catch (PreferencesException | TypeNotAllowedForParentException e) {
             throw new ParserException(e);
         }
 
         if (originalAnchor != null) {
-            if(originalAnchor.getType().isAnchor()) {                
+            if (originalAnchor.getType().isAnchor()) {
                 dd.getLogicalDocStruct().addChild(originalAnchor.getAllChildren().get(0));
                 this.dsLogical = dd.getLogicalDocStruct().getAllChildren().get(0);
                 this.dsAnchor = dd.getLogicalDocStruct();
@@ -80,24 +79,22 @@ public class MarcXmlParserUGH extends MarcXmlParser {
                 this.dsAnchor = dd.getLogicalDocStruct();
                 this.dsAnchor.addChild(dsLogical);
             }
-        } else {            
+        } else {
             this.dsLogical = dd.getLogicalDocStruct();
-            if(this.dsLogical.getType().isAnchor()) {
+            if (this.dsLogical.getType().isAnchor()) {
                 this.dsAnchor = this.dsLogical;
                 this.dsLogical = null;
-                if(this.dsAnchor.getAllChildren() != null && !this.dsAnchor.getAllChildren().isEmpty()) {                    
+                if (this.dsAnchor.getAllChildren() != null && !this.dsAnchor.getAllChildren().isEmpty()) {
                     this.dsLogical = this.dsAnchor.getAllChildren().get(0);
                 } else {
                     this.dsLogical = createChildForAnchor(this.dsAnchor, dd);
                     this.dsAnchor.addChild(this.dsLogical);
                 }
-            } else {                
+            } else {
                 this.anchorId = parseAnchorId(this.dsLogical);
             }
         }
-        
 
-        
         addMissingMetadata(dd);
         return dd;
     }
@@ -106,18 +103,18 @@ public class MarcXmlParserUGH extends MarcXmlParser {
     public String getAchorID() {
         return this.anchorId;
     }
-    
-    private String parseAnchorId(DocStruct ds)  {
-        if(!getMetadataValues(ds, ANCHOR_ID_TYPE).isEmpty()) {
+
+    private String parseAnchorId(DocStruct ds) {
+        if (!getMetadataValues(ds, ANCHOR_ID_TYPE).isEmpty()) {
             String anchorID = getMetadataValues(ds, ANCHOR_ID_TYPE).get(0);
             return anchorID;
         }
         return null;
     }
-    
+
     private List<String> getMetadataValues(DocStruct ds, String metadataTypeName) {
         MetadataType type = prefs.getMetadataTypeByName(metadataTypeName);
-        if(type != null) {
+        if (type != null) {
             return ds.getAllMetadataByType(type).stream().map(md -> md.getValue()).collect(Collectors.toList());
         }
         return Collections.emptyList();
@@ -125,16 +122,22 @@ public class MarcXmlParserUGH extends MarcXmlParser {
 
     private DocStruct createChildForAnchor(DocStruct dsAnchor, DigitalDocument dd) {
         DocStructType anchorType = dsAnchor.getType();
-        return anchorType.getAllAllowedDocStructTypes().stream().findFirst()
+        return anchorType.getAllAllowedDocStructTypes()
+                .stream()
+                .findFirst()
                 .map(typeName -> this.prefs.getDocStrctTypeByName(typeName))
                 .map(type -> {
                     try {
                         DocStruct ds = dd.createDocStruct(type);
                         Fileformat ffChild = readMarc(this.marcDoc, ds);
-                        Metadata id = ds.getAllMetadataByType(this.prefs.getMetadataTypeByName("CatalogIDDigital")).get(0);
+                        MetadataType idType = this.prefs.getMetadataTypeByName("CatalogIDDigital");
+                        Metadata id = ds.getAllMetadataByType(idType).stream().findAny().orElse(null);
+                        if (id == null) {
+                            id = createMetadata(idType, ds);
+                        }
                         id.setValue(Long.toString(System.currentTimeMillis()));
                         return ds;
-                    } catch (TypeNotAllowedForParentException  | ParserException e) {
+                    } catch (TypeNotAllowedForParentException | ParserException | MetadataTypeNotAllowedException | DocStructHasNoTypeException e) {
                         logger.error(e);
                         return null;
                     }
@@ -142,20 +145,26 @@ public class MarcXmlParserUGH extends MarcXmlParser {
                 .orElse(null);
     }
 
+    private Metadata createMetadata(MetadataType type, DocStruct ds) throws MetadataTypeNotAllowedException, DocStructHasNoTypeException {
+        Metadata iddig = new Metadata(type);
+        ds.addMetadata(iddig);
+        return iddig;
+    }
+
     private Fileformat readMarc(Document marcDoc, DocStruct docStruct) throws ParserException {
         try {
             MarcFileformat marc = new MarcFileformat(prefs);
             File tempFile = File.createTempFile("marc-import", "xml");
             XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
-            try(FileOutputStream fos = new FileOutputStream(tempFile)) {            
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 xmlOutputter.output(marcDoc, fos);
             }
             marc.read(tempFile.getAbsolutePath(), docStruct);
             return marc;
-        } catch (IOException | ReadException  e) {
+        } catch (IOException | ReadException e) {
             throw new ParserException(e);
         }
-        
+
     }
-    
+
 }
