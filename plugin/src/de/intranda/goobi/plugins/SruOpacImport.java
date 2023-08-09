@@ -711,8 +711,16 @@ public class SruOpacImport implements IOpacPluginVersion2 {
 
     protected String getMappedDocStructType(Map<String, String> mappings, Document document, Namespace ns) {
         for (String xpath : mappings.keySet()) {
-
-            XPathExpression<Element> expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns);
+            
+            XPathExpression<Element> expr;
+            if(StringUtils.isBlank(ns.getPrefix())) {                
+                expr = XPathFactory.instance().compile(xpath, Filters.element(), null);
+            } else {
+                expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns);
+            }
+            
+            expr.evaluateFirst(document);
+            
             String found = Optional.ofNullable(expr.evaluateFirst(document)).map(e -> e.getText()).orElse(null);
             if (StringUtils.isNotBlank(found)) {
                 return mappings.get(xpath);

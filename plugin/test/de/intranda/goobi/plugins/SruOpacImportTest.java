@@ -7,9 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -284,4 +284,22 @@ public class SruOpacImportTest {
                 doc, Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
         assertEquals("SingleSheetMaterial", ds);
     }
+    
+    //@Test
+    public void findMappedValue2() throws PreferencesException, JDOMException, IOException {
+        prefs.loadPrefs(rulesetHUMarc);
+        
+        SAXBuilder builder = new SAXBuilder(); 
+        Document origDoc = builder.build(new URL("https://obv-at-ubww.alma.exlibrisgroup.com/view/sru/43ACC_WUW?version=1.2&operation=searchRetrieve&query=alma.local_control_field_009=AC16876952&maximumRecords=5&recordSchema=marcxml"));
+        Element record = origDoc.getRootElement()
+                .getChild("records", null)
+                .getChild("record", null)
+                .getChild("recordData", null)
+                .getChild("record", null);
+        Document doc = new Document(record.clone());
+        String ds = importer.getMappedDocStructType(Collections.singletonMap("//marc:controlfield[@tag='008'][substring(text(),4,1) = '6']", "SingleSheetMaterial"),
+                doc, Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
+        assertEquals("SingleSheetMaterial", ds);
+    }
+    
 }
