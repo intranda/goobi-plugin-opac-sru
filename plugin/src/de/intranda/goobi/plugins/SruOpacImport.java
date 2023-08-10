@@ -86,6 +86,10 @@ import ugh.fileformats.mets.MetsMods;
 public class SruOpacImport implements IOpacPluginVersion2 {
     private static final Logger myLogger = Logger.getLogger(SruOpacImport.class);
 
+    private static final String PLUGIN_NAME = "intranda_opac_sru";
+    private static final String PLUGIN_NAME_DEPRECATED = "SruOpacImport";
+
+    
     private XMLConfiguration config;
     private int hitcount;
     private String gattung = "Aa";
@@ -116,7 +120,10 @@ public class SruOpacImport implements IOpacPluginVersion2 {
      * @throws ImportPluginException if any configuration files could not be found or read
      */
     public SruOpacImport() throws ImportPluginException {
-        this.config = ConfigPlugins.getPluginConfig("SruOpacImport");
+        this.config = ConfigPlugins.getPluginConfig(PLUGIN_NAME);
+        if(this.config.getFile() == null || !this.config.getFile().exists()) {
+            this.config = ConfigPlugins.getPluginConfig(PLUGIN_NAME_DEPRECATED);
+        }
         init();
     }
 
@@ -713,8 +720,9 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         for (String xpath : mappings.keySet()) {
             
             XPathExpression<Element> expr;
-            if(StringUtils.isBlank(ns.getPrefix())) {                
-                expr = XPathFactory.instance().compile(xpath, Filters.element(), null);
+            if(ns != null && StringUtils.isBlank(ns.getPrefix())) {          
+                Namespace ns2 = Namespace.getNamespace("marc", ns.getURI());
+                expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns2);
             } else {
                 expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns);
             }
