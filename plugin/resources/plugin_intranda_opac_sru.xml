@@ -3,10 +3,6 @@
     <storeMetadata>true</storeMetadata>
     <metadataFolder>/opt/digiverso/goobi/tmp/</metadataFolder>
     <charset>utf-8</charset>
-<!--     <mapping catalogue="FU-BERLIN (ALMA)">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_alma_fu.xml</mapping> -->
-<!--     <mapping catalogue="HU-BERLIN (SRU)">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_hu.xml</mapping> -->
-<!--     <mapping catalogue="TEST-ALMA">/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map_wu.xml</mapping> -->
-<!--     <mapping>/opt/digiverso/git/goobi-plugin-opac-sru/plugin/resources/marc_map.xml</mapping> -->
     <marcXmlParserType catalogue="TEST-ALMA">FU</marcXmlParserType>
     <marcXmlParserType>UGH</marcXmlParserType>
     <searchFields>
@@ -38,6 +34,10 @@
     </namespace>
     <namespace catalogue="TEST-ALMA">
         <prefix>slim</prefix>
+    	<uri>http://www.loc.gov/MARC21/slim</uri>
+    </namespace>
+    <namespace>
+        <prefix></prefix>
     	<uri>http://www.loc.gov/MARC21/slim</uri>
     </namespace>
     <sru>
