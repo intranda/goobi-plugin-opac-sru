@@ -720,7 +720,9 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         for (String xpath : mappings.keySet()) {
             
             XPathExpression<Element> expr;
-            if(ns != null && StringUtils.isBlank(ns.getPrefix())) {          
+            if(ns != null && StringUtils.isBlank(ns.getPrefix())) {        
+                //always provide a namespace with prefix. A namespace with no prefix is not allowed by jdom2 xpath
+                //and no namespace declaration does not match any nodes which have a namespace, even in that namespace does not have a prefix
                 Namespace ns2 = Namespace.getNamespace("marc", ns.getURI());
                 expr = XPathFactory.instance().compile(xpath, Filters.element(), null, ns2);
             } else {
