@@ -360,6 +360,9 @@ public class SruOpacImport implements IOpacPluginVersion2 {
         //query the catalogue, first without using a search field. recordSchema is always marcxml
         String recordSchema = "marcxml";
         String answer = client.querySRU(catalogue, inSuchfeld + "=" + inSuchbegriff, recordSchema);
+        if(StringUtils.isBlank(answer)) {
+            throw new Exception("Empty response from opac " + catalogue.getDescription() + " for " + inSuchfeld + "=" + inSuchbegriff);
+        }
         //retrieve the marcXml document from the answer
         try {
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
@@ -367,7 +370,6 @@ public class SruOpacImport implements IOpacPluginVersion2 {
             //If no record was found, search again using the search field
             answer = client.querySRU(catalogue, inSuchbegriff, recordSchema);
             marcXmlDoc = SRUClient.retrieveMarcRecord(answer);
-
         }
 
         //throw exception if not exactly one record was found
