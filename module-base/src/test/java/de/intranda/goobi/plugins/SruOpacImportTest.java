@@ -72,10 +72,10 @@ public class SruOpacImportTest {
 
     @Before
     public void setUp() throws Exception {
-        
-        ConfigurationHelper.CONFIG_FILE_NAME = "src/test/resources/goobi_config.properties";
+
+        ConfigurationHelper.configFileName = "src/test/resources/goobi_config.properties";
         ConfigurationHelper.resetConfigurationFile();
-        
+
         prefs = new Prefs();
         catalogueFU = new ConfigOpacCatalogue("FU-BERLIN (ALMA)", "SRU-Schnittstelle der FU-Berlin",
                 "fu-berlin.alma.exlibrisgroup.com", "view/sru/49KOBV_FUB", null, 80, null, "SRU", null);
@@ -90,8 +90,10 @@ public class SruOpacImportTest {
         importer = new SruOpacImport(config);
 
         ConfigOpacDoctype monograph = new ConfigOpacDoctype("monograph", "Monograph", "", false, false, false, null, Arrays.asList("AA"), null);
-        ConfigOpacDoctype periodical = new ConfigOpacDoctype("periodical", "Periodical", "", true, false, false, null, Arrays.asList("AA"), "PeriodicalVolume");
-        ConfigOpacDoctype multiVolume = new ConfigOpacDoctype("multiVolume", "MultiVolumeWork", "", false, true, false, null, Arrays.asList("AA"), "Volume");
+        ConfigOpacDoctype periodical =
+                new ConfigOpacDoctype("periodical", "Periodical", "", true, false, false, null, Arrays.asList("AA"), "PeriodicalVolume");
+        ConfigOpacDoctype multiVolume =
+                new ConfigOpacDoctype("multiVolume", "MultiVolumeWork", "", false, true, false, null, Arrays.asList("AA"), "Volume");
         ConfigOpacDoctype volumeMap = new ConfigOpacDoctype("multiVolumeMap", "MapVolume", "", false, true, false, null, Arrays.asList("Kf"), null);
         ConfigOpacDoctype singleMap = new ConfigOpacDoctype("singleMap", "SingleMap", "", false, true, false, null, Arrays.asList("Ka"), null);
 
@@ -101,7 +103,7 @@ public class SruOpacImportTest {
         Mockito.when(configOpac.getDoctypeByName(Mockito.anyString())).thenReturn(configOpacDoctype);
         Mockito.when(configOpacDoctype.getMappings()).thenReturn(Collections.singletonList("AA"));
         importer.setConfigOpac(configOpac);
-        
+
     }
 
     @After
@@ -177,7 +179,7 @@ public class SruOpacImportTest {
         assertTrue(outputFile.exists());
 
     }
-    
+
     @Test
     @Ignore("This failing test was not executed before")
     public void testHU_Monograph_Series() throws Exception {
@@ -206,7 +208,6 @@ public class SruOpacImportTest {
 
     }
 
-    
     @Test
     @Ignore("This failing test was not executed before")
     public void testHU_Volume() throws Exception {
@@ -278,12 +279,11 @@ public class SruOpacImportTest {
         assertEquals("marcxml.title", importer.getMappedSearchField("4", "BVB"));
     }
 
-
     @Test
     public void findMappedValue() throws PreferencesException, JDOMException, IOException {
         prefs.loadPrefs(rulesetHUMarc);
-        
-        SAXBuilder builder = new SAXBuilder(); 
+
+        SAXBuilder builder = new SAXBuilder();
         Document origDoc = builder.build(new File("src/test/resources/samples/BV045903998.xml"));
         Element record = origDoc.getRootElement()
                 .getChild("records", null)
@@ -291,26 +291,30 @@ public class SruOpacImportTest {
                 .getChild("recordData", null)
                 .getChild("record", null);
         Document doc = new Document(record.clone());
-        String ds = importer.getMappedDocStructType(Collections.singletonMap("//marc:datafield[@tag='650']/marc:subfield[@code='a'][text()='Vorlesungsverzeichnis.']", "SingleSheetMaterial"),
+        String ds = importer.getMappedDocStructType(
+                Collections.singletonMap("//marc:datafield[@tag='650']/marc:subfield[@code='a'][text()='Vorlesungsverzeichnis.']",
+                        "SingleSheetMaterial"),
                 doc, Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
         assertEquals("SingleSheetMaterial", ds);
     }
-    
+
     //@Test
     public void findMappedValue2() throws PreferencesException, JDOMException, IOException {
         prefs.loadPrefs(rulesetHUMarc);
-        
-        SAXBuilder builder = new SAXBuilder(); 
-        Document origDoc = builder.build(new URL("https://obv-at-ubww.alma.exlibrisgroup.com/view/sru/43ACC_WUW?version=1.2&operation=searchRetrieve&query=alma.local_control_field_009=AC16876952&maximumRecords=5&recordSchema=marcxml"));
+
+        SAXBuilder builder = new SAXBuilder();
+        Document origDoc = builder.build(new URL(
+                "https://obv-at-ubww.alma.exlibrisgroup.com/view/sru/43ACC_WUW?version=1.2&operation=searchRetrieve&query=alma.local_control_field_009=AC16876952&maximumRecords=5&recordSchema=marcxml"));
         Element record = origDoc.getRootElement()
                 .getChild("records", null)
                 .getChild("record", null)
                 .getChild("recordData", null)
                 .getChild("record", null);
         Document doc = new Document(record.clone());
-        String ds = importer.getMappedDocStructType(Collections.singletonMap("//marc:controlfield[@tag='008'][substring(text(),4,1) = '6']", "SingleSheetMaterial"),
+        String ds = importer.getMappedDocStructType(
+                Collections.singletonMap("//marc:controlfield[@tag='008'][substring(text(),4,1) = '6']", "SingleSheetMaterial"),
                 doc, Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim"));
         assertEquals("SingleSheetMaterial", ds);
     }
-    
+
 }
